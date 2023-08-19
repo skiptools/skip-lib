@@ -6,8 +6,57 @@
 # the blocks to add to the build.gradle.kts
 build:
   contents:
+    - block: 'plugins'
+      export: false
+      contents:
+        - 'kotlin("android") version "1.9.0"'
+        - 'id("com.android.library") version "8.1.0"'
     - block: 'dependencies'
       contents:
         - 'implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.7.3")'
         - 'implementation("org.jetbrains.kotlinx:kotlinx-coroutines-android:1.7.3")'
         - 'testImplementation("org.jetbrains.kotlinx:kotlinx-coroutines-test:1.7.3")'
+
+    - block: 'kotlin'
+      contents:
+        - 'jvmToolchain(17)'
+
+    - block: 'android'
+      contents:
+        - 'namespace = group as String'
+        - 'compileSdk = 33'
+        - block: 'defaultConfig'
+          contents:
+            - 'minSdk = 28'
+            - 'testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"'
+        - block: 'compileOptions'
+          contents:
+            - 'sourceCompatibility = JavaVersion.VERSION_17'
+            - 'targetCompatibility = JavaVersion.VERSION_17'
+        - block: 'kotlinOptions'
+          contents:
+            - 'jvmTarget = "17"'
+
+        - block: 'testOptions'
+          contents:
+            - 'unitTests.isIncludeAndroidResources = true'
+
+        - block: 'sourceSets'
+          contents:
+            - 'getByName("main").java.srcDirs("src/main/kotlin")'
+            - 'getByName("test").java.srcDirs("src/test/kotlin")'
+            # Causes "Duplicate Content Roots Detected" and failure to run tests in Android studio
+            #- 'getByName("androidTest").java.srcDirs("src/test/kotlin")'
+
+    - block: 'tasks.withType<org.jetbrains.kotlin.gradle.tasks.KotlinCompile>()'
+      contents:
+        - block: 'kotlinOptions'
+          contents:
+            - 'suppressWarnings = true'
+
+    - block: 'tasks.withType<Test>().configureEach'
+      contents:
+        - 'systemProperties.put("robolectric.logging", "stdout")'
+        - block: 'testLogging'
+          contents:
+            - 'this.showStandardStreams = true'
