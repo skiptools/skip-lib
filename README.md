@@ -1,4 +1,4 @@
 # skip-lib
 
-The Skip Standard Library.
+Standard Library for [Skip](https://skip.tools") apps.
 
