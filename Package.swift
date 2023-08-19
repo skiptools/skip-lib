@@ -14,7 +14,6 @@ let package = Package(
         .package(url: "https://source.skip.tools/skip-unit.git", from: "0.0.0"),
     ],
     targets: [
-        // Standard library types: Array, Dictionary, Set, etc.
         .target(name: "SkipLib", plugins: [.plugin(name: "preflight", package: "skip")]),
         .target(name: "SkipLibKt", dependencies: ["SkipLib"], resources: [.process("Skip")], plugins: [.plugin(name: "transpile", package: "skip")]),
         .testTarget(name: "SkipLibTests", dependencies: ["SkipLib"], plugins: [.plugin(name: "preflight", package: "skip")]),
