@@ -23,7 +23,7 @@ build:
     - block: 'android'
       contents:
         - 'namespace = group as String'
-        - 'compileSdk = 33'
+        - 'compileSdk = 34'
         - block: 'defaultConfig'
           contents:
             - 'minSdk = 28'
