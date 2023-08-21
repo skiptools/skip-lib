@@ -11,7 +11,7 @@ let package = Package(
     ],
     dependencies: [
         .package(url: "https://source.skip.tools/skip.git", from: "0.5.92"),
-        .package(url: "https://source.skip.tools/skip-unit.git", from: "0.0.17"),
+        .package(url: "https://source.skip.tools/skip-unit.git", from: "0.0.18"),
     ],
     targets: [
         .target(name: "SkipLib", plugins: [.plugin(name: "preflight", package: "skip")]),
