@@ -271,6 +271,9 @@ val String.last: Char?
 val Substring.last: Char?
     get() = stringValue.last
 
+operator fun String.Companion.invoke(format: String, vararg args: Any): String { return format.format(*args) }
+operator fun String.Companion.invoke(format: String, arguments: Array<Any>): String { return format.format(*arguments.toList().toTypedArray()) }
+
 // MARK: - Character
 
 fun Char(char: Char): Char = char

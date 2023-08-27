@@ -110,6 +110,16 @@ public struct Substring: RandomAccessCollection {
     }
 }
 
+/// String(format:) constructor.
+public func String(format: String, _ args: Any...) -> String {
+    fatalError()
+}
+
+/// String(format:) constructor.
+public func String(format: String, arguments: [Any]) -> String {
+    fatalError()
+}
+
 public struct Character {
     public init(_ character: Character) {
     }

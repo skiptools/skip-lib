@@ -228,4 +228,62 @@ final class StringTests: XCTestCase {
         let str2 = arr.joined(separator: "++")
         XCTAssertEqual(str2, "ab++cd++efg++hi")
     }
+
+    func testStringFormat() {
+        XCTAssertEqual(String(format: "%%"), "%") // Escaping percent sign
+        XCTAssertEqual(String(format: "%d", 42), "42") // Integer format
+        XCTAssertEqual(String(format: "%f", 3.14159), "3.141590") // Float format
+        XCTAssertEqual(String(format: "%.2f", 3.14159), "3.14") // Float format with precision
+        XCTAssertEqual(String(format: "%5d", 42), "   42") // Padding
+        XCTAssertEqual(String(format: "%.3f", 2.71828), "2.718") // Float format with precision
+        XCTAssertEqual(String(format: "%.2f%%", 75.0), "75.00%") // Percent format
+        XCTAssertEqual(String(format: "%3$d %2$d %1$d", 1, 2, 3), "3 2 1") // Argument reordering
+        XCTAssertEqual(String(format: "%3$d %2$d %d", 1, 2, 3, 4), "3 2 1") // Extra arguments ignored
+        //XCTAssertNil(String(format: "%@")) // Missing argument
+
+        #if !SKIP // java.util.UnknownFormatConversionException: Conversion = '@'
+        XCTAssertEqual(String(format: "Name: %@, Age: %d", "Alice", 30), "Name: Alice, Age: 30") // Mixed formats
+        XCTAssertEqual(String(format: "%@ %d", arguments: ["Answer:", 42]), "Answer: 42") // Arguments in an array
+        XCTAssertEqual(String(format: "Hello, %@", "world"), "Hello, world") // Basic substitution
+        XCTAssertEqual(String(format: "%@, %@", "Hello", "world"), "Hello, world") // Multiple substitutions
+        //XCTAssertEqual(String(format: "%%@ %s %d", "String", 42), "%@ %s 42") // Mixed literal and format specifiers
+        XCTAssertEqual(String(format: "%@%@%@%@", "a", "b", "c", "d"), "abcd") // Multiple %@ substitutions
+        XCTAssertEqual(String(format: "%1$@ %2$@ %1$@", "A", "B"), "A B A") // Reusing arguments
+        //XCTAssertEqual(String(format: "%5$@ %1$d %4$@", 42, "hello", 3.14159, "world"), "world 42 3.14159") // Mixed arguments
+        //XCTAssertEqual(String(format: "The %@ is %@: %2$d", "answer", "forty-two"), "The answer is forty-two: 42") // Mixed substitutions
+        #endif
+
+        #if !SKIP // java.util.UnknownFormatConversionException: Conversion = '.'
+        XCTAssertEqual(String(format: "%.*f", 3, 3.14159), "3.142") // Precision with variable argument
+        XCTAssertEqual(String(format: "%1$.*2$f", 3.14159, 3), "3.142") // Dynamic width and precision
+        #endif
+
+        XCTAssertEqual(String(format: "The answer is %d", arguments: [42]), "The answer is 42") // Argument in array
+        XCTAssertEqual(String(format: "The %% is not replaced: %%%d", 42), "The % is not replaced: %42") // Escaping and substitution
+
+        XCTAssertEqual(String(format: "The answer is %d", 42), "The answer is 42") // Basic integer substitution
+
+        #if !SKIP // java.util.UnknownFormatConversionException: Conversion = 'z'
+        XCTAssertEqual(String(format: "The answer is %zd", 42), "The answer is 42") // Basic integer substitution (alternative specifier)
+        XCTAssertEqual(String(format: "The value is %u", -42), "The value is 4294967254") // Unsigned format (negative number)
+        XCTAssertEqual(String(format: "The answer is %3$lld", 42, 84), "The answer is 84") // Long long format (64-bit)
+        XCTAssertEqual(String(format: "The answer is %05d", 42), "The answer is 00042") // Zero padding
+        #endif
+
+        XCTAssertEqual(String(format: "The answer is %x", 42), "The answer is 2a") // Hexadecimal format
+        XCTAssertEqual(String(format: "The answer is %o", 42), "The answer is 52") // Octal format
+        XCTAssertEqual(String(format: "The answer is %+d", 42), "The answer is +42") // Positive sign
+        XCTAssertEqual(String(format: "The answer is % d", 42), "The answer is  42") // Space for positive sign
+        XCTAssertEqual(String(format: "The answer is %10.2f", 3.14159), "The answer is       3.14") // Width and precision
+        XCTAssertEqual(String(format: "The value is %+.2e", 12345.6789), "The value is +1.23e+04") // Exponential notation
+        XCTAssertEqual(String(format: "The value is %#.2f", 123.45), "The value is 123.45") // No effect of # flag on float
+        XCTAssertEqual(String(format: "The value is %#x", 42), "The value is 0x2a") // Hex format with # flag
+        XCTAssertEqual(String(format: "The value is %02x", 42), "The value is 2a") // No effect of 0 flag on hex
+
+        #if SKIP
+        XCTAssertEqual(String(format: "The value is %.0f", 42.5), "The value is 43") // Different rounding in Java
+        #else
+        XCTAssertEqual(String(format: "The value is %.0f", 42.5), "The value is 42") // No effect of 0 precision on float
+        #endif
+    }
 }
