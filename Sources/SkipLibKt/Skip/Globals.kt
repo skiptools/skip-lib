@@ -6,7 +6,7 @@
 package skip.lib
 
 typealias Never = Nothing
-typealias AnyClass = kotlin.reflect.KClass<Any>
+typealias AnyClass = kotlin.reflect.KClass<*>
 
 fun type(of: Any): kotlin.reflect.KClass<*> = of::class
 
