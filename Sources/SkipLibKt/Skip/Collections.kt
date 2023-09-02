@@ -459,3 +459,9 @@ private fun stride(from: Double, to: Double, inclusive: Boolean, by: Double): Se
     }
     return strideSequence(strideHasNext, strideNext)
 }
+
+val IntRange.upperBound: Int
+    get() = if (endInclusive == Int.MAX_VALUE) Int.MAX_VALUE else endInclusive + 1
+val IntRange.lowerBound: Int
+    get() = start
+// IntRange.isEmpty, IntRange.contains can be used as-is

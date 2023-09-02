@@ -687,8 +687,18 @@ public protocol RangeExpression<Bound> {
     associatedtype Bound
 }
 
-// Mark available only so that we can support subscript(Range<Int>)
+// We only support this API on Kotlin IntRange
 public struct Range<Bound> {
+    public let lowerBound: Bound
+    public let upperBound: Bound
+
+    public func contains(_ element: Bound) -> Bool {
+        fatalError()
+    }
+
+    public var isEmpty: Bool {
+        fatalError()
+    }
 }
 
 @available(*, unavailable)
