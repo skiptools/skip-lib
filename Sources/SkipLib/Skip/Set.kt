@@ -239,6 +239,10 @@ class Set<Element>: Collection<Element>, SetAlgebra<Set<Element>, Element>, Muta
         return storage.hashCode()
     }
 
+    override fun toString(): String {
+        return storage.toString()
+    }
+
     override var supdate: ((Any) -> Unit)? = null
     override var smutatingcount = 0
     override fun scopy(): MutableStruct = Set(this, nocopy = true)
