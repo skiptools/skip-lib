@@ -127,4 +127,6 @@ public struct Character {
 
 public typealias CChar = Character
 
+public typealias StaticString = String
+
 #endif

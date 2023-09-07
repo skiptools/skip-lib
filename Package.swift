@@ -8,8 +8,8 @@ let package = Package(
         .library(name: "SkipLib", targets: ["SkipLib"]),
     ],
     dependencies: [
-        .package(url: "https://source.skip.tools/skip.git", from: "0.6.54"),
-        .package(url: "https://source.skip.tools/skip-unit.git", from: "0.2.16"),
+        .package(url: "https://source.skip.tools/skip.git", from: "0.6.56"),
+        .package(url: "https://source.skip.tools/skip-unit.git", from: "0.2.17"),
     ],
     targets: [
         .target(name: "SkipLib", dependencies: [.product(name: "SkipUnit", package: "skip-unit", condition: .when(platforms: [.macOS]))], plugins: [.plugin(name: "skipstone", package: "skip")]),
