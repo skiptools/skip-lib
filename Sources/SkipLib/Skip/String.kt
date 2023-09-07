@@ -5,9 +5,6 @@
 // as published by the Free Software Foundation https://fsf.org
 package skip.lib
 
-/// Transpiler converts String.Index to StringIndex.
-typealias StringIndex = Int
-
 /// Allow Swift code to reference Substring type.
 class Substring(val stringValue: String, val startIndex: Int) {
     override fun toString(): String = stringValue
