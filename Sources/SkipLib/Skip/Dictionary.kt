@@ -257,11 +257,3 @@ class Dictionary<K, V>: Collection<Tuple2<K, V>>, MutableStruct {
         override fun contains(element: V): Boolean = dictionary.storage.containsValue(element)
     }
 }
-
-/// Named key access for dictionary entries.
-val <K, V> Tuple2<K, V>.key
-    get() = element0
-
-/// Named value access for dictionary entries.
-val <K, V> Tuple2<K, V>.value
-    get() = element1

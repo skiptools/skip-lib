@@ -12,6 +12,12 @@ public struct Dictionary<Key, Value>: Collection {
     public typealias Index = Int
     public typealias Element = (key: Key, value: Value)
 
+    private static func _exerciseElement(e: (key: Key, value: Value)) {
+        // Use our tuple labels in Swift so that we generate accessors for them
+        let _ = e.key
+        let _ = e.value
+    }
+
     public init() {
     }
 
