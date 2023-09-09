@@ -71,7 +71,11 @@ final class MathTests: XCTestCase {
         XCTAssertEqual(0.7853981633974483, atan(1.0))
         XCTAssertEqual(1.1071487177940905, atan(2.0), accuracy: 1e-14)
         XCTAssertEqual(-0.7853981633974483, atan(-1.0))
-        XCTAssertEqual(1.2626272556789115, atan(Double.pi))
+
+        // Swift & Robo JVM gives: 1.2626272556789115
+        // Android emulator gives: 1.2626272556789118
+        XCTAssertEqual(1.2626272556789115, atan(Double.pi), accuracy: 1e-14)
+
         XCTAssertEqual(1.2182829050172777, atan(M_E))
         XCTAssertTrue(atan(Double.nan).isNaN)
 
