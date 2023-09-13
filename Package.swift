@@ -5,11 +5,11 @@ let package = Package(
     name: "skip-lib",
     platforms: [.iOS(.v16), .macOS(.v13), .tvOS(.v16), .watchOS(.v9), .macCatalyst(.v16)],
     products: [
-        .library(name: "SkipLib", type: .dynamic, targets: ["SkipLib"]),
+        .library(name: "SkipLib", targets: ["SkipLib"]),
     ],
     dependencies: [
-        .package(url: "https://source.skip.tools/skip.git", from: "0.6.68"),
-        .package(url: "https://source.skip.tools/skip-unit.git", from: "0.3.0"),
+        .package(url: "https://source.skip.tools/skip.git", from: "0.6.70"),
+        .package(url: "https://source.skip.tools/skip-unit.git", from: "0.3.1"),
     ],
     targets: [
         .target(name: "SkipLib", dependencies: [.product(name: "SkipUnit", package: "skip-unit")], plugins: [.plugin(name: "skipstone", package: "skip")]),
