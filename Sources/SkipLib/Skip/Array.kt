@@ -131,9 +131,9 @@ class Array<Element>: RandomAccessCollection<Element>, RangeReplaceableCollectio
         return collection.hashCode()
     }
 
-	override fun toString(): String {
-		return collection.joinToString()
-	}
+    override fun toString(): String {
+        return collection.joinToString()
+    }
 
     override var supdate: ((Any) -> Unit)? = null
     override var smutatingcount = 0
