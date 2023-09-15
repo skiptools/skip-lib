@@ -1,8 +1,56 @@
-# skip-lib
+# SkipLib
 
-Standard Library for [Skip](https://skip.tools") apps.
+[Skip](https://skip.tools) is a technology for creating dual-platform mobile apps in Swift and SwiftUI. This repository houses Skip's SkipLib library.
+
+## About 
+
+The SkipLib library vends the `skip.lib` Kotlin package. It serves two purposes:
+
+1. SkipLib is a reimplementation of the Swift standard library for Kotlin on Android. Its goal is to mirror as much of the Swift standard library as possible, allowing Skip developers to use Swift standard library API with confidence.
+1. SkipLib contains custom Kotlin API that the Skip transpiler takes advantage of when translating your Swift source to the equivalent Kotlin code. For example, the Kotlin language does not have tuples. Instead, SkipLib's [`Tuple.kt`](Sources/SkipLib/Skip/Tuple.kt) defines bespoke Kotlin `Tuple` classes. When the transpiler translates Swift code that references tuples, it uses these `Tuple` classes in the Kotlin it generates.
 
 ## Status
+
+- SkipLib's Swift symbol files (see [Implementation Strategy](#implementation-strategy)) are nominally complete. They should declare all Swift standard library API. This is difficult to validate, however, so if you find anything missing, please [report it](../../issues) to us.
+
+    Unimplemented API should be appropriately marked with `@available(unavailable, *)` annotations.
+- A significant portion of the [collections](#collections) API is unimplemented.
+- `AsyncSequence` is almost entirely unimplemented.
+- Unit testing is not comprehensive. See [Tests](#tests) for the current test run status.
+
+## Contributing
+
+We welcome contributions to SkipLib. The Skip product documentation includes helpful instructions on [local Skip library development](https://skip.tools/docs/#local-libraries). To help fill in unimplemented API in SkipLib:
+
+1. Find unimplemented API. Unimplemented API should be marked with `@available(unavailable, *)` in the Swift symbol files.
+1. Write an appropriate Kotlin implementation. See [Implementation Strategy](#implementation-strategy) below. For [collections](#collections) API, make sure your implementation is duplicated for `String` as well.
+1. Write unit tests.
+1. [Submit a PR.](../../pulls)
+
+Other forms of contributions such as test cases, comments, and documentation are also welcome!
+
+## Implementation Strategy
+
+Apart from the Skip transpiler itself, SkipLib implements the lowest levels of the Swift language. Its implementation strategy, therefore, differs from other Skip libraries. 
+
+Most Skip libraries *call* Kotlin API, but are *written* in Swift, relying on the Skip transpiler for translation to Kotlin. Most of SkipLib, however, is written in pure Kotlin. Consider SkipLib's implementation of Swift's `Array`. SkipLib divides its `Array` support into two files:
+
+1. [`Sources/SkipLib/Array.swift`](Sources/SkipLib/Array.swift) acts as a Swift header file, declaring the `Array` type's Swift API but stubbing out the implementation. The `// SKIP SYMBOLFILE` comment at the top of the file marks it as such. Read more about special Skip comments in the Skip product [documentation](https://skip.tools/docs/#dev-skip-comments).
+1. [`Sources/SkipLib/Skip/Array.kt`](Sources/SkipLib/Skip/Array.kt) contains the actual `Array` implementation in Kotlin. 
+
+This pattern is used for most Swift types throughout SkipLib. Meanwhile, SwiftLib implementations of constructs built directly into the Swift language - e.g. tuples or `inout` parameters - only have a Kotlin file, with no corresponding Swift symbol file.
+
+### Collections
+
+The `Array` example above is apt, because collections are perhaps the most complex part of the Swift standard library, and of SkipLib. Swift's comprehensive collection protocols allow `Array`, `Set`, `Dictionary`, `String`, and other types to all share a common set of API, including iteration, `map`, `reduce`, and much more.
+
+Corresponding Kotlin types - `List`, `Set`, `Map`, `String`, etc - do not share a similarly rich API set. As a result, SkipLib must duplicate collection protocol implementations in both `Collections.kt` and `String.kt`, and must duplicate `SetAlgebra` implementations in both `Set.kt` and `OptionSet.kt`.
+
+See the explanatory comments in [`Collections.kt`](Sources/SkipLib/Skip/Collections.kt) for more information on the design of SkipLib's internal collections support.
+
+## Tests
+
+The following table shows SkipLib's current test status.
 
 | Test               | Case                      | Swift | Kotlin |
 | ------------------ | ------------------------- | ----- | ------ |
@@ -112,5 +160,3 @@ Standard Library for [Skip](https://skip.tools") apps.
 | StructTests        | testStructMutateDidSet    | PASS  | PASS   |
 | StructTests        | testStructReferences      | PASS  | PASS   |
 |                    |                           | 100%  | 97%    |
-
-
