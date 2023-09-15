@@ -12,15 +12,15 @@ The SkipLib library vends the `skip.lib` Kotlin package. It serves two purposes:
 ## Status
 
 - SkipLib's Swift symbol files (see [Implementation Strategy](#implementation-strategy)) are nominally complete. They should declare all Swift standard library API. This is difficult to validate, however, so if you find anything missing, please [report it](../../issues) to us.
-
-    Unimplemented API should be appropriately marked with `@available(unavailable, *)` annotations.
-- A significant portion of the [collections](#collections) API is unimplemented.
-- `AsyncSequence` is almost entirely unimplemented.
+- Unimplemented API is appropriately marked with `@available(unavailable, *)` annotations. Skip will generate an error when you attempt to use an unimplemented API.
+- In particular, a significant portion of the [collections](#collections) API is not yet implemented.
 - Unit testing is not comprehensive. See [Tests](#tests) for the current test run status.
 
 ## Contributing
 
-We welcome contributions to SkipLib. The Skip product documentation includes helpful instructions on [local Skip library development](https://skip.tools/docs/#local-libraries). To help fill in unimplemented API in SkipLib:
+We welcome contributions to SkipLib. The Skip product documentation includes helpful instructions on [local Skip library development](https://skip.tools/docs/#local-libraries). 
+
+The most pressing need is to reduce the amount of unimplemented API. To help fill in unimplemented API in SkipLib:
 
 1. Find unimplemented API. Unimplemented API should be marked with `@available(unavailable, *)` in the Swift symbol files.
 1. Write an appropriate Kotlin implementation. See [Implementation Strategy](#implementation-strategy) below. For [collections](#collections) API, make sure your implementation is duplicated for `String` as well.
