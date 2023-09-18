@@ -7,8 +7,8 @@
 #if !SKIP
 import Darwin
 #else
-// SKIP INSERT: import kotlin.math.pow
-// SKIP INSERT: import kotlin.math.IEEErem
+import kotlin.math.pow
+import kotlin.math.IEEErem
 #endif
 
 public func acosf(_ x: Float) -> Float {
