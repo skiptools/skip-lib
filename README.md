@@ -40,9 +40,11 @@ Most Skip libraries *call* Kotlin API, but are *written* in Swift, relying on th
 
 This pattern is used for most Swift types throughout SkipLib. Meanwhile, SwiftLib implementations of constructs built directly into the Swift language - e.g. tuples or `inout` parameters - only have a Kotlin file, with no corresponding Swift symbol file.
 
+## Topics
+
 ### Collections
 
-The `Array` example above is apt, because collections are perhaps the most complex part of the Swift standard library, and of SkipLib. Swift's comprehensive collection protocols allow `Array`, `Set`, `Dictionary`, `String`, and other types to all share a common set of API, including iteration, `map`, `reduce`, and much more.
+Collections are perhaps the most complex part of the Swift standard library, and of SkipLib. Swift's comprehensive collection protocols allow `Array`, `Set`, `Dictionary`, `String`, and other types to all share a common set of API, including iteration, `map`, `reduce`, and much more.
 
 Corresponding Kotlin types - `List`, `Set`, `Map`, `String`, etc - do not share a similarly rich API set. As a result, SkipLib must duplicate collection protocol implementations in both `Collections.kt` and `String.kt`, and must duplicate `SetAlgebra` implementations in both `Set.kt` and `OptionSet.kt`.
 
