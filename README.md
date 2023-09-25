@@ -1,20 +1,27 @@
 # SkipLib
 
-[Skip](https://skip.tools) is a technology for creating dual-platform mobile apps in Swift and SwiftUI. This repository houses Skip's SkipLib library.
+Swift standard library for [Skip](https://skip.tools) apps.
 
 ## About 
 
-The SkipLib library vends the `skip.lib` Kotlin package. It serves two purposes:
+SkipLib vends the `skip.lib` Kotlin package. It serves two purposes:
 
 1. SkipLib is a reimplementation of the Swift standard library for Kotlin on Android. Its goal is to mirror as much of the Swift standard library as possible, allowing Skip developers to use Swift standard library API with confidence.
 1. SkipLib contains custom Kotlin API that the Skip transpiler takes advantage of when translating your Swift source to the equivalent Kotlin code. For example, the Kotlin language does not have tuples. Instead, SkipLib's `Tuple.kt` defines bespoke Kotlin `Tuple` classes. When the transpiler translates Swift code that references tuples, it uses these `Tuple` classes in the Kotlin it generates.
+
+## Dependencies
+
+SkipLib depends on the [skip](https://source.skip.tools/skip) transpiler plugin and has no additional library dependencies.
+
+It is part of the core Skip stack and is not intended to be imported directly.
+The module is transparently adopted through the automatic addition of `import skip.lib.*` to transpiled files by the Skip transpiler.
 
 ## Status
 
 - SkipLib's Swift symbol files (see [Implementation Strategy](#implementation-strategy)) are nominally complete. They should declare all Swift standard library API. This is difficult to validate, however, so if you find anything missing, please [report it](https://source.skip.tools/skip/issues) to us.
 - Unimplemented API is appropriately marked with `@available(unavailable, *)` annotations. Skip will generate an error when you attempt to use an unimplemented API.
 - In particular, a significant portion of the [collections](#collections) API is not yet implemented.
-- Unit testing is not comprehensive. See [Tests](#tests) for the current test run status.
+- Unit testing is not comprehensive. See [Test Status](#test-status) for the current test run status.
 
 ## Contributing
 
@@ -50,7 +57,7 @@ Corresponding Kotlin types - `List`, `Set`, `Map`, `String`, etc - do not share 
 
 See the explanatory comments in `Collections.kt` for more information on the design of SkipLib's internal collections support.
 
-## Tests
+## Test Status
 
 The following table shows SkipLib's current test status.
 
