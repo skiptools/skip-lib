@@ -21,7 +21,7 @@ The module is transparently adopted through the automatic addition of `import sk
 - SkipLib's Swift symbol files (see [Implementation Strategy](#implementation-strategy)) are nominally complete. They should declare all Swift standard library API. This is difficult to validate, however, so if you find anything missing, please [report it](https://github.com/skiptools/skip-lib/issues) to us.
 - Unimplemented API is appropriately marked with `@available(unavailable, *)` annotations. Skip will generate an error when you attempt to use an unimplemented API.
 - In particular, a significant portion of the [collections](#collections) API is not yet implemented.
-- Unit testing is not comprehensive. See [Test Status](#test-status) for the current test run status.
+- Unit testing is not comprehensive. See [Tests](#tests) for the current test run status.
 
 ## Contributing
 
@@ -57,9 +57,9 @@ Corresponding Kotlin types - `List`, `Set`, `Map`, `String`, etc - do not share 
 
 See the explanatory comments in `Collections.kt` for more information on the design of SkipLib's internal collections support.
 
-## Test Status
+## Tests
 
-The following table shows SkipLib's current test status.
+The following table shows SkipLib's current test status. Test [contributions](#contributing) are welcome.
 
 | Test               | Case                      | Swift | Kotlin |
 | ------------------ | ------------------------- | ----- | ------ |
