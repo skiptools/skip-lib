@@ -266,10 +266,6 @@ final class StringTests: XCTestCase {
         #if !SKIP // java.util.UnknownFormatConversionException: Conversion = 'z'
         XCTAssertEqual(String(format: "The answer is %zd", 42), "The answer is 42") // Basic integer substitution (alternative specifier)
         XCTAssertEqual(String(format: "The value is %u", -42), "The value is 4294967254") // Unsigned format (negative number)
-        #if os(macOS) || os(Linux) || targetEnvironment(macCatalyst)
-        // this is a random number on iOS
-        XCTAssertEqual(String(format: "The answer is %3$lld", 42, 84), "The answer is 84") // Long long format (64-bit)
-        #endif
         XCTAssertEqual(String(format: "The answer is %05d", 42), "The answer is 00042") // Zero padding
         #endif
 
