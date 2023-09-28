@@ -356,13 +356,13 @@ public struct KeyedEncodingContainer<Key: CodingKey> : KeyedEncodingContainerPro
 }
 
 extension KeyedEncodingContainerProtocol {
-    mutating func encode<T, U>(_ value: Dictionary<T, U>, forKey key: CodingKey) throws {
+    public mutating func encode<T, U>(_ value: Dictionary<T, U>, forKey key: CodingKey) throws {
         //fatalError("SKIP TODO: KeyedEncodingContainerProtocol.encode dictionary")
         // var container = nestedContainer(keyedBy: CodingKey.self, forKey: key)
         //try container.encode(contentsOf: value)
     }
 
-    mutating func encode<T>(_ value: any Sequence<T>, forKey key: CodingKey) throws {
+    public mutating func encode<T>(_ value: any Sequence<T>, forKey key: CodingKey) throws {
         var container = nestedUnkeyedContainer(forKey: key)
         try container.encode(contentsOf: value)
     }
