@@ -516,6 +516,30 @@ public func logbl(_ x: Double) -> Double {
     #endif
 }
 
+public func abs(_ x: Double) -> Double {
+    #if !SKIP
+    fatalError() // Darwin.fabsf(x)
+    #else
+    return kotlin.math.abs(x)
+    #endif
+}
+
+public func abs(_ x: Int) -> Int {
+    #if !SKIP
+    fatalError()
+    #else
+    return kotlin.math.abs(x)
+    #endif
+}
+
+public func abs(_ x: Int64) -> Int64 {
+    #if !SKIP
+    fatalError()
+    #else
+    return kotlin.math.abs(x)
+    #endif
+}
+
 public func fabsf(_ x: Float) -> Float {
     #if !SKIP
     fatalError() // Darwin.fabsf(x)
