@@ -7,10 +7,11 @@
 build:
   contents:
     - block: 'dependencies'
+      export: false
       contents:
-        - 'implementation(platform("org.jetbrains.kotlin:kotlin-bom:1.9.0"))'
-        - 'implementation("org.jetbrains.kotlin:kotlin-reflect")'
-        - 'implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.7.3")'
-        - 'implementation("org.jetbrains.kotlinx:kotlinx-coroutines-android:1.7.3")'
+        - 'api(platform("org.jetbrains.kotlin:kotlin-bom:1.9.0"))'
+        - 'api("org.jetbrains.kotlin:kotlin-reflect")'
+        - 'api("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.7.3")'
+        - 'api("org.jetbrains.kotlinx:kotlinx-coroutines-android:1.7.3")'
         - 'testImplementation("org.jetbrains.kotlinx:kotlinx-coroutines-test:1.7.3")'
         - 'androidTestImplementation("org.jetbrains.kotlinx:kotlinx-coroutines-test:1.7.3")'
