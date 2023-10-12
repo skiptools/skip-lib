@@ -101,7 +101,8 @@ final class ConcurrencyTests: XCTestCase {
         let sum = try await i1 + i2
         let end = currentTimeMillis()
         XCTAssertEqual(700, sum)
-        XCTAssertLessThan(end - start, 700)
+        // note that the timing assertion has been observed to fail under high load on the Android emulator; this is not unexpected
+        XCTAssertLessThan(end - start, 700) 
     }
 
     func testAsyncSequence() async throws {
