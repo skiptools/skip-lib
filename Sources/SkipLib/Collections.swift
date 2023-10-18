@@ -105,7 +105,6 @@ extension Sequence {
         fatalError()
     }
 
-    @available(*, unavailable)
     public func starts(with possiblePrefix: Any, by areEquivalent: (Element, Element) throws -> Bool) rethrows -> Bool {
         fatalError()
     }
@@ -169,7 +168,6 @@ extension Sequence {
         fatalError()
     }
 
-    @available(*, unavailable)
     public func starts(with possiblePrefix: Any) -> Bool {
         fatalError()
     }

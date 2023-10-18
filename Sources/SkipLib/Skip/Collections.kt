@@ -126,6 +126,26 @@ interface Sequence<Element>: IterableStorage<Element> {
         }
     }
 
+    fun starts(with: Sequence<Element>): Boolean {
+        val itr = iterable.iterator()
+        for (element in with.iterable) {
+            if (!itr.hasNext() || element != itr.next()) {
+                return false
+            }
+        }
+        return true
+    }
+
+    fun starts(with: Sequence<Element>, by: (Element, Element) -> Boolean): Boolean {
+        val itr = iterable.iterator()
+        for (element in with.iterable) {
+            if (!itr.hasNext() || !by(element, itr.next())) {
+                return false
+            }
+        }
+        return true
+    }
+
     fun contains(where: (Element) -> Boolean): Boolean {
         iterable.forEach { if (where(it)) return true }
         return false

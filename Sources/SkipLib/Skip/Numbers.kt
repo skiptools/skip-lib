@@ -27,12 +27,14 @@ val ULong.Companion.min: ULong get() = ULong.MIN_VALUE
 
 val Double.Companion.nan: Double get() = Double.NaN
 val Double.isNaN: Boolean get() = isNaN()
+val Double.isFinite: Boolean get() = isFinite()
 val Double.isInfinite: Boolean get() = isInfinite()
 val Double.Companion.infinity: Double get() = Double.POSITIVE_INFINITY
 val Double.Companion.pi: Double get() = kotlin.math.PI
 
 val Float.Companion.nan: Float get() = Float.NaN
 val Float.isNaN: Boolean get() = isNaN()
+val Float.isFinite: Boolean get() = isFinite()
 val Float.isInfinite: Boolean get() = isInfinite()
 val Float.Companion.infinity: Float get() = Float.POSITIVE_INFINITY
 val Float.Companion.pi: Float get() = 3.1415925f

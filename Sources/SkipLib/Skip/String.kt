@@ -122,6 +122,27 @@ fun String.enumerated(): Sequence<Tuple2<Int, Char>> {
 }
 fun Substring.enumerated(): Sequence<Tuple2<Int, Char>> = stringValue.enumerated()
 
+fun String.starts(with: String): Boolean {
+    return startsWith(with)
+}
+fun Substring.starts(with: String): Boolean {
+    return stringValue.startsWith(with)
+}
+fun String.starts(with: String, by: (Char, Char) -> Boolean): Boolean {
+    if (with.length > length) {
+        return false
+    }
+    for (i in 0 until with.length) {
+        if (!by(with[i], this[i])) {
+            return false
+        }
+    }
+    return true
+}
+fun Substring.starts(with: String, by: (Char, Char) -> Boolean): Boolean {
+    return stringValue.starts(with, by)
+}
+
 fun String.contains(where: (Char) -> Boolean): Boolean {
     for (c in this) {
         if (where(c)) return true

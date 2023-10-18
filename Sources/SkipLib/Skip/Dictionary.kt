@@ -11,7 +11,7 @@ import java.lang.UnsupportedOperationException
 fun <K, V> dictionaryOf(vararg entries: Tuple2<K, V>): Dictionary<K, V> {
     val dictionary = Dictionary<K, V>()
     for (entry in entries) {
-        dictionary[entry.element0] = entry.element1
+        dictionary.put(entry.element0, entry.element1)
     }
     return dictionary
 }
@@ -114,6 +114,13 @@ class Dictionary<K, V>: Collection<Tuple2<K, V>>, MutableStruct {
         } else {
             mutableStorage[key.sref()] = value.sref()
         }
+        didmutate()
+    }
+
+    /// Adds the value to the dictionary, preserving nulls.
+    fun put(key: K, value: V) {
+        willmutate()
+        mutableStorage[key.sref()] = value.sref()
         didmutate()
     }
 
