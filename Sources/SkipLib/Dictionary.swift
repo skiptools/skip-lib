@@ -8,7 +8,7 @@
 
 #if SKIP
 
-public struct Dictionary<Key, Value>: Collection {
+public struct Dictionary<Key, Value>: Collection, Codable {
     public typealias Index = Int
     public typealias Element = (key: Key, value: Value)
 
