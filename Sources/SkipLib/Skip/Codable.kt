@@ -22,6 +22,53 @@ interface Encoder {
     fun singleValueContainer(): SingleValueEncodingContainer
 }
 
+/// Helper base type for Kotlin top level encoders.
+abstract class TopLevelEncoder<Output> {
+    abstract fun encoder(): Encoder
+    abstract fun output(from: Encoder): Output
+
+    fun <T> encode(value: T): Output {
+        val encoder = encoder()
+        val container = encoder.singleValueContainer()
+        codableSingleValueEncode(value, container)
+        return output(encoder)
+    }
+
+    fun encode(value: Sequence<*>): Output {
+        val encoder = encoder()
+        val container = encoder.unkeyedContainer()
+        for (element in value.iterable) {
+            codableUnkeyedEncode(element, container)
+        }
+        return output(encoder)
+    }
+
+    inline fun <reified K, V> encode(value: Dictionary<K, V>): Output where K: Any, V: Any {
+        val encoder = encoder()
+        if (K::class == Int::class || K::class == String::class) {
+            encodeAsDictionary(value, encoder)
+        } else {
+            encodeAsArray(value, encoder)
+        }
+        return output(encoder)
+    }
+
+    fun encodeAsDictionary(value: Dictionary<*, *>, encoder: Encoder) {
+        val container = encoder.container(keyedBy = DictionaryCodingKey::class)
+        for ((dkey, dvalue) in value.storage) {
+            codableDictionaryKeyedEncode(dvalue, dkey, container)
+        }
+    }
+
+    fun <K, V> encodeAsArray(value: Dictionary<K, V>, encoder: Encoder) where K: Any, V: Any {
+        val container = encoder.unkeyedContainer()
+        for ((dkey, dvalue) in value.storage) {
+            codableUnkeyedEncode(dkey, container)
+            codableUnkeyedEncode(dvalue, container)
+        }
+    }
+}
+
 interface KeyedEncodingContainerProtocol {
     val codingPath: Array<CodingKey>
     fun encodeNil(forKey: CodingKey)
@@ -37,9 +84,9 @@ interface KeyedEncodingContainerProtocol {
     fun encode(value: UShort, forKey: CodingKey)
     fun encode(value: UInt, forKey: CodingKey)
     fun encode(value: ULong, forKey: CodingKey)
-    fun <T> encode(value: T, forKey: CodingKey) where T: Encodable
+    fun <T> encode(value: T, forKey: CodingKey) where T: Any
 
-    fun <T> encodeConditional(object_: T, forKey: CodingKey) where T: Encodable {
+    fun <T> encodeConditional(object_: T, forKey: CodingKey) where T: Any {
         encode(object_, forKey)
     }
 
@@ -91,7 +138,7 @@ interface KeyedEncodingContainerProtocol {
         if (value != null) encode(value, forKey)
     }
 
-    fun <T> encodeIfPresent(value: T?, forKey: CodingKey) where T: Encodable {
+    fun <T> encodeIfPresent(value: T?, forKey: CodingKey) where T: Any {
         if (value != null) encode(value, forKey)
     }
 
@@ -159,11 +206,11 @@ class KeyedEncodingContainer<Key>(container: KeyedEncodingContainerProtocol) : K
         box.encode(value, forKey)
     }
 
-    override fun <T> encode(value: T, forKey: CodingKey) where T: Encodable {
+    override fun <T> encode(value: T, forKey: CodingKey) where T: Any {
         box.encode(value, forKey)
     }
 
-    override fun <T> encodeConditional(object_: T, forKey: CodingKey) where T: Encodable {
+    override fun <T> encodeConditional(object_: T, forKey: CodingKey) where T: Any {
         box.encodeConditional(object_, forKey)
     }
 
@@ -215,7 +262,7 @@ class KeyedEncodingContainer<Key>(container: KeyedEncodingContainerProtocol) : K
         box.encodeIfPresent(value, forKey)
     }
 
-    override fun <T> encodeIfPresent(value: T?, forKey: CodingKey) where T: Encodable {
+    override fun <T> encodeIfPresent(value: T?, forKey: CodingKey) where T: Any {
         box.encodeIfPresent(value, forKey)
     }
 
@@ -261,63 +308,15 @@ class KeyedEncodingContainer<Key>(container: KeyedEncodingContainerProtocol) : K
     fun encodeAsDictionary(value: Dictionary<*, *>, forKey: CodingKey) {
         val container = nestedContainer(keyedBy = DictionaryCodingKey::class, forKey)
         for ((dkey, dvalue) in value.storage) {
-            when (dvalue) {
-                is Boolean -> container.encode(dvalue, forKey = DictionaryCodingKey(dkey.toString()))
-                is String -> container.encode(dvalue, forKey = DictionaryCodingKey(dkey.toString()))
-                is Byte -> container.encode(dvalue, forKey = DictionaryCodingKey(dkey.toString()))
-                is Short -> container.encode(dvalue, forKey = DictionaryCodingKey(dkey.toString()))
-                is Int -> container.encode(dvalue, forKey = DictionaryCodingKey(dkey.toString()))
-                is Long -> container.encode(dvalue, forKey = DictionaryCodingKey(dkey.toString()))
-                is UByte -> container.encode(dvalue, forKey = DictionaryCodingKey(dkey.toString()))
-                is UShort -> container.encode(dvalue, forKey = DictionaryCodingKey(dkey.toString()))
-                is UInt -> container.encode(dvalue, forKey = DictionaryCodingKey(dkey.toString()))
-                is ULong -> container.encode(dvalue, forKey = DictionaryCodingKey(dkey.toString()))
-                is Float -> container.encode(dvalue, forKey = DictionaryCodingKey(dkey.toString()))
-                is Double -> container.encode(dvalue, forKey = DictionaryCodingKey(dkey.toString()))
-                is Encodable -> container.encode(dvalue, forKey = DictionaryCodingKey(dkey.toString()))
-                else -> {
-                    if (dvalue is Sequence<*>) {
-                        val dvalueContainer = container.nestedUnkeyedContainer(forKey = DictionaryCodingKey(dkey.toString()))
-                        dvalueContainer.encode(contentsOf = dvalue)
-                    } else {
-                        fatalError("KeyedEncodingContainer: unhandled encode for Dictionary<*, $dvalue>")
-                    }
-                }
-            }
+            codableDictionaryKeyedEncode(dvalue, dkey, container)
         }
     }
 
     fun <K, V> encodeAsArray(value: Dictionary<K, V>, forKey: CodingKey) where K: Any, V: Any {
         val container = nestedUnkeyedContainer(forKey)
         for ((dkey, dvalue) in value.storage) {
-            encodeAny(dkey, container)
-            encodeAny(dvalue, container)
-        }
-    }
-
-    fun encodeAny(value: Any, container: UnkeyedEncodingContainer) {
-        when (value) {
-            is Boolean -> container.encode(value)
-            is String -> container.encode(value)
-            is Byte -> container.encode(value)
-            is Short -> container.encode(value)
-            is Int -> container.encode(value)
-            is Long -> container.encode(value)
-            is UByte -> container.encode(value)
-            is UShort -> container.encode(value)
-            is UInt -> container.encode(value)
-            is ULong -> container.encode(value)
-            is Float -> container.encode(value)
-            is Double -> container.encode(value)
-            is Encodable -> container.encode(value)
-            else -> {
-                if (value is Sequence<*>) {
-                    val valueContainer = container.nestedUnkeyedContainer()
-                    valueContainer.encode(contentsOf = value)
-                } else {
-                    fatalError("Unhandled unkeyed encoding for $value")
-                }
-            }
+            codableUnkeyedEncode(dkey, container)
+            codableUnkeyedEncode(dvalue, container)
         }
     }
 }
@@ -338,37 +337,15 @@ interface UnkeyedEncodingContainer {
     fun encode(value: UShort)
     fun encode(value: UInt)
     fun encode(value: ULong)
-    fun <T> encode(value: T) where T: Encodable
+    fun <T> encode(value: T) where T: Any
 
-    fun <T> encodeConditional(object_: T) where T: Encodable {
+    fun <T> encodeConditional(object_: T) where T: Any {
         encode(object_)
     }
 
     fun encode(contentsOf: Sequence<*>) {
         for (element in contentsOf.iterable) {
-            when (element) {
-                is String -> encode(element)
-                is Boolean -> encode(element)
-                is Byte -> encode(element)
-                is Short -> encode(element)
-                is Int -> encode(element)
-                is Long -> encode(element)
-                is UByte -> encode(element)
-                is UShort -> encode(element)
-                is UInt -> encode(element)
-                is ULong -> encode(element)
-                is Float -> encode(element)
-                is Double -> encode(element)
-                is Encodable -> encode(element)
-                else -> {
-                    if (element is Sequence<*>) {
-                        val container = nestedUnkeyedContainer()
-                        container.encode(contentsOf = element)
-                    } else {
-                        fatalError("KeyedEncodingContainerProtocol: unhandled encode for $element")
-                    }
-                }
-            }
+            codableUnkeyedEncode(element, this)
         }
     }
 
@@ -392,7 +369,73 @@ interface SingleValueEncodingContainer {
     fun encode(value: UShort)
     fun encode(value: UInt)
     fun encode(value: ULong)
-    fun <T> encode(value: T) where T: Encodable
+    fun <T> encode(value: T) where T: Any
+}
+
+fun <T> codableDictionaryKeyedEncode(value: T?, forKey: Any?, container: KeyedEncodingContainerProtocol) where T: Any {
+    val key = DictionaryCodingKey(forKey?.toString() ?: "")
+    when (value) {
+        is Boolean -> container.encode(value, key)
+        is String -> container.encode(value, key)
+        is Byte -> container.encode(value, key)
+        is Short -> container.encode(value, key)
+        is Int -> container.encode(value, key)
+        is Long -> container.encode(value, key)
+        is UByte -> container.encode(value, key)
+        is UShort -> container.encode(value, key)
+        is UInt -> container.encode(value, key)
+        is ULong -> container.encode(value, key)
+        is Float -> container.encode(value, key)
+        is Double -> container.encode(value, key)
+        is Sequence<*> -> {
+            val valueContainer = container.nestedUnkeyedContainer(key)
+            valueContainer.encode(contentsOf = value)
+        }
+        null -> container.encodeNil(key)
+        else -> container.encode(value, key)
+    }
+}
+
+fun <T> codableUnkeyedEncode(value: T?, container: UnkeyedEncodingContainer) where T: Any {
+    when (value) {
+        is String -> container.encode(value)
+        is Boolean -> container.encode(value)
+        is Byte -> container.encode(value)
+        is Short -> container.encode(value)
+        is Int -> container.encode(value)
+        is Long -> container.encode(value)
+        is UByte -> container.encode(value)
+        is UShort -> container.encode(value)
+        is UInt -> container.encode(value)
+        is ULong -> container.encode(value)
+        is Float -> container.encode(value)
+        is Double -> container.encode(value)
+        is Sequence<*> -> {
+            val nestedContainer = container.nestedUnkeyedContainer()
+            nestedContainer.encode(contentsOf = value)
+        }
+        null -> container.encodeNil()
+        else -> container.encode(value)
+    }
+}
+
+fun <T> codableSingleValueEncode(value: T?, container: SingleValueEncodingContainer) where T: Any {
+    when (value) {
+        is String -> container.encode(value)
+        is Boolean -> container.encode(value)
+        is Byte -> container.encode(value)
+        is Short -> container.encode(value)
+        is Int -> container.encode(value)
+        is Long -> container.encode(value)
+        is UByte -> container.encode(value)
+        is UShort -> container.encode(value)
+        is UInt -> container.encode(value)
+        is ULong -> container.encode(value)
+        is Float -> container.encode(value)
+        is Double -> container.encode(value)
+        null -> container.encodeNil()
+        else -> container.encode(value)
+    }
 }
 
 interface Decodable {
@@ -408,6 +451,71 @@ interface Decoder {
     fun <Key> container(keyedBy: KClass<Key>): KeyedDecodingContainer<Key> where Key: CodingKey
     fun unkeyedContainer(): UnkeyedDecodingContainer
     fun singleValueContainer(): SingleValueDecodingContainer
+}
+
+/// Helper base type for Kotlin top level decoders.
+abstract class TopLevelDecoder<Input> {
+    abstract fun decoder(from: Input): Decoder
+
+    inline fun <reified T> decode(type: KClass<T>, from: Input): T where T: Any {
+        val decoder = decoder(from)
+        val valueDecoder = codableSingleValueDecoder(type)
+        val container = decoder.singleValueContainer()
+        return valueDecoder(container)
+    }
+
+    inline fun <reified E> decode(type: KClass<Array<E>>, from: Input): Array<E> where E: Any {
+        return decodeSequence(type = E::class, from, factory = { Array(it, nocopy = true)  }) as Array<E>
+    }
+
+    inline fun <reified E> decode(type: KClass<Set<E>>, from: Input): Set<E> where E: Any {
+        return decodeSequence(type = E::class, from, factory = { Set(it, nocopy = true)  }) as Set<E>
+    }
+
+    inline fun <reified E> decodeSequence(type: KClass<E>, from: Input, factory: (MutableList<E>) -> Sequence<E>): Sequence<E> where E: Any {
+        val decoder = decoder(from)
+        val elementDecoder = codableUnkeyedDecoder(E::class)
+        val container = decoder.unkeyedContainer()
+        val list: MutableList<E> = mutableListOf()
+        while (!container.isAtEnd) {
+            val element = elementDecoder(container)
+            list.add(element)
+        }
+        return factory(list)
+    }
+
+    inline fun <reified K, reified V> decode(type: KClass<Dictionary<K, V>>, from: Input): Dictionary<K, V> where K: Any, V: Any {
+        when (K::class) {
+            String::class -> return decodeAsDictionary(type, from, key = { it.stringValue as K })
+            Int::class -> return decodeAsDictionary(type, from, key = { (it.intValue ?: 0) as K })
+            else -> return decodeAsArray(type, from)
+        }
+    }
+
+    inline fun <K, reified V> decodeAsDictionary(type: KClass<Dictionary<K, V>>, from: Input, key: (CodingKey) -> K): Dictionary<K, V> where V: Any {
+        val decoder = decoder(from)
+        val valueDecoder = codableDictionaryKeyedDecoder(V::class)
+        val container = decoder.container(keyedBy = DictionaryCodingKey::class)
+        val map = LinkedHashMap<K, V>()
+        for (codingKey in container.allKeys) {
+            map[key(codingKey)] = valueDecoder(container, codingKey)
+        }
+        return Dictionary(map, nocopy = true)
+    }
+
+    inline fun <reified K, reified V> decodeAsArray(type: KClass<Dictionary<K, V>>, from: Input): Dictionary<K, V> where K: Any, V: Any {
+        val decoder = decoder(from)
+        val keyDecoder = codableUnkeyedDecoder(K::class)
+        val valueDecoder = codableUnkeyedDecoder(V::class)
+        val container = decoder.unkeyedContainer()
+        val map = LinkedHashMap<K, V>()
+        while (!container.isAtEnd) {
+            val key = keyDecoder(container)
+            val value = valueDecoder(container)
+            map[key] = value
+        }
+        return Dictionary(map, nocopy = true)
+    }
 }
 
 interface KeyedDecodingContainerProtocol {
@@ -427,11 +535,7 @@ interface KeyedDecodingContainerProtocol {
     fun decode(type: KClass<UShort>, forKey: CodingKey): UShort
     fun decode(type: KClass<UInt>, forKey: CodingKey): UInt
     fun decode(type: KClass<ULong>, forKey: CodingKey): ULong
-    fun <T> decodeDecodable(type: KClass<T>, forKey: CodingKey): T where T: Any
-
-    fun <T> decode(type: KClass<T>, forKey: CodingKey): T where T: Decodable {
-        return decodeDecodable(type, forKey)
-    }
+    fun <T> decode(type: KClass<T>, forKey: CodingKey): T where T: Any
 
     fun decodeIfPresent(type: KClass<Boolean>, forKey: CodingKey): Boolean? {
         return if (contains(forKey)) decode(type, forKey) else null
@@ -481,7 +585,7 @@ interface KeyedDecodingContainerProtocol {
         return if (contains(forKey)) decode(type, forKey) else null
     }
 
-    fun <T> decodeIfPresent(type: KClass<T>, forKey: CodingKey): T? where T: Decodable {
+    fun <T> decodeIfPresent(type: KClass<T>, forKey: CodingKey): T? where T: Any {
         return if (contains(forKey)) decode(type, forKey) else null
     }
 
@@ -556,12 +660,8 @@ class KeyedDecodingContainer<Key>(container: KeyedDecodingContainerProtocol): Ke
         return box.decode(type, forKey)
     }
 
-    override fun <T> decode(type: KClass<T>, forKey: CodingKey): T where T: Decodable {
+    override fun <T> decode(type: KClass<T>, forKey: CodingKey): T where T : Any {
         return box.decode(type, forKey)
-    }
-
-    override fun <T> decodeDecodable(type: KClass<T>, forKey: CodingKey): T where T : Any {
-        return box.decodeDecodable(type, forKey)
     }
 
     override fun decodeIfPresent(type: KClass<Boolean>, forKey: CodingKey): Boolean? {
@@ -612,7 +712,7 @@ class KeyedDecodingContainer<Key>(container: KeyedDecodingContainerProtocol): Ke
         return box.decodeIfPresent(type, forKey)
     }
 
-    override fun <T> decodeIfPresent(type: KClass<T>, forKey: CodingKey): T? where T: Decodable {
+    override fun <T> decodeIfPresent(type: KClass<T>, forKey: CodingKey): T? where T: Any {
         return box.decodeIfPresent(type, forKey)
     }
 
@@ -643,7 +743,7 @@ class KeyedDecodingContainer<Key>(container: KeyedDecodingContainerProtocol): Ke
     }
 
     inline fun <reified E> decodeSequence(type: KClass<E>, forKey: CodingKey, factory: (MutableList<E>) -> Sequence<E>): Sequence<E> where E: Any {
-        val decoder = unkeyedDecoder(E::class)
+        val decoder = codableUnkeyedDecoder(E::class)
         val container = nestedUnkeyedContainer(forKey)
         val list: MutableList<E> = mutableListOf()
         while (!container.isAtEnd) {
@@ -662,7 +762,7 @@ class KeyedDecodingContainer<Key>(container: KeyedDecodingContainerProtocol): Ke
     }
 
     inline fun <K, reified V> decodeAsDictionary(type: KClass<Dictionary<K, V>>, forKey: CodingKey, key: (CodingKey) -> K): Dictionary<K, V> where V: Any {
-        val decoder = keyedDecoder(V::class)
+        val decoder = codableDictionaryKeyedDecoder(V::class)
         val container = nestedContainer(keyedBy = DictionaryCodingKey::class, forKey)
         val map = LinkedHashMap<K, V>()
         for (codingKey in container.allKeys) {
@@ -672,8 +772,8 @@ class KeyedDecodingContainer<Key>(container: KeyedDecodingContainerProtocol): Ke
     }
 
     inline fun <reified K, reified V> decodeAsArray(type: KClass<Dictionary<K, V>>, forKey: CodingKey): Dictionary<K, V> where K: Any, V: Any {
-        val keyDecoder = unkeyedDecoder(K::class)
-        val valueDecoder = unkeyedDecoder(V::class)
+        val keyDecoder = codableUnkeyedDecoder(K::class)
+        val valueDecoder = codableUnkeyedDecoder(V::class)
         val container = nestedUnkeyedContainer(forKey)
         val map = LinkedHashMap<K, V>()
         while (!container.isAtEnd) {
@@ -682,46 +782,6 @@ class KeyedDecodingContainer<Key>(container: KeyedDecodingContainerProtocol): Ke
             map[key] = value
         }
         return Dictionary(map, nocopy = true)
-    }
-
-    inline fun <reified T> keyedDecoder(forType: KClass<T>): (KeyedDecodingContainer<DictionaryCodingKey>, CodingKey) -> T where T: Any {
-        val decoder: (KeyedDecodingContainer<DictionaryCodingKey>, CodingKey) -> T
-        when (T::class) {
-            Boolean::class -> decoder = { container, dkey -> container.decode(Boolean::class, dkey) as T }
-            String::class -> decoder = { container, dkey -> container.decode(String::class, dkey) as T }
-            Byte::class -> decoder = { container, dkey -> container.decode(Byte::class, dkey) as T }
-            Short::class -> decoder = { container, dkey -> container.decode(Short::class, dkey) as T }
-            Int::class -> decoder = { container, dkey -> container.decode(Int::class, dkey) as T }
-            Long::class -> decoder = { container, dkey -> container.decode(Long::class, dkey) as T }
-            Float::class -> decoder = { container, dkey -> container.decode(Float::class, dkey) as T }
-            Double::class -> decoder = { container, dkey -> container.decode(Double::class, dkey) as T }
-            UByte::class -> decoder = { container, dkey -> container.decode(UByte::class, dkey) as T }
-            UShort::class -> decoder = { container, dkey -> container.decode(UShort::class, dkey) as T }
-            UInt::class -> decoder = { container, dkey -> container.decode(UInt::class, dkey) as T }
-            ULong::class -> decoder = { container, dkey -> container.decode(ULong::class, dkey) as T }
-            else -> decoder = { container, dkey -> container.decodeDecodable(T::class, dkey) as T }
-        }
-        return decoder
-    }
-
-    inline fun <reified T> unkeyedDecoder(forType: KClass<T>): (UnkeyedDecodingContainer) -> T where T: Any {
-        val decoder: (UnkeyedDecodingContainer) -> T
-        when (T::class) {
-            Boolean::class -> decoder = { it.decode(Boolean::class) as T }
-            String::class -> decoder = { it.decode(String::class) as T }
-            Byte::class -> decoder = { it.decode(Byte::class) as T }
-            Short::class -> decoder = { it.decode(Short::class) as T }
-            Int::class -> decoder = { it.decode(Int::class) as T }
-            Long::class -> decoder = { it.decode(Long::class) as T }
-            Float::class -> decoder = { it.decode(Float::class) as T }
-            Double::class -> decoder = { it.decode(Double::class) as T }
-            UByte::class -> decoder = { it.decode(UByte::class) as T }
-            UShort::class -> decoder = { it.decode(UShort::class) as T }
-            UInt::class -> decoder = { it.decode(UInt::class) as T }
-            ULong::class -> decoder = { it.decode(ULong::class) as T }
-            else -> decoder = { it.decodeDecodable(T::class) as T }
-        }
-        return decoder
     }
 }
 
@@ -746,11 +806,7 @@ interface UnkeyedDecodingContainer {
     fun decode(type: KClass<UShort>): UShort
     fun decode(type: KClass<UInt>): UInt
     fun decode(type: KClass<ULong>): ULong
-    fun <T> decodeDecodable(type: KClass<T>): T where T : Any
-
-    fun <T> decode(type: KClass<T>): T where T: Decodable {
-        return decodeDecodable(type)
-    }
+    fun <T> decode(type: KClass<T>): T where T : Any
 
     fun decodeIfPresent(type: KClass<Boolean>): Boolean? {
         return if (isAtEnd) null else decode(type)
@@ -800,7 +856,7 @@ interface UnkeyedDecodingContainer {
         return if (isAtEnd) null else decode(type)
     }
 
-    fun <T> decodeIfPresent(type: KClass<T>): T? where T: Decodable {
+    fun <T> decodeIfPresent(type: KClass<T>): T? where T: Any {
         return if (isAtEnd) null else decode(type)
     }
 
@@ -825,5 +881,65 @@ interface SingleValueDecodingContainer {
     fun decode(type: KClass<UShort>): UShort
     fun decode(type: KClass<UInt>): UInt
     fun decode(type: KClass<ULong>): ULong
-    fun <T> decode(type: KClass<T>): T where T: Decodable
+    fun <T> decode(type: KClass<T>): T where T: Any
+}
+
+inline fun <reified T> codableDictionaryKeyedDecoder(forType: KClass<T>): (KeyedDecodingContainer<DictionaryCodingKey>, CodingKey) -> T where T: Any {
+    val decoder: (KeyedDecodingContainer<DictionaryCodingKey>, CodingKey) -> T
+    when (T::class) {
+        Boolean::class -> decoder = { container, dkey -> container.decode(Boolean::class, dkey) as T }
+        String::class -> decoder = { container, dkey -> container.decode(String::class, dkey) as T }
+        Byte::class -> decoder = { container, dkey -> container.decode(Byte::class, dkey) as T }
+        Short::class -> decoder = { container, dkey -> container.decode(Short::class, dkey) as T }
+        Int::class -> decoder = { container, dkey -> container.decode(Int::class, dkey) as T }
+        Long::class -> decoder = { container, dkey -> container.decode(Long::class, dkey) as T }
+        Float::class -> decoder = { container, dkey -> container.decode(Float::class, dkey) as T }
+        Double::class -> decoder = { container, dkey -> container.decode(Double::class, dkey) as T }
+        UByte::class -> decoder = { container, dkey -> container.decode(UByte::class, dkey) as T }
+        UShort::class -> decoder = { container, dkey -> container.decode(UShort::class, dkey) as T }
+        UInt::class -> decoder = { container, dkey -> container.decode(UInt::class, dkey) as T }
+        ULong::class -> decoder = { container, dkey -> container.decode(ULong::class, dkey) as T }
+        else -> decoder = { container, dkey -> container.decode(T::class, dkey) as T }
+    }
+    return decoder
+}
+
+inline fun <reified T> codableUnkeyedDecoder(forType: KClass<T>): (UnkeyedDecodingContainer) -> T where T: Any {
+    val decoder: (UnkeyedDecodingContainer) -> T
+    when (T::class) {
+        Boolean::class -> decoder = { it.decode(Boolean::class) as T }
+        String::class -> decoder = { it.decode(String::class) as T }
+        Byte::class -> decoder = { it.decode(Byte::class) as T }
+        Short::class -> decoder = { it.decode(Short::class) as T }
+        Int::class -> decoder = { it.decode(Int::class) as T }
+        Long::class -> decoder = { it.decode(Long::class) as T }
+        Float::class -> decoder = { it.decode(Float::class) as T }
+        Double::class -> decoder = { it.decode(Double::class) as T }
+        UByte::class -> decoder = { it.decode(UByte::class) as T }
+        UShort::class -> decoder = { it.decode(UShort::class) as T }
+        UInt::class -> decoder = { it.decode(UInt::class) as T }
+        ULong::class -> decoder = { it.decode(ULong::class) as T }
+        else -> decoder = { it.decode(T::class) as T }
+    }
+    return decoder
+}
+
+inline fun <reified T> codableSingleValueDecoder(forType: KClass<T>): (SingleValueDecodingContainer) -> T where T: Any {
+    val decoder: (SingleValueDecodingContainer) -> T
+    when (T::class) {
+        Boolean::class -> decoder = { it.decode(Boolean::class) as T }
+        String::class -> decoder = { it.decode(String::class) as T }
+        Byte::class -> decoder = { it.decode(Byte::class) as T }
+        Short::class -> decoder = { it.decode(Short::class) as T }
+        Int::class -> decoder = { it.decode(Int::class) as T }
+        Long::class -> decoder = { it.decode(Long::class) as T }
+        Float::class -> decoder = { it.decode(Float::class) as T }
+        Double::class -> decoder = { it.decode(Double::class) as T }
+        UByte::class -> decoder = { it.decode(UByte::class) as T }
+        UShort::class -> decoder = { it.decode(UShort::class) as T }
+        UInt::class -> decoder = { it.decode(UInt::class) as T }
+        ULong::class -> decoder = { it.decode(ULong::class) as T }
+        else -> decoder = { it.decode(T::class) as T }
+    }
+    return decoder
 }
