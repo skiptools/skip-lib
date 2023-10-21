@@ -27,7 +27,7 @@ abstract class TopLevelEncoder<Output> {
     abstract fun encoder(): Encoder
     abstract fun output(from: Encoder): Output
 
-    fun <T> encode(value: T): Output {
+    fun <T> encode(value: T): Output where T: Encodable {
         val encoder = encoder()
         val container = encoder.singleValueContainer()
         codableSingleValueEncode(value, container)
@@ -457,7 +457,7 @@ interface Decoder {
 abstract class TopLevelDecoder<Input> {
     abstract fun decoder(from: Input): Decoder
 
-    inline fun <reified T> decode(type: KClass<T>, from: Input): T where T: Any {
+    inline fun <reified T> decode(type: KClass<T>, from: Input): T where T: Decodable {
         val decoder = decoder(from)
         val valueDecoder = codableSingleValueDecoder(type)
         val container = decoder.singleValueContainer()
@@ -738,8 +738,16 @@ class KeyedDecodingContainer<Key>(container: KeyedDecodingContainerProtocol): Ke
         return decodeSequence(type = E::class, forKey, factory = { Array(it, nocopy = true)  }) as Array<E>
     }
 
+    inline fun <reified E> decodeIfPresent(type: KClass<Array<E>>, forKey: CodingKey): Array<E>? where E: Any {
+        return if (contains(forKey)) decode(type, forKey) else null
+    }
+
     inline fun <reified E> decode(type: KClass<Set<E>>, forKey: CodingKey): Set<E> where E: Any {
         return decodeSequence(type = E::class, forKey, factory = { Set(it, nocopy = true)  }) as Set<E>
+    }
+
+    inline fun <reified E> decodeIfPresent(type: KClass<Set<E>>, forKey: CodingKey): Set<E>? where E: Any {
+        return if (contains(forKey)) decode(type, forKey) else null
     }
 
     inline fun <reified E> decodeSequence(type: KClass<E>, forKey: CodingKey, factory: (MutableList<E>) -> Sequence<E>): Sequence<E> where E: Any {
@@ -759,6 +767,10 @@ class KeyedDecodingContainer<Key>(container: KeyedDecodingContainerProtocol): Ke
             Int::class -> return decodeAsDictionary(type, forKey, key = { (it.intValue ?: 0) as K })
             else -> return decodeAsArray(type, forKey)
         }
+    }
+
+    inline fun <reified K, reified V> decodeIfPresent(type: KClass<Dictionary<K, V>>, forKey: CodingKey): Dictionary<K, V>? where K: Any, V: Any {
+        return if (contains(forKey)) decode(type, forKey) else null
     }
 
     inline fun <K, reified V> decodeAsDictionary(type: KClass<Dictionary<K, V>>, forKey: CodingKey, key: (CodingKey) -> K): Dictionary<K, V> where V: Any {
