@@ -27,18 +27,16 @@ abstract class TopLevelEncoder<Output> {
     abstract fun encoder(): Encoder
     abstract fun output(from: Encoder): Output
 
-    fun <T> encode(value: T): Output where T: Encodable {
+    fun <T> encode(value: T): Output where T: Any {
         val encoder = encoder()
-        val container = encoder.singleValueContainer()
-        codableSingleValueEncode(value, container)
-        return output(encoder)
-    }
-
-    fun encode(value: Sequence<*>): Output {
-        val encoder = encoder()
-        val container = encoder.unkeyedContainer()
-        for (element in value.iterable) {
-            codableUnkeyedEncode(element, container)
+        if (value is Sequence<*>) {
+            val container = encoder.unkeyedContainer()
+            for (element in value.iterable) {
+                codableUnkeyedEncode(element, container)
+            }
+        } else {
+            val container = encoder.singleValueContainer()
+            codableSingleValueEncode(value, container)
         }
         return output(encoder)
     }
@@ -207,11 +205,16 @@ class KeyedEncodingContainer<Key>(container: KeyedEncodingContainerProtocol) : K
     }
 
     override fun <T> encode(value: T, forKey: CodingKey) where T: Any {
-        box.encode(value, forKey)
+        if (value is Sequence<*>) {
+            val container = nestedUnkeyedContainer(forKey)
+            container.encode(contentsOf = value)
+        } else {
+            box.encode(value, forKey)
+        }
     }
 
     override fun <T> encodeConditional(object_: T, forKey: CodingKey) where T: Any {
-        box.encodeConditional(object_, forKey)
+        encode(object_, forKey) // Delegate to our method to handle Sequences
     }
 
     override fun encodeIfPresent(value: Boolean?, forKey: CodingKey) {
@@ -263,7 +266,7 @@ class KeyedEncodingContainer<Key>(container: KeyedEncodingContainerProtocol) : K
     }
 
     override fun <T> encodeIfPresent(value: T?, forKey: CodingKey) where T: Any {
-        box.encodeIfPresent(value, forKey)
+        if (value != null) encode(value, forKey) // Delegate to our function to handle Sequences
     }
 
     override fun <NestedKey> nestedContainer(keyedBy: KClass<NestedKey>, forKey: CodingKey): KeyedEncodingContainer<NestedKey> where NestedKey: CodingKey {
@@ -283,15 +286,6 @@ class KeyedEncodingContainer<Key>(container: KeyedEncodingContainerProtocol) : K
     }
 
     // In Swift, Arrays and Dictionaries are Codable. In Kotlin, we cover them here to overcome generic type erasure
-
-    fun encode(value: Sequence<*>, forKey: CodingKey) {
-        val container = nestedUnkeyedContainer(forKey)
-        container.encode(contentsOf = value)
-    }
-
-    fun encodeIfPresent(value: Sequence<*>?, forKey: CodingKey) {
-        if (value != null) encode(value, forKey)
-    }
 
     inline fun <reified K, V> encode(value: Dictionary<K, V>, forKey: CodingKey) where K: Any, V: Any {
         if (K::class == Int::class || K::class == String::class) {
@@ -464,35 +458,44 @@ abstract class TopLevelDecoder<Input> {
         return valueDecoder(container)
     }
 
-    inline fun <reified E> decode(type: KClass<Array<E>>, from: Input): Array<E> where E: Any {
-        return decodeSequence(type = E::class, from, factory = { Array(it, nocopy = true)  }) as Array<E>
-    }
-
-    inline fun <reified E> decode(type: KClass<Set<E>>, from: Input): Set<E> where E: Any {
-        return decodeSequence(type = E::class, from, factory = { Set(it, nocopy = true)  }) as Set<E>
-    }
-
-    inline fun <reified E> decodeSequence(type: KClass<E>, from: Input, factory: (MutableList<E>) -> Sequence<E>): Sequence<E> where E: Any {
+    inline fun <reified E> decode(type: KClass<Array<*>>, elementType: KClass<E>, from: Input): Array<E> where E: Any {
         val decoder = decoder(from)
-        val elementDecoder = codableUnkeyedDecoder(E::class)
+        return decodeSequence(decoder.unkeyedContainer(), type = E::class, factory = { Array(it, nocopy = true)  }) as Array<E>
+    }
+
+    inline fun <reified E> decode(type: KClass<Set<*>>, elementType: KClass<E>, from: Input): Set<E> where E: Any {
+        val decoder = decoder(from)
+        return decodeSequence(decoder.unkeyedContainer(), type = E::class, factory = { Set(it, nocopy = true)  }) as Set<E>
+    }
+
+    inline fun <reified E> decode(type: KClass<Array<*>>, elementType: KClass<Array<*>>, nestedElementType: KClass<E>, from: Input): Array<Array<E>> where E: Any {
+        val decoder = decoder(from)
         val container = decoder.unkeyedContainer()
-        val list: MutableList<E> = mutableListOf()
+        val list: MutableList<Array<E>> = mutableListOf()
         while (!container.isAtEnd) {
-            val element = elementDecoder(container)
-            list.add(element)
+            val element = decodeSequence(container.nestedUnkeyedContainer(), E::class, factory = { Array(it, nocopy = true) })
+            list.add(element as Array<E>)
         }
-        return factory(list)
+        return Array(list, nocopy = true)
     }
 
-    inline fun <reified K, reified V> decode(type: KClass<Dictionary<K, V>>, from: Input): Dictionary<K, V> where K: Any, V: Any {
+    inline fun <reified K, reified V> decode(type: KClass<Dictionary<*, *>>, keyType: KClass<K>, valueType: KClass<V>, from: Input): Dictionary<K, V> where K: Any, V: Any {
         when (K::class) {
-            String::class -> return decodeAsDictionary(type, from, key = { it.stringValue as K })
-            Int::class -> return decodeAsDictionary(type, from, key = { (it.intValue ?: 0) as K })
-            else -> return decodeAsArray(type, from)
+            String::class -> return decodeAsDictionary(keyType, valueType, from, key = { it.stringValue as K })
+            Int::class -> return decodeAsDictionary(keyType, valueType, from, key = { (it.intValue ?: 0) as K })
+            else -> return decodeAsArray(keyType, valueType, from)
         }
     }
 
-    inline fun <K, reified V> decodeAsDictionary(type: KClass<Dictionary<K, V>>, from: Input, key: (CodingKey) -> K): Dictionary<K, V> where V: Any {
+    inline fun <reified K, reified E> decode(type: KClass<Dictionary<*, *>>, keyType: KClass<K>, valueType: KClass<Array<*>>, nestedElementType: KClass<E>, from: Input): Dictionary<K, Array<E>> where K: Any, E: Any {
+        when (K::class) {
+            String::class -> return decodeAsDictionaryOfArrays(keyType, nestedElementType, from, key = { it.stringValue as K })
+            Int::class -> return decodeAsDictionaryOfArrays(keyType, nestedElementType, from, key = { (it.intValue ?: 0) as K })
+            else -> return decodeAsArrayOfArrays(keyType, nestedElementType, from)
+        }
+    }
+
+    inline fun <K, reified V> decodeAsDictionary(keyType: KClass<K>, valueType: KClass<V>, from: Input, key: (CodingKey) -> K): Dictionary<K, V> where K: Any, V: Any {
         val decoder = decoder(from)
         val valueDecoder = codableDictionaryKeyedDecoder(V::class)
         val container = decoder.container(keyedBy = DictionaryCodingKey::class)
@@ -503,7 +506,18 @@ abstract class TopLevelDecoder<Input> {
         return Dictionary(map, nocopy = true)
     }
 
-    inline fun <reified K, reified V> decodeAsArray(type: KClass<Dictionary<K, V>>, from: Input): Dictionary<K, V> where K: Any, V: Any {
+    inline fun <K, reified E> decodeAsDictionaryOfArrays(keyType: KClass<K>, nestedElementType: KClass<E>, from: Input, key: (CodingKey) -> K): Dictionary<K, Array<E>> where K: Any, E: Any {
+        val decoder = decoder(from)
+        val container = decoder.container(keyedBy = DictionaryCodingKey::class)
+        val map = LinkedHashMap<K, Array<E>>()
+        for (codingKey in container.allKeys) {
+            val nestedContainer = container.nestedUnkeyedContainer(codingKey)
+            map[key(codingKey)] = decodeSequence(nestedContainer, E::class, factory = { Array(it, nocopy = true) }) as Array<E>
+        }
+        return Dictionary(map, nocopy = true)
+    }
+
+    inline fun <reified K, reified V> decodeAsArray(keyType: KClass<K>, valueType: KClass<V>, from: Input): Dictionary<K, V> where K: Any, V: Any {
         val decoder = decoder(from)
         val keyDecoder = codableUnkeyedDecoder(K::class)
         val valueDecoder = codableUnkeyedDecoder(V::class)
@@ -512,6 +526,20 @@ abstract class TopLevelDecoder<Input> {
         while (!container.isAtEnd) {
             val key = keyDecoder(container)
             val value = valueDecoder(container)
+            map[key] = value
+        }
+        return Dictionary(map, nocopy = true)
+    }
+
+    inline fun <reified K, reified E> decodeAsArrayOfArrays(keyType: KClass<K>, nestedElementType: KClass<E>, from: Input): Dictionary<K, Array<E>> where K: Any, E: Any {
+        val decoder = decoder(from)
+        val keyDecoder = codableUnkeyedDecoder(K::class)
+        val container = decoder.unkeyedContainer()
+        val map = LinkedHashMap<K, Array<E>>()
+        while (!container.isAtEnd) {
+            val key = keyDecoder(container)
+            val nestedContainer = container.nestedUnkeyedContainer()
+            val value = decodeSequence(nestedContainer, E::class, factory = { Array(it, nocopy = true) }) as Array<E>
             map[key] = value
         }
         return Dictionary(map, nocopy = true)
@@ -734,46 +762,61 @@ class KeyedDecodingContainer<Key>(container: KeyedDecodingContainerProtocol): Ke
 
     // In Swift, Arrays and Dictionaries are Codable. In Kotlin, we cover them here to overcome generic type erasure
 
-    inline fun <reified E> decode(type: KClass<Array<E>>, forKey: CodingKey): Array<E> where E: Any {
-        return decodeSequence(type = E::class, forKey, factory = { Array(it, nocopy = true)  }) as Array<E>
+    inline fun <reified E> decode(type: KClass<Array<*>>, elementType: KClass<E>, forKey: CodingKey): Array<E> where E: Any {
+        return decodeSequence(nestedUnkeyedContainer(forKey), type = E::class, factory = { Array(it, nocopy = true)  }) as Array<E>
     }
 
-    inline fun <reified E> decodeIfPresent(type: KClass<Array<E>>, forKey: CodingKey): Array<E>? where E: Any {
-        return if (contains(forKey)) decode(type, forKey) else null
+    inline fun <reified E> decodeIfPresent(type: KClass<Array<*>>, elementType: KClass<E>, forKey: CodingKey): Array<E>? where E: Any {
+        return if (contains(forKey)) decode(type, elementType, forKey) else null
     }
 
-    inline fun <reified E> decode(type: KClass<Set<E>>, forKey: CodingKey): Set<E> where E: Any {
-        return decodeSequence(type = E::class, forKey, factory = { Set(it, nocopy = true)  }) as Set<E>
+    inline fun <reified E> decode(type: KClass<Set<*>>, elementType: KClass<E>, forKey: CodingKey): Set<E> where E: Any {
+        return decodeSequence(nestedUnkeyedContainer(forKey), type = E::class, factory = { Set(it, nocopy = true)  }) as Set<E>
     }
 
-    inline fun <reified E> decodeIfPresent(type: KClass<Set<E>>, forKey: CodingKey): Set<E>? where E: Any {
-        return if (contains(forKey)) decode(type, forKey) else null
+    inline fun <reified E> decodeIfPresent(type: KClass<Set<*>>, elementType: KClass<E>, forKey: CodingKey): Set<E>? where E: Any {
+        return if (contains(forKey)) decode(type, elementType, forKey) else null
     }
 
-    inline fun <reified E> decodeSequence(type: KClass<E>, forKey: CodingKey, factory: (MutableList<E>) -> Sequence<E>): Sequence<E> where E: Any {
-        val decoder = codableUnkeyedDecoder(E::class)
+    inline fun <reified E> decode(type: KClass<Array<*>>, elementType: KClass<Array<*>>, nestedElementType: KClass<E>, forKey: CodingKey): Array<Array<E>> where E: Any {
         val container = nestedUnkeyedContainer(forKey)
-        val list: MutableList<E> = mutableListOf()
+        val list: MutableList<Array<E>> = mutableListOf()
         while (!container.isAtEnd) {
-            val element = decoder(container)
-            list.add(element)
+            val element = decodeSequence(container.nestedUnkeyedContainer(), E::class, factory = { Array(it, nocopy = true) })
+            list.add(element as Array<E>)
         }
-        return factory(list)
+        return Array(list, nocopy = true)
     }
 
-    inline fun <reified K, reified V> decode(type: KClass<Dictionary<K, V>>, forKey: CodingKey): Dictionary<K, V> where K: Any, V: Any {
+    inline fun <reified E> decodeIfPresent(type: KClass<Array<*>>, elementType: KClass<Array<*>>, nestedElementType: KClass<E>, forKey: CodingKey): Array<Array<E>>? where E: Any {
+        return if (contains(forKey)) decode(type, elementType, nestedElementType, forKey) else null
+    }
+
+    inline fun <reified K, reified V> decode(type: KClass<Dictionary<*, *>>, keyType: KClass<K>, valueType: KClass<V>, forKey: CodingKey): Dictionary<K, V> where K: Any, V: Any {
         when (K::class) {
-            String::class -> return decodeAsDictionary(type, forKey, key = { it.stringValue as K })
-            Int::class -> return decodeAsDictionary(type, forKey, key = { (it.intValue ?: 0) as K })
-            else -> return decodeAsArray(type, forKey)
+            String::class -> return decodeAsDictionary(keyType, valueType, forKey, key = { it.stringValue as K })
+            Int::class -> return decodeAsDictionary(keyType, valueType, forKey, key = { (it.intValue ?: 0) as K })
+            else -> return decodeAsArray(keyType, valueType, forKey)
         }
     }
 
-    inline fun <reified K, reified V> decodeIfPresent(type: KClass<Dictionary<K, V>>, forKey: CodingKey): Dictionary<K, V>? where K: Any, V: Any {
-        return if (contains(forKey)) decode(type, forKey) else null
+    inline fun <reified K, reified V> decodeIfPresent(type: KClass<Dictionary<*, *>>, keyType: KClass<K>, valueType: KClass<V>, forKey: CodingKey): Dictionary<K, V>? where K: Any, V: Any {
+        return if (contains(forKey)) decode(type, keyType, valueType, forKey) else null
     }
 
-    inline fun <K, reified V> decodeAsDictionary(type: KClass<Dictionary<K, V>>, forKey: CodingKey, key: (CodingKey) -> K): Dictionary<K, V> where V: Any {
+    inline fun <reified K, reified E> decode(type: KClass<Dictionary<*, *>>, keyType: KClass<K>, valueType: KClass<Array<*>>, nestedElementType: KClass<E>, forKey: CodingKey): Dictionary<K, Array<E>> where K: Any, E: Any {
+        when (K::class) {
+            String::class -> return decodeAsDictionaryOfArrays(keyType, nestedElementType, forKey, key = { it.stringValue as K })
+            Int::class -> return decodeAsDictionaryOfArrays(keyType, nestedElementType, forKey, key = { (it.intValue ?: 0) as K })
+            else -> return decodeAsArrayOfArrays(keyType, nestedElementType, forKey)
+        }
+    }
+
+    inline fun <reified K, reified E> decodeIfPresent(type: KClass<Dictionary<*, *>>, keyType: KClass<K>, valueType: KClass<Array<*>>, nestedElementType: KClass<E>, forKey: CodingKey): Dictionary<K, Array<E>>? where K: Any, E: Any {
+        return if (contains(forKey)) decode(type, keyType, valueType, nestedElementType, forKey) else null
+    }
+
+    inline fun <K, reified V> decodeAsDictionary(keyType: KClass<K>, valueType: KClass<V>, forKey: CodingKey, key: (CodingKey) -> K): Dictionary<K, V> where K: Any, V: Any {
         val decoder = codableDictionaryKeyedDecoder(V::class)
         val container = nestedContainer(keyedBy = DictionaryCodingKey::class, forKey)
         val map = LinkedHashMap<K, V>()
@@ -783,7 +826,17 @@ class KeyedDecodingContainer<Key>(container: KeyedDecodingContainerProtocol): Ke
         return Dictionary(map, nocopy = true)
     }
 
-    inline fun <reified K, reified V> decodeAsArray(type: KClass<Dictionary<K, V>>, forKey: CodingKey): Dictionary<K, V> where K: Any, V: Any {
+    inline fun <K, reified E> decodeAsDictionaryOfArrays(keyType: KClass<K>, nestedElementType: KClass<E>, forKey: CodingKey, key: (CodingKey) -> K): Dictionary<K, Array<E>> where K: Any, E: Any {
+        val container = nestedContainer(keyedBy = DictionaryCodingKey::class, forKey)
+        val map = LinkedHashMap<K, Array<E>>()
+        for (codingKey in container.allKeys) {
+            val nestedContainer = container.nestedUnkeyedContainer(codingKey)
+            map[key(codingKey)] = decodeSequence(nestedContainer, E::class, factory = { Array(it, nocopy = true) }) as Array<E>
+        }
+        return Dictionary(map, nocopy = true)
+    }
+
+    inline fun <reified K, reified V> decodeAsArray(keyType: KClass<K>, valueType: KClass<V>, forKey: CodingKey): Dictionary<K, V> where K: Any, V: Any {
         val keyDecoder = codableUnkeyedDecoder(K::class)
         val valueDecoder = codableUnkeyedDecoder(V::class)
         val container = nestedUnkeyedContainer(forKey)
@@ -791,6 +844,19 @@ class KeyedDecodingContainer<Key>(container: KeyedDecodingContainerProtocol): Ke
         while (!container.isAtEnd) {
             val key = keyDecoder(container)
             val value = valueDecoder(container)
+            map[key] = value
+        }
+        return Dictionary(map, nocopy = true)
+    }
+
+    inline fun <reified K, reified E> decodeAsArrayOfArrays(keyType: KClass<K>, nestedElementType: KClass<E>, forKey: CodingKey): Dictionary<K, Array<E>> where K: Any, E: Any {
+        val keyDecoder = codableUnkeyedDecoder(K::class)
+        val container = nestedUnkeyedContainer(forKey)
+        val map = LinkedHashMap<K, Array<E>>()
+        while (!container.isAtEnd) {
+            val key = keyDecoder(container)
+            val nestedContainer = container.nestedUnkeyedContainer()
+            val value = decodeSequence(nestedContainer, E::class, factory = { Array(it, nocopy = true) }) as Array<E>
             map[key] = value
         }
         return Dictionary(map, nocopy = true)
@@ -894,6 +960,16 @@ interface SingleValueDecodingContainer {
     fun decode(type: KClass<UInt>): UInt
     fun decode(type: KClass<ULong>): ULong
     fun <T> decode(type: KClass<T>): T where T: Any
+}
+
+inline fun <reified E> decodeSequence(container: UnkeyedDecodingContainer, type: KClass<E>, factory: (MutableList<E>) -> Sequence<E>): Sequence<E> where E: Any {
+    val decoder = codableUnkeyedDecoder(E::class)
+    val list: MutableList<E> = mutableListOf()
+    while (!container.isAtEnd) {
+        val element = decoder(container)
+        list.add(element)
+    }
+    return factory(list)
 }
 
 inline fun <reified T> codableDictionaryKeyedDecoder(forType: KClass<T>): (KeyedDecodingContainer<DictionaryCodingKey>, CodingKey) -> T where T: Any {
