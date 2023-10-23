@@ -1,4 +1,4 @@
-// swift-tools-version: 5.8
+// swift-tools-version: 5.9
 import PackageDescription
 
 let package = Package(
@@ -8,8 +8,8 @@ let package = Package(
         .library(name: "SkipLib", type: .dynamic, targets: ["SkipLib"]),
     ],
     dependencies: [
-        .package(url: "https://source.skip.tools/skip.git", from: "0.6.131"),
-        .package(url: "https://source.skip.tools/skip-unit.git", from: "0.3.15"),
+        .package(url: "https://source.skip.tools/skip.git", from: "0.7.1"),
+        .package(url: "https://source.skip.tools/skip-unit.git", from: "0.4.0"),
     ],
     targets: [
         .target(name: "SkipLib", dependencies: [.product(name: "SkipUnit", package: "skip-unit")], plugins: [.plugin(name: "skipstone", package: "skip")]),
