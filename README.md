@@ -25,7 +25,7 @@ The module is transparently adopted through the automatic addition of `import sk
 
 ## Contributing
 
-We welcome contributions to SkipLib. The Skip product [documentation](https://skip.tools/docs) includes helpful instructions on local Skip library development. 
+We welcome contributions to SkipLib. The Skip product [documentation](https://skip.tools/docs/contributing/) includes helpful instructions and tips on local Skip library development. 
 
 The most pressing need is to reduce the amount of unimplemented API. To help fill in unimplemented API in SkipLib:
 
