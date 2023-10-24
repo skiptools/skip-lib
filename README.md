@@ -13,7 +13,7 @@ SkipLib vends the `skip.lib` Kotlin package. It serves two purposes:
 
 SkipLib depends on the [skip](https://source.skip.tools/skip) transpiler plugin and has no additional library dependencies.
 
-It is part of the core *skipstack* and is not intended to be imported directly.
+It is part of the core *SkipStack* and is not intended to be imported directly.
 The module is transparently adopted through the automatic addition of `import skip.lib.*` to transpiled files by the Skip transpiler.
 
 ## Status
@@ -25,7 +25,7 @@ The module is transparently adopted through the automatic addition of `import sk
 
 ## Contributing
 
-We welcome contributions to SkipLib. The Skip product documentation includes helpful instructions on [local Skip library development](https://skip.tools/docs/). 
+We welcome contributions to SkipLib. The Skip product [documentation](https://skip.tools/docs) includes helpful instructions on local Skip library development. 
 
 The most pressing need is to reduce the amount of unimplemented API. To help fill in unimplemented API in SkipLib:
 
