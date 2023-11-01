@@ -5,6 +5,8 @@
 // as published by the Free Software Foundation https://fsf.org
 package skip.lib
 
+internal val systemRandom = SystemRandomNumberGenerator()
+
 typealias Never = Nothing
 typealias AnyClass = kotlin.reflect.KClass<*>
 

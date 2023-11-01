@@ -5,6 +5,8 @@
 // as published by the Free Software Foundation https://fsf.org
 package skip.lib
 
+import java.util.Random
+
 /// Allow Swift code to reference Substring type.
 class Substring(val stringValue: String, val startIndex: Int) {
     override fun toString(): String = stringValue
@@ -78,6 +80,14 @@ val Substring.underestimatedCount: Int
 fun <T> String.withContiguousStorageIfAvailable(body: (Any) -> T): T? = null
 fun <T> Substring.withContiguousStorageIfAvailable(body: (Any) -> T): T? = null
 
+fun String.shuffled(using: InOut<RandomNumberGenerator>? = null): Array<Char> {
+    val list = ArrayList<Char>()
+    list.addAll(this.asIterable())
+    list.shuffle(using)
+    return Array(list, nocopy = true)
+}
+fun Substring.shuffled(using: InOut<RandomNumberGenerator>? = null): Array<Char> = stringValue.shuffled(using)
+
 fun <RE> String.map(transform: (Char) -> RE): Array<RE> {
     return Array(map(transform), nocopy = true)
 }
@@ -121,6 +131,17 @@ fun String.enumerated(): Sequence<Tuple2<Int, Char>> {
     }
 }
 fun Substring.enumerated(): Sequence<Tuple2<Int, Char>> = stringValue.enumerated()
+fun String.min(by: (Char, Char) -> Boolean): Char? {
+    return minWithOrNull(object: Comparator<Char> {
+        override fun compare(c0: Char, c1: Char): Int {
+            return c0.compareTo(c1)
+        }
+    })
+}
+fun Substring.min(by: (Char, Char) -> Boolean): Char? = stringValue.min(by)
+
+fun String.min(): Char? = min { c0, c1 -> c0 < c1 }
+fun Substring.min(): Char? = stringValue.min()
 
 fun String.starts(with: String): Boolean {
     return startsWith(with)
@@ -243,6 +264,11 @@ fun Substring.index(i: Int, offsetBy: Int): Int = i + offsetBy
 fun Substring.distance(from: Int, to: Int): Int = to - from
 fun Substring.index(after: Int): Int = after + 1
 
+fun String.randomElement(using: InOut<RandomNumberGenerator>? = null): Char? {
+    return if (isEmpty) null else elementAt(Int.random(0 until count(), using))
+}
+fun Substring.randomElement(using: InOut<RandomNumberGenerator>? = null): Char? = stringValue.randomElement(using)
+
 val String.first: Char?
     get() = firstOrNull()
 val Substring.first: Char?
@@ -262,6 +288,15 @@ fun String.firstIndex(of: String): Int? {
 }
 fun Substring.firstIndex(of: String): Int? {
     return firstIndex(of[0])
+}
+
+fun String.firstIndex(where: (Char) -> Boolean): Int? {
+    val index = indexOfFirst(where)
+    return if (index == -1) null else index
+}
+fun Substring.firstIndex(where: (Char) -> Boolean): Int? {
+    val index = stringValue.indexOfFirst(where)
+    return if (index == -1) null else index + startIndex
 }
 
 operator fun String.get(range: IntRange): Substring {

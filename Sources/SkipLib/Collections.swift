@@ -28,12 +28,10 @@ extension Sequence {
         fatalError()
     }
 
-    @available(*, unavailable)
     public func shuffled<T: RandomNumberGenerator>(using generator: inout T) -> [Element] {
         fatalError()
     }
 
-    @available(*, unavailable)
     public func shuffled() -> [Element] {
         fatalError()
     }
@@ -95,12 +93,10 @@ extension Sequence {
         fatalError()
     }
     
-    @available(*, unavailable)
     public func min(by areInIncreasingOrder: (Element, Element) throws -> Bool) rethrows -> Element? {
         fatalError()
     }
 
-    @available(*, unavailable)
     public func max(by areInIncreasingOrder: (Element, Element) throws -> Bool) rethrows -> Element? {
         fatalError()
     }
@@ -181,12 +177,10 @@ extension Sequence {
         fatalError()
     }
 
-    @available(*, unavailable)
     public func min() -> Element? {
         fatalError()
     }
 
-    @available(*, unavailable)
     public func max() -> Element? {
         fatalError()
     }
@@ -260,12 +254,10 @@ extension Collection {
         fatalError()
     }
 
-    @available(*, unavailable)
     public func randomElement() -> Element? {
         fatalError()
     }
 
-    @available(*, unavailable)
     public func randomElement(using generator: inout any RandomNumberGenerator) -> Element? {
         fatalError()
     }
@@ -305,17 +297,8 @@ extension Collection {
         fatalError()
     }
 
-    @available(*, unavailable)
     public func firstIndex(where predicate: (Element) throws -> Bool) rethrows -> Int? {
         fatalError()
-    }
-
-    @available(*, unavailable)
-    public mutating func shuffle() {
-    }
-
-    @available(*, unavailable)
-    public mutating func sort() {
     }
 
     @available(*, unavailable)
@@ -323,8 +306,16 @@ extension Collection {
         fatalError()
     }
 
-    @available(*, unavailable)
+    public mutating func shuffle() {
+    }
+
     public mutating func shuffle<T: RandomNumberGenerator>(using generator: inout T) {
+    }
+
+    public mutating func sort() {
+    }
+
+    public mutating func sort(by areIncreasingOrder: (Element, Element) throws -> Bool) rethrows {
     }
 
     // SKIP NOWARN

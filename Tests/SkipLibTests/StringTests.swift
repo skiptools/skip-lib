@@ -285,4 +285,35 @@ final class StringTests: XCTestCase {
         XCTAssertEqual(String(format: "The value is %.0f", 42.5), "The value is 42") // No effect of 0 precision on float
         #endif
     }
+
+    func testRandomElement() {
+        XCTAssertNil("".randomElement())
+
+        let str = "abcde"
+        var seen: Set<Character> = []
+        for _ in 0..<100 {
+            seen.insert(str.randomElement()!)
+        }
+        XCTAssertEqual(seen.count, 5)
+        XCTAssertTrue(seen.contains("a"))
+        XCTAssertTrue(seen.contains("e"))
+    }
+
+    func testShuffled() {
+        let empty: [Character] = []
+        XCTAssertEqual(empty, "".shuffled())
+        let single: [Character] = ["a"]
+        XCTAssertEqual(single, "a".shuffled())
+
+        let str = "abcdefghij"
+        let arr: [Character] = ["a", "b", "c", "d", "e", "f", "g", "h", "i", "j"]
+        let shuffled = str.shuffled()
+        XCTAssertNotEqual(arr, shuffled)
+        XCTAssertEqual(Set(arr), Set(shuffled))
+
+        var gen: RandomNumberGenerator = SystemRandomNumberGenerator()
+        let shuffled2 = str.shuffled(using: &gen)
+        XCTAssertNotEqual(arr, shuffled2)
+        XCTAssertEqual(Set(arr), Set(shuffled2))
+    }
 }

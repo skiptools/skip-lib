@@ -5,6 +5,8 @@
 // as published by the Free Software Foundation https://fsf.org
 package skip.lib
 
+import java.util.Random
+
 // WARNING: Replicate all implemented immutable Sequence, Collections API in String.kt
 
 // We use a Storage model wrapping internal Kotlin collections rather than implementing the collection
@@ -89,6 +91,13 @@ interface Sequence<Element>: IterableStorage<Element> {
 
     fun <T> withContiguousStorageIfAvailable(body: (Any) -> T): T? = null
 
+    fun shuffled(using: InOut<RandomNumberGenerator>? = null): Array<Element> {
+        val list = ArrayList<Element>()
+        list.addAll(iterable)
+        list.shuffle(using)
+        return Array(list, nocopy = true)
+    }
+
     fun <RE> map(transform: (Element) -> RE): Array<RE> {
         return Array(iterable.map(transform), nocopy = true)
     }
@@ -124,6 +133,52 @@ interface Sequence<Element>: IterableStorage<Element> {
             override val iterable: Iterable<Tuple2<Int, Element>>
                 get() = enumeratedIterable
         }
+    }
+
+    fun min(): Element? {
+        return iterable.minWithOrNull(object: Comparator<Element> {
+            override fun compare(p0: Element, p1: Element): Int {
+                @Suppress("UNCHECKED_CAST")
+                return (p0 as Comparable<Element>).compareTo(p1)
+            }
+        })
+    }
+
+    fun min(by: (Element, Element) -> Boolean): Element? {
+        return iterable.minWithOrNull(object: Comparator<Element> {
+            override fun compare(p0: Element, p1: Element): Int {
+                if (by(p0, p1)) {
+                    return -1
+                } else if (by(p1, p0)) {
+                    return 1
+                } else {
+                    return 0
+                }
+            }
+        })
+    }
+
+    fun max(): Element? {
+        return iterable.maxWithOrNull(object: Comparator<Element> {
+            override fun compare(p0: Element, p1: Element): Int {
+                @Suppress("UNCHECKED_CAST")
+                return (p0 as Comparable<Element>).compareTo(p1)
+            }
+        })
+    }
+
+    fun max(by: (Element, Element) -> Boolean): Element? {
+        return iterable.maxWithOrNull(object: Comparator<Element> {
+            override fun compare(p0: Element, p1: Element): Int {
+                if (by(p0, p1)) {
+                    return -1
+                } else if (by(p1, p0)) {
+                    return 1
+                } else {
+                    return 0
+                }
+            }
+        })
     }
 
     fun starts(with: Sequence<Element>): Boolean {
@@ -184,16 +239,45 @@ interface Sequence<Element>: IterableStorage<Element> {
 
     @Suppress("UNCHECKED_CAST")
     fun sorted(): Array<Element> {
-        return Array(iterable.sortedWith(compareBy { it as Comparable<Element> }), nocopy = true)
+        return sorted(by = { p0, p1 -> (p0 as Comparable<Element>).compareTo(p1) < 0 })
     }
 
-    @Suppress("UNCHECKED_CAST")
     fun sorted(by: (Element, Element) -> Boolean): Array<Element> {
-        return Array(iterable.sortedWith({ lhs, rhs -> if (by(lhs, rhs)) -1 else 1 }), nocopy = true)
+        return Array(sortedList(by), nocopy = true)
     }
 
     fun contains(element: Element): Boolean {
         return iterable.contains(element)
+    }
+}
+
+/// Helper.
+internal fun <Element> Sequence<Element>.sortedList(by: (Element, Element) -> Boolean): List<Element> {
+    return iterable.sortedWith(object: Comparator<Element> {
+        override fun compare(p0: Element, p1: Element): Int {
+            if (by(p0, p1)) {
+                return -1
+            } else if (by(p1, p0)) {
+                return 1
+            } else {
+                return 0
+            }
+        }
+    })
+}
+
+/// Helper.
+internal fun <Element> MutableList<Element>.shuffle(using: InOut<RandomNumberGenerator>?) {
+    // Use same algorithm as Swift std library
+    var amount = size
+    var currentIndex = 0
+    while (amount > 1) {
+        val random = Int.random(0 until amount, using)
+        amount -= 1
+        val previous = this[currentIndex]
+        this[currentIndex] = this[currentIndex + random]
+        this[currentIndex + random] = previous
+        currentIndex += 1
     }
 }
 
@@ -255,6 +339,10 @@ interface Collection<Element>: Sequence<Element>, CollectionStorage<Element> {
     fun distance(from: Int, to: Int): Int  = to - from
     fun index(after: Int): Int = after + 1
 
+    fun randomElement(using: InOut<RandomNumberGenerator>? = null): Element? {
+        return if(isEmpty) null else collection.elementAt(Int.random(storageStartIndex until effectiveStorageEndIndex, using = using))
+    }
+
     fun popFirst(): Element? {
         if (isEmpty) {
             return null
@@ -279,6 +367,11 @@ interface Collection<Element>: Sequence<Element>, CollectionStorage<Element> {
         return if (index == -1) null else index
     }
 
+    fun firstIndex(where: (Element) -> Boolean): Int? {
+        val index = indexOfFirst(where)
+        return if (index == -1) null else index
+    }
+
     operator fun get(range: IntRange): Collection<Element> {
         // We translate open ranges to use Int.min and Int.max in Kotlin
         val lowerBound = if (range.start == Int.min) 0 else range.start
@@ -299,6 +392,38 @@ interface Collection<Element>: Sequence<Element>, CollectionStorage<Element> {
     fun removeAll(keepingCapacity: Boolean = false) {
         willMutateStorage()
         mutableCollection.clear()
+        didMutateStorage()
+    }
+
+    fun shuffle(using: InOut<RandomNumberGenerator>? = null) {
+        val reassignStorage = mutableCollection !is MutableList<*>
+        val list: MutableList<Element>
+        if (reassignStorage) {
+            list = ArrayList<Element>()
+            list.addAll(iterable)
+        } else {
+            list = mutableCollection as MutableList<Element>
+        }
+
+        willMutateStorage()
+        list.shuffle(using)
+        if (reassignStorage) {
+            mutableCollection.clear()
+            mutableCollection.addAll(list)
+        }
+        didMutateStorage()
+    }
+
+    @Suppress("UNCHECKED_CAST")
+    fun sort() {
+        sort({ p0, p1 -> (p0 as Comparable<Element>).compareTo(p1) < 0 })
+    }
+
+    fun sort(by: (Element, Element) -> Boolean) {
+        val list = sortedList(by)
+        willMutateStorage()
+        mutableCollection.clear()
+        mutableCollection.addAll(list)
         didMutateStorage()
     }
 }

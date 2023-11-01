@@ -7,23 +7,111 @@ package skip.lib
 
 val Byte.Companion.max: Byte get() = Byte.MAX_VALUE
 val Byte.Companion.min: Byte get() = Byte.MIN_VALUE
+fun Byte.Companion.random(in_: IntRange, using: InOut<RandomNumberGenerator>? = null): Byte {
+    val diff = in_.endInclusive - in_.start
+    if (diff < 0) {
+        throw ErrorException(cause = IllegalArgumentException(in_.toString()))
+    } else if (diff == 0) {
+        return Byte(in_.start)
+    }
+    val next = (using?.value ?: systemRandom).next()
+    val mod = Int(next % ULong(diff + 1))
+    return Byte(in_.start + mod)
+}
+
 val UByte.Companion.max: Byte get() = Byte.MAX_VALUE
 val UByte.Companion.min: UByte get() = UByte.MIN_VALUE
+fun UByte.Companion.random(in_: UIntRange, using: InOut<RandomNumberGenerator>? = null): UByte {
+    if (in_.endInclusive < in_.start) {
+        throw ErrorException(cause = IllegalArgumentException(in_.toString()))
+    } else if (in_.endInclusive == in_.start) {
+        return UByte(in_.start)
+    }
+    val next = (using?.value ?: systemRandom).next()
+    val mod = UInt(next % ULong(in_.endInclusive - in_.start + 1U))
+    return UByte(in_.start + mod)
+}
 
 val Short.Companion.max: Short get() = Short.MAX_VALUE
 val Short.Companion.min: Short get() = Short.MIN_VALUE
+fun Short.Companion.random(in_: IntRange, using: InOut<RandomNumberGenerator>? = null): Short {
+    val diff = in_.endInclusive - in_.start
+    if (diff < 0) {
+        throw ErrorException(cause = IllegalArgumentException(in_.toString()))
+    } else if (diff == 0) {
+        return Short(in_.start)
+    }
+    val next = (using?.value ?: systemRandom).next()
+    val mod = Int(next % ULong(diff + 1))
+    return Short(in_.start + mod)
+}
+
 val UShort.Companion.max: UShort get() = UShort.MAX_VALUE
 val UShort.Companion.min: UShort get() = UShort.MIN_VALUE
+fun UShort.Companion.random(in_: UIntRange, using: InOut<RandomNumberGenerator>? = null): UShort {
+    if (in_.endInclusive < in_.start) {
+        throw ErrorException(cause = IllegalArgumentException(in_.toString()))
+    } else if (in_.endInclusive == in_.start) {
+        return UShort(in_.start)
+    }
+    val next = (using?.value ?: systemRandom).next()
+    val mod = UInt(next % ULong(in_.endInclusive - in_.start + 1U))
+    return UShort(in_.start + mod)
+}
 
 val Int.Companion.max: Int get() = Int.MAX_VALUE
 val Int.Companion.min: Int get() = Int.MIN_VALUE
+fun Int.Companion.random(in_: IntRange, using: InOut<RandomNumberGenerator>? = null): Int {
+    val diff = in_.endInclusive - in_.start
+    if (diff < 0) {
+        throw ErrorException(cause = IllegalArgumentException(in_.toString()))
+    } else if (diff == 0) {
+        return in_.start
+    }
+    val next = (using?.value ?: systemRandom).next()
+    val mod = Int(next % ULong(diff + 1))
+    return in_.start + mod
+}
+
 val UInt.Companion.max: UInt get() = UInt.MAX_VALUE
 val UInt.Companion.min: UInt get() = UInt.MIN_VALUE
+fun UInt.Companion.random(in_: UIntRange, using: InOut<RandomNumberGenerator>? = null): UInt {
+    if (in_.endInclusive < in_.start) {
+        throw ErrorException(cause = IllegalArgumentException(in_.toString()))
+    } else if (in_.endInclusive == in_.start) {
+        return in_.start
+    }
+    val next = (using?.value ?: systemRandom).next()
+    val mod = UInt(next % ULong(in_.endInclusive - in_.start + 1U))
+    return in_.start + mod
+}
 
 val Long.Companion.max: Long get() = Long.MAX_VALUE
 val Long.Companion.min: Long get() = Long.MIN_VALUE
+fun Long.Companion.random(in_: LongRange, using: InOut<RandomNumberGenerator>? = null): Long {
+    val diff = in_.endInclusive - in_.start
+    if (diff < 0) {
+        throw ErrorException(cause = IllegalArgumentException(in_.toString()))
+    } else if (diff == 0L) {
+        return in_.start
+    }
+    val next = (using?.value ?: systemRandom).next()
+    val mod = Long(next % ULong(diff + 1L))
+    return in_.start + mod
+}
+
 val ULong.Companion.max: ULong get() = ULong.MAX_VALUE
 val ULong.Companion.min: ULong get() = ULong.MIN_VALUE
+fun ULong.Companion.random(in_: ULongRange, using: InOut<RandomNumberGenerator>? = null): ULong {
+    if (in_.endInclusive < in_.start) {
+        throw ErrorException(cause = IllegalArgumentException(in_.toString()))
+    } else if (in_.endInclusive == in_.start) {
+        return in_.start
+    }
+    val next = (using?.value ?: systemRandom).next()
+    val mod = next % (in_.endInclusive - in_.start + 1UL)
+    return in_.start + mod
+}
 
 val Double.Companion.nan: Double get() = Double.NaN
 val Double.isNaN: Boolean get() = isNaN()
@@ -31,6 +119,15 @@ val Double.isFinite: Boolean get() = isFinite()
 val Double.isInfinite: Boolean get() = isInfinite()
 val Double.Companion.infinity: Double get() = Double.POSITIVE_INFINITY
 val Double.Companion.pi: Double get() = kotlin.math.PI
+fun Double.Companion.random(in_: ClosedFloatingPointRange<Double>): Double {
+    val diff = in_.endInclusive - in_.start
+    if (diff < 0.0) {
+        throw ErrorException(cause = IllegalArgumentException(in_.toString()))
+    } else if (diff == 0.0) {
+        return in_.start
+    }
+    return in_.start + diff * systemRandom.rawValue.nextDouble()
+}
 
 val Float.Companion.nan: Float get() = Float.NaN
 val Float.isNaN: Boolean get() = isNaN()
@@ -38,6 +135,15 @@ val Float.isFinite: Boolean get() = isFinite()
 val Float.isInfinite: Boolean get() = isInfinite()
 val Float.Companion.infinity: Float get() = Float.POSITIVE_INFINITY
 val Float.Companion.pi: Float get() = 3.1415925f
+fun Float.Companion.random(in_: ClosedFloatingPointRange<Float>): Float {
+    val diff = in_.endInclusive - in_.start
+    if (diff < 0.0f) {
+        throw ErrorException(cause = IllegalArgumentException(in_.toString()))
+    } else if (diff == 0.0f) {
+        return in_.start
+    }
+    return in_.start + diff * systemRandom.rawValue.nextFloat()
+}
 
 fun Byte(number: Number): Byte = number.toByte()
 fun Byte(number: UByte): Byte = number.toByte()

@@ -243,4 +243,41 @@ final class NumberTests: XCTestCase {
     private func hashValueEqual<T: Hashable>(_ lhs: T, _ rhs: T) -> Bool where T: Any {
         return lhs.hashValue == rhs.hashValue
     }
+
+    func testRandomNumbers() {
+        XCTAssertEqual(0, Int.random(in: 0 ... 0))
+        XCTAssertEqual(100, Int.random(in: 100 ..< 101))
+
+        checkRandomRange({ Int.random(in: 0 ..< 3) }, min: 0, max: 2)
+        checkRandomRange({ Int.random(in: 0 ... 3) }, min: 0, max: 3)
+        checkRandomRange({ Int.random(in: -100 ..< -97) }, min: -100, max: -98)
+        checkRandomRange({ Int.random(in: -100 ... -97) }, min: -100, max: -97)
+        checkRandomRange({ Int.random(in: -2 ..< 2) }, min: -2, max: 1)
+        checkRandomRange({ Int.random(in: -2 ... 2) }, min: -2, max: 2)
+
+        checkRandomRange({ UInt8.random(in: UInt8(0) ..< UInt8(3)) }, min: UInt8(0), max: UInt8(2))
+        checkRandomRange({ Int64.random(in: Int64(0) ..< Int64(3)) }, min: Int64(0), max: Int64(2))
+
+        var gen: RandomNumberGenerator = SystemRandomNumberGenerator()
+        checkRandomRange({ Int.random(in: 0 ..< 3, using: &gen) }, min: 0, max: 2)
+
+        for _ in 0..<10 {
+            let nextDouble = Double.random(in: -2.5...2.5)
+            XCTAssertGreaterThanOrEqual(nextDouble, -2.5)
+            XCTAssertLessThanOrEqual(nextDouble, 2.5)
+
+            let nextFloat = Float.random(in: Float(-2.5)...Float(2.5))
+            XCTAssertGreaterThanOrEqual(nextFloat, Float(-2.5))
+            XCTAssertLessThanOrEqual(nextFloat, Float(2.5))
+        }
+    }
+
+    private func checkRandomRange<T>(_ generator: () -> T, min: T, max: T) where T: Equatable, T: Comparable {
+        var randoms: [T] = []
+        for _ in 0..<100 {
+            randoms.append(generator())
+        }
+        XCTAssertEqual(randoms.min(), min)
+        XCTAssertEqual(randoms.max(), max)
+    }
 }

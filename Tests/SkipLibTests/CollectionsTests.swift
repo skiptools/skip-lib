@@ -144,6 +144,10 @@ final class CollectionsTests: XCTestCase {
         let strings2 = strings.sorted()
         XCTAssertEqual(strings, ["A", "Z", "M"])
         XCTAssertEqual(strings2, ["A", "M", "Z"])
+
+        var strings3 = strings
+        strings3.sort()
+        XCTAssertEqual(strings3, ["A", "M", "Z"])
     }
 
     func testFirstLast() {
@@ -297,6 +301,41 @@ final class CollectionsTests: XCTestCase {
         let arr = ["0", "1", "2", "3"]
         let idxs = arr.indices.reversed()
         XCTAssertEqual(Array(idxs), [3, 2, 1, 0])
+    }
+
+    func testRandomElement() {
+        let empty: [Int] = []
+        XCTAssertNil(empty.randomElement())
+
+        let arr = [100, 101, 102, 103, 104]
+        var seen: Set<Int> = []
+        for _ in 0..<100 {
+            seen.insert(arr.randomElement()!)
+        }
+        XCTAssertEqual(seen.count, 5)
+        XCTAssertTrue(seen.contains(100))
+        XCTAssertTrue(seen.contains(104))
+    }
+
+    func testShuffle() {
+        let empty: [Int] = []
+        XCTAssertEqual(empty, empty.shuffled())
+        XCTAssertEqual([1], [1].shuffled())
+
+        let arr = [100, 101, 102, 103, 104, 105, 106, 107, 108, 109]
+        let shuffled = arr.shuffled()
+        XCTAssertNotEqual(arr, shuffled)
+        XCTAssertEqual(Set(arr), Set(shuffled))
+
+        var gen: RandomNumberGenerator = SystemRandomNumberGenerator()
+        let shuffled2 = arr.shuffled(using: &gen)
+        XCTAssertNotEqual(arr, shuffled2)
+        XCTAssertEqual(Set(arr), Set(shuffled2))
+
+        var arr2 = arr
+        arr2.shuffle()
+        XCTAssertNotEqual(arr, arr2)
+        XCTAssertEqual(Set(arr), Set(arr2))
     }
 }
 
