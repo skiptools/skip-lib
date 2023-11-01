@@ -5,8 +5,6 @@
 // as published by the Free Software Foundation https://fsf.org
 package skip.lib
 
-import java.util.Random
-
 // WARNING: Replicate all implemented immutable Sequence, Collections API in String.kt
 
 // We use a Storage model wrapping internal Kotlin collections rather than implementing the collection
@@ -99,7 +97,7 @@ interface Sequence<Element>: IterableStorage<Element> {
     }
 
     fun <RE> map(transform: (Element) -> RE): Array<RE> {
-        return Array(iterable.map(transform), nocopy = true)
+        return transformToArray { it.map(transform) }
     }
 
     fun forEach(body: (Element) -> Unit) {
@@ -110,12 +108,29 @@ interface Sequence<Element>: IterableStorage<Element> {
         return iterable.firstOrNull(where).sref()
     }
 
+    fun suffix(maxLength: Int): Array<Element> {
+        val numberToDrop = max(0, iterable.count() - maxLength)
+        return dropFirst(numberToDrop)
+    }
+
     fun dropFirst(k: Int = 1): Array<Element> {
-        return Array(iterable.drop(k), nocopy = true)
+        return transformToArray { it.drop(k) }
     }
 
     fun dropLast(k: Int = 1): Array<Element> {
-        return Array(iterable.toList().dropLast(k), nocopy = true)
+        return transformToArray { it.toList().dropLast(k) }
+    }
+
+    fun drop(while_: (Element) -> Boolean): Array<Element> {
+        return transformToArray { it.dropWhile(while_) }
+    }
+
+    fun prefix(maxLength: Int): Array<Element> {
+        return transformToArray { it.take(maxLength) }
+    }
+
+    fun prefix(while_: (Element) -> Boolean): Array<Element> {
+        return transformToArray { it.takeWhile(while_) }
     }
 
     fun enumerated(): Sequence<Tuple2<Int, Element>> {
@@ -201,6 +216,17 @@ interface Sequence<Element>: IterableStorage<Element> {
         return true
     }
 
+    fun elementsEqual(other: Sequence<Element>, by: (Element, Element) -> Boolean = { it1, it2 -> it1 == it2 }): Boolean {
+        val itr = this.iterable.iterator()
+        val otherItr = other.iterable.iterator()
+        while (itr.hasNext()) {
+            if (!otherItr.hasNext() || !by(itr.next(), otherItr.next())) {
+                return false
+            }
+        }
+        return !otherItr.hasNext()
+    }
+
     fun contains(where: (Element) -> Boolean): Boolean {
         iterable.forEach { if (where(it)) return true }
         return false
@@ -226,15 +252,15 @@ interface Sequence<Element>: IterableStorage<Element> {
     }
 
     fun reversed(): Array<Element> {
-        return Array(iterable.reversed(), nocopy = true)
+        return transformToArray { it.reversed() }
     }
 
     fun <RE> flatMap(transform: (Element) -> Sequence<RE>): Array<RE> {
-        return Array(iterable.flatMap { transform(it).iterable }, nocopy = true)
+        return transformToArray { it.flatMap { transform(it).iterable } }
     }
 
     fun <RE> compactMap(transform: (Element) -> RE?): Array<RE> {
-        return Array(iterable.mapNotNull(transform), nocopy = true)
+        return transformToArray { it.mapNotNull(transform) }
     }
 
     @Suppress("UNCHECKED_CAST")
@@ -243,41 +269,11 @@ interface Sequence<Element>: IterableStorage<Element> {
     }
 
     fun sorted(by: (Element, Element) -> Boolean): Array<Element> {
-        return Array(sortedList(by), nocopy = true)
+        return transformToArray { it.sortedWith(PredicateComparator(by)) }
     }
 
     fun contains(element: Element): Boolean {
         return iterable.contains(element)
-    }
-}
-
-/// Helper.
-internal fun <Element> Sequence<Element>.sortedList(by: (Element, Element) -> Boolean): List<Element> {
-    return iterable.sortedWith(object: Comparator<Element> {
-        override fun compare(p0: Element, p1: Element): Int {
-            if (by(p0, p1)) {
-                return -1
-            } else if (by(p1, p0)) {
-                return 1
-            } else {
-                return 0
-            }
-        }
-    })
-}
-
-/// Helper.
-internal fun <Element> MutableList<Element>.shuffle(using: InOut<RandomNumberGenerator>?) {
-    // Use same algorithm as Swift std library
-    var amount = size
-    var currentIndex = 0
-    while (amount > 1) {
-        val random = Int.random(0 until amount, using)
-        amount -= 1
-        val previous = this[currentIndex]
-        this[currentIndex] = this[currentIndex + random]
-        this[currentIndex + random] = previous
-        currentIndex += 1
     }
 }
 
@@ -304,6 +300,41 @@ fun <Element, RE> Sequence<Element>.joined(separator: Element): Array<RE> where 
 
 fun Sequence<String>.joined(separator: String = ""): String {
     return iterable.joinToString(separator = separator)
+}
+
+// Helper for funcs that return a transformation of this sequence.
+internal fun <Element, ResultElement> Sequence<Element>.transformToArray(operation: (Iterable<Element>) -> Iterable<ResultElement>): Array<ResultElement> {
+    val iterable = this.iterable
+    val result = operation(iterable)
+    return Array(result, nocopy = result !== iterable)
+}
+
+// Helper to sort using a predicate.
+internal class PredicateComparator<Element>(val lessThan: (Element, Element) -> Boolean): Comparator<Element> {
+    override fun compare(p0: Element, p1: Element): Int {
+        if (lessThan(p0, p1)) {
+            return -1
+        } else if (lessThan(p1, p0)) {
+            return 1
+        } else {
+            return 0
+        }
+    }
+}
+
+/// Helper to shuffle a Kotlin list.
+internal fun <Element> MutableList<Element>.shuffle(using: InOut<RandomNumberGenerator>?) {
+    // Use same algorithm as Swift std library
+    var amount = size
+    var currentIndex = 0
+    while (amount > 1) {
+        val random = Int.random(0 until amount, using)
+        amount -= 1
+        val previous = this[currentIndex]
+        this[currentIndex] = this[currentIndex + random]
+        this[currentIndex + random] = previous
+        currentIndex += 1
+    }
 }
 
 /// Kotlin representation of `Swift.Collection`.
@@ -339,28 +370,69 @@ interface Collection<Element>: Sequence<Element>, CollectionStorage<Element> {
     fun distance(from: Int, to: Int): Int  = to - from
     fun index(after: Int): Int = after + 1
 
+    fun formIndex(after: InOut<Int>) {
+        after.value = after.value + 1
+    }
+
+    fun formIndex(i: InOut<Int>, offsetBy: Int) {
+        i.value = i.value + offsetBy
+    }
+
     fun randomElement(using: InOut<RandomNumberGenerator>? = null): Element? {
         return if(isEmpty) null else collection.elementAt(Int.random(storageStartIndex until effectiveStorageEndIndex, using = using))
     }
 
     fun popFirst(): Element? {
-        if (isEmpty) {
-            return null
-        }
-        return removeFirst()
+        return if (isEmpty) null else removeFirst()
     }
 
     fun removeFirst(): Element {
         willMutateStorage()
-        val iterator = mutableCollection.iterator()
-        val ret = iterator.next()
-        iterator.remove()
+        val itr = mutableCollection.iterator()
+        val ret = itr.next()
+        itr.remove()
         didMutateStorage()
         return ret
     }
 
+    fun removeFirst(k: Int) {
+        willMutateStorage()
+        val itr = mutableCollection.iterator()
+        for (i in 0 until k) {
+            itr.next()
+            itr.remove()
+        }
+        didMutateStorage()
+    }
+
     val first: Element?
         get() = if (isEmpty) null else collection.elementAt(storageStartIndex).sref()
+
+    fun prefix(upTo: Int, unusedp: Any? = null): Array<Element> {
+        if (upTo <= storageStartIndex) {
+            return Array<Element>()
+        }
+        val list = ArrayList<Element>(upTo - startIndex)
+        for (i in storageStartIndex until upTo) {
+            list.add(collection.elementAt(i))
+        }
+        return Array(list, nocopy = true)
+    }
+
+    fun prefix(through: Int, unusedp0: Any? = null, unusedp1: Any? = null): Array<Element> {
+        return prefix(upTo = through + 1)
+    }
+
+    fun suffix(from: Int, unusedp: Any? = null): Array<Element> {
+        if (from >= effectiveStorageEndIndex) {
+            return Array<Element>()
+        }
+        val list = ArrayList<Element>(effectiveStorageEndIndex - from)
+        for (i in from until effectiveStorageEndIndex) {
+            list.add(collection.elementAt(i))
+        }
+        return Array(list, nocopy = true)
+    }
 
     fun firstIndex(of: Element): Int? {
         val index = indexOf(of)
@@ -396,22 +468,7 @@ interface Collection<Element>: Sequence<Element>, CollectionStorage<Element> {
     }
 
     fun shuffle(using: InOut<RandomNumberGenerator>? = null) {
-        val reassignStorage = mutableCollection !is MutableList<*>
-        val list: MutableList<Element>
-        if (reassignStorage) {
-            list = ArrayList<Element>()
-            list.addAll(iterable)
-        } else {
-            list = mutableCollection as MutableList<Element>
-        }
-
-        willMutateStorage()
-        list.shuffle(using)
-        if (reassignStorage) {
-            mutableCollection.clear()
-            mutableCollection.addAll(list)
-        }
-        didMutateStorage()
+        transformMutableCollectionAsList { it.shuffle(using) }
     }
 
     @Suppress("UNCHECKED_CAST")
@@ -420,12 +477,41 @@ interface Collection<Element>: Sequence<Element>, CollectionStorage<Element> {
     }
 
     fun sort(by: (Element, Element) -> Boolean) {
-        val list = sortedList(by)
-        willMutateStorage()
+        transformMutableCollectionAsList { it.sortWith(PredicateComparator(by)) }
+    }
+
+    fun trimmingPrefix(while_: (Element) -> Boolean): Array<Element> {
+        return transformToArray { it.dropWhile(while_) }
+    }
+
+    fun trimPrefix(while_: (Element) -> Boolean) {
+        transformMutableCollectionAsList {
+            val itr = it.iterator()
+            while (itr.hasNext() && while_(itr.next())) {
+                itr.remove()
+            }
+        }
+    }
+}
+
+internal fun <Element> Collection<Element>.transformMutableCollectionAsList(operation: (MutableList<Element>) -> Unit) {
+    val mutableCollection = this.mutableCollection
+    val reassignStorage = mutableCollection !is MutableList<*>
+    val list: MutableList<Element>
+    if (reassignStorage) {
+        list = ArrayList<Element>(mutableCollection.size)
+        list.addAll(mutableCollection)
+    } else {
+        list = mutableCollection as MutableList<Element>
+    }
+
+    willMutateStorage()
+    operation(list)
+    if (reassignStorage) {
         mutableCollection.clear()
         mutableCollection.addAll(list)
-        didMutateStorage()
     }
+    didMutateStorage()
 }
 
 /// Implement subscript as an extension function so that `Dictionary` can implement it for keyed access instead.
@@ -438,6 +524,14 @@ operator fun <Element> Collection<Element>.get(position: Int): Element {
 
 /// Kotlin representation of `Swift.BidirectionalCollection`.
 interface BidirectionalCollection<Element>: Collection<Element>, MutableListStorage<Element> {
+    // Add parameter to avoid conflict with index(after:)
+    fun index(before: Int, unusedp: Any? = null): Int = before - 1
+
+    // Add parameter to avoid conflict with formIndex(after:)
+    fun formIndex(before: InOut<Int>, unusedp: Any? = null) {
+        before.value = before.value - 1
+    }
+
     fun last(where: (Element) -> Boolean): Element? {
         // If we're not a slice we can use the collection directly, otherwise use our sliced iterator
         if (storageStartIndex == 0 && storageEndIndex == null) {
@@ -449,6 +543,16 @@ interface BidirectionalCollection<Element>: Collection<Element>, MutableListStor
 
     val last: Element?
         get() = if (isEmpty) null else elementAt(effectiveStorageEndIndex - 1).sref()
+
+    fun lastIndex(of: Element): Int? {
+        val lastIndex = collection.lastIndexOf(of)
+        return if (lastIndex < storageStartIndex || lastIndex >= effectiveStorageEndIndex) null else lastIndex
+    }
+
+    fun lastIndex(where: (Element) -> Boolean): Int? {
+        val lastIndex = collection.indexOfLast(where)
+        return if (lastIndex < storageStartIndex || lastIndex >= effectiveStorageEndIndex) null else lastIndex
+    }
 
     fun popLast(): Element? {
         willMutateStorage()
@@ -489,6 +593,28 @@ interface RangeReplaceableCollection<Element>: Collection<Element>, MutableListS
         mutableList.add(at, newElement.sref())
         didMutateStorage()
     }
+
+    fun insert(contentsOf: Sequence<Element>, at: Int) {
+        willMutateStorage()
+        // Copy contents to sref
+        val list = ArrayList<Element>(contentsOf.iterable.count())
+        list.addAll(contentsOf)
+        mutableList.addAll(at, list)
+        didMutateStorage()
+    }
+
+    fun remove(at: Int): Element {
+        willMutateStorage()
+        val element = mutableList.removeAt(at)
+        didMutateStorage()
+        return element
+    }
+
+    fun removeAll(where: (Element) -> Boolean) {
+        willMutateStorage()
+        mutableList.removeAll(where)
+        didMutateStorage()
+    }
 }
 
 /// Kotlin representation of `Swift.MutableCollection`.
@@ -507,6 +633,20 @@ interface MutableCollection<Element>: Collection<Element>, MutableListStorage<El
         willMutateStorage()
         mutableList.subList(lowerBound, upperBound).clear()
         mutableList.addAll(lowerBound, elements.collection.map { it.sref() })
+        didMutateStorage()
+    }
+
+    fun swapAt(i: Int, j: Int) {
+        willMutateStorage()
+        val previous = mutableList[i]
+        mutableList[i] = mutableList[j]
+        mutableList[j] = previous
+        didMutateStorage()
+    }
+
+    fun reverse() {
+        willMutateStorage()
+        mutableList.reverse()
         didMutateStorage()
     }
 }
@@ -603,6 +743,15 @@ private fun stride(from: Double, to: Double, inclusive: Boolean, by: Double): Se
         ret
     }
     return strideSequence(strideHasNext, strideNext)
+}
+
+fun <E1, E2> zip(sequence1: Sequence<E1>, sequence2: Sequence<E2>): Array<Tuple2<E1, E2>> {
+    val zipped = sequence1.iterable.zip(sequence2.iterable)
+    val list = ArrayList<Tuple2<E1, E2>>(zipped.size)
+    for ((e1, e2) in zipped) {
+        list.add(Tuple2(e1, e2))
+    }
+    return Array(list, nocopy = true)
 }
 
 val IntRange.upperBound: Int

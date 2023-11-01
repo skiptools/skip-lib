@@ -61,7 +61,6 @@ extension Sequence {
         fatalError()
     }
 
-    @available(*, unavailable)
     public func suffix(_ maxLength: Int) -> [Element] {
         fatalError()
     }
@@ -74,17 +73,14 @@ extension Sequence {
         fatalError()
     }
 
-    @available(*, unavailable)
     public func drop(while predicate: (Element) throws -> Bool) rethrows -> [Element] /* DropWhileSequence<Self> */ {
         fatalError()
     }
 
-    @available(*, unavailable)
     public func prefix(_ maxLength: Int) -> [Element] /* PrefixSequence<Self> */ {
         fatalError()
     }
 
-    @available(*, unavailable)
     public func prefix(while predicate: (Element) throws -> Bool) rethrows -> [Element] {
         fatalError()
     }
@@ -105,8 +101,11 @@ extension Sequence {
         fatalError()
     }
 
-    @available(*, unavailable)
-    public func elementsEqual(_ other: Any, by areEquivalent: (Element, Element) throws -> Bool) rethrows -> Bool {
+    public func elementsEqual(_ other: any Sequence<Element>) -> Bool {
+        fatalError()
+    }
+
+    public func elementsEqual(_ other: any Sequence<Element>, by areEquivalent: (Element, Element) throws -> Bool) rethrows -> Bool {
         fatalError()
     }
 
@@ -165,11 +164,6 @@ extension Sequence {
     }
 
     public func starts(with possiblePrefix: Any) -> Bool {
-        fatalError()
-    }
-
-    @available(*, unavailable)
-    public func elementsEqual(_ other: Any) -> Bool {
         fatalError()
     }
 
@@ -241,11 +235,9 @@ extension Collection {
         fatalError()
     }
 
-    @available(*, unavailable)
     public func formIndex(after i: inout Int) {
     }
 
-    @available(*, unavailable)
     public func formIndex(_ i: inout Int, offsetBy distance: Int) {
     }
 
@@ -270,17 +262,14 @@ extension Collection {
         fatalError()
     }
 
-    @available(*, unavailable)
     public func prefix(upTo end: Int) -> [Element] /* Collection<Element> */ {
         fatalError()
     }
 
-    @available(*, unavailable)
     public func suffix(from start: Int) -> [Element] /* Collection<Element> */ {
         fatalError()
     }
 
-    @available(*, unavailable)
     public func prefix(through end: Int) -> [Element] /* Collection<Element> */ {
         fatalError()
     }
@@ -289,7 +278,6 @@ extension Collection {
         fatalError()
     }
 
-    @available(*, unavailable)
     public mutating func removeFirst(_ k: Int) {
     }
 
@@ -323,12 +311,10 @@ extension Collection {
         fatalError()
     }
 
-    @available(*, unavailable)
     public func trimmingPrefix(while predicate: (Element) throws -> Bool) rethrows -> [Element] /* Collection<Element> */ {
         fatalError()
     }
 
-    @available(*, unavailable)
     public mutating func trimPrefix(while predicate: (Element) throws -> Bool) throws {
     }
 
@@ -361,12 +347,10 @@ public protocol BidirectionalCollection : Collection {
 }
 
 extension BidirectionalCollection {
-    @available(*, unavailable)
     public func index(before i: Int) -> Int {
         fatalError()
     }
 
-    @available(*, unavailable)
     public func formIndex(before i: inout Int) {
     }
 
@@ -378,12 +362,10 @@ extension BidirectionalCollection {
         fatalError()
     }
 
-    @available(*, unavailable)
     public func lastIndex(of element: Element) -> Int? {
         fatalError()
     }
 
-    @available(*, unavailable)
     public func lastIndex(where predicate: (Element) throws -> Bool) rethrows -> Int? {
         fatalError()
     }
@@ -480,11 +462,9 @@ extension RangeReplaceableCollection {
     public mutating func insert(_ newElement: Element, at i: Int) {
     }
 
-    @available(*, unavailable)
     public mutating func insert(contentsOf newElements: any Sequence<Element>, at i: Int) {
     }
 
-    @available(*, unavailable)
     public mutating func remove(at i: Int) -> Element {
         fatalError()
     }
@@ -496,7 +476,6 @@ extension RangeReplaceableCollection {
     public mutating func removeAll(keepingCapacity keepCapacity: Bool = false) {
     }
 
-    @available(*, unavailable)
     public mutating func removeAll(where shouldBeRemoved: (Element) throws -> Bool) rethrows {
     }
 
@@ -566,11 +545,9 @@ extension MutableCollection {
         set {}
     }
 
-    @available(*, unavailable)
     mutating func swapAt(_ i: Int, _ j: Int) {
     }
 
-    @available(*, unavailable)
     public mutating func reverse() {
     }
 }
@@ -597,6 +574,10 @@ public func stride<T>(from start: T, to end: T, by stride: T) -> any Sequence<T>
 }
 
 public func stride<T>(from start: T, through end: T, by stride: T) -> any Sequence<T> {
+    fatalError()
+}
+
+public func zip<E1, E2>(_ sequence1: any Sequence<E1>, _ sequence2: any Sequence<E2>) -> [(E1, E2)] {
     fatalError()
 }
 

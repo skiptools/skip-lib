@@ -92,7 +92,7 @@ final class StringTests: XCTestCase {
         XCTAssertEqual(str.distance(from: str.startIndex, to: index), 10)
     }
 
-    func testFirstDropFirst() {
+    func testFirstLast() {
         let str = "hello, world!"
         let firstChar = str.first
         XCTAssertEqual(firstChar?.description, "h")
@@ -104,6 +104,36 @@ final class StringTests: XCTestCase {
         XCTAssertEqual(frst, "hello, world")
         let frst2 = str.dropLast(2)
         XCTAssertEqual(frst2, "hello, worl")
+
+        XCTAssertEqual(", world!", str.drop(while: { "hellow".contains($0) }))
+        XCTAssertEqual("", str.drop(while: { _ in true }))
+    }
+
+    func testPrefixSuffix() {
+        let str = "abc"
+        XCTAssertEqual("", str.prefix(0))
+        XCTAssertEqual("c", str.suffix(1))
+        XCTAssertEqual("bc", str.suffix(2))
+        XCTAssertEqual("abc", str.suffix(4))
+
+        XCTAssertEqual("", str.prefix(0))
+        XCTAssertEqual("a", str.prefix(1))
+        XCTAssertEqual("ab", str.prefix(2))
+        XCTAssertEqual("abc", str.prefix(4))
+
+        XCTAssertEqual("ab", str.prefix(while: { $0 != "c" }))
+        XCTAssertEqual("", str.prefix(while: { _ in false }))
+
+        XCTAssertEqual("c", str.suffix(from: str.index(before: str.endIndex)))
+        XCTAssertEqual("abc", str.suffix(from: str.startIndex))
+    }
+
+    func testElementsEqual() {
+        let str = "abc"
+        XCTAssertTrue(str.elementsEqual("abc"))
+        XCTAssertFalse(str.elementsEqual("ab"))
+        XCTAssertTrue(str.elementsEqual("abc", by: { $0 == $1 }))
+        XCTAssertFalse(str.elementsEqual("abc", by: { $0 != $1 }))
     }
 
     func testMultlineStrings() {

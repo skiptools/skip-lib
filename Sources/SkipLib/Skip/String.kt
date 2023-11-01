@@ -106,12 +106,26 @@ fun Substring.forEach(body: (Char) -> Unit) = stringValue.forEach(body)
 fun String.first(where: (Char) -> Boolean): Char? = firstOrNull(where)
 fun Substring.first(where: (Char) -> Boolean): Char? = stringValue.first(where)
 
+fun String.suffix(maxLength: Int): String {
+    val numberToDrop = max(0, length - maxLength)
+    return dropFirst(numberToDrop)
+}
+fun Substring.suffix(maxLength: Int): String = stringValue.suffix(maxLength)
+
 fun String.dropFirst(k: Int = 1): String = drop(k)
 fun Substring.dropFirst(k: Int = 1): String = stringValue.drop(k)
 
 // String.dropLast(k) used as-is
 fun String.dropLast(): String = dropLast(1)
 fun Substring.dropLast(k: Int = 1): String = stringValue.dropLast(k)
+
+fun String.drop(while_: (Char) -> Boolean): String = dropWhile(while_)
+fun Substring.drop(while_: (Char) -> Boolean): String = stringValue.drop(while_)
+
+fun String.prefix(maxLength: Int): String = take(maxLength)
+fun Substring.prefix(maxLength: Int): String = stringValue.prefix(maxLength)
+fun String.prefix(while_: (Char) -> Boolean): String = takeWhile(while_)
+fun Substring.prefix(while_: (Char) -> Boolean): String = stringValue.prefix(while_)
 
 fun String.enumerated(): Sequence<Tuple2<Int, Char>> {
     val stringIterator = { iterator() }
@@ -163,6 +177,21 @@ fun String.starts(with: String, by: (Char, Char) -> Boolean): Boolean {
 fun Substring.starts(with: String, by: (Char, Char) -> Boolean): Boolean {
     return stringValue.starts(with, by)
 }
+
+fun String.elementsEqual(other: String, by: (Char, Char) -> Boolean = { it1, it2 -> it1 == it2 }): Boolean {
+    if (length != other.length) {
+        return false
+    }
+    for ((c0, c1) in zip(other)) {
+        if (!by(c0, c1)) {
+            return false
+        }
+    }
+    return true
+}
+fun String.elementsEqual(other: Substring, by: (Char, Char) -> Boolean = { it1, it2 -> it1 == it2 }): Boolean = elementsEqual(other.stringValue, by)
+fun Substring.elementsEqual(other: String, by: (Char, Char) -> Boolean = { it1, it2 -> it1 == it2 }): Boolean = stringValue.elementsEqual(other, by)
+fun Substring.elementsEqual(other: Substring, by: (Char, Char) -> Boolean = { it1, it2 -> it1 == it2 }): Boolean = stringValue.elementsEqual(other.stringValue, by)
 
 fun String.contains(where: (Char) -> Boolean): Boolean {
     for (c in this) {
@@ -260,9 +289,20 @@ val Substring.count: Int
 fun String.index(i: Int, offsetBy: Int): Int = i + offsetBy
 fun String.distance(from: Int, to: Int): Int = to - from
 fun String.index(after: Int): Int = after + 1
+fun String.index(before: Int, unusedp: Any? = null): Int = before - 1
 fun Substring.index(i: Int, offsetBy: Int): Int = i + offsetBy
 fun Substring.distance(from: Int, to: Int): Int = to - from
 fun Substring.index(after: Int): Int = after + 1
+fun Substring.index(before: Int, unusedp: Any? = null): Int = before - 1
+
+fun String.formIndex(after: InOut<Int>) {
+    after.value = after.value + 1
+}
+fun Substring.formIndex(after: InOut<Int>): Unit = stringValue.formIndex(after)
+fun String.formIndex(i: InOut<Int>, offsetBy: Int) {
+    i.value = i.value + offsetBy
+}
+fun Substring.formIndex(i: InOut<Int>, offsetBy: Int): Unit = stringValue.formIndex(i, offsetBy)
 
 fun String.randomElement(using: InOut<RandomNumberGenerator>? = null): Char? {
     return if (isEmpty) null else elementAt(Int.random(0 until count(), using))
@@ -273,6 +313,27 @@ val String.first: Char?
     get() = firstOrNull()
 val Substring.first: Char?
     get() = stringValue.first
+
+fun String.prefix(upTo: Int, unusedp: Any? = null): String {
+    return substring(0 until upTo)
+}
+fun Substring.prefix(upTo: Int, unusedp: Any? = null): String {
+    return stringValue.substring(0 until upTo - startIndex)
+}
+
+fun String.prefix(through: Int, unusedp0: Any? = null, unusedp1: Any? = null): String {
+    return prefix(upTo = through + 1)
+}
+fun Substring.prefix(through: Int, unusedp0: Any? = null, unusedp1: Any? = null): String {
+    return prefix(upTo = through + 1)
+}
+
+fun String.suffix(from: Int, unusedp: Any? = null): String {
+    return substring(from until length)
+}
+fun Substring.from(from: Int, unusedp: Any? = null): String {
+    return stringValue.substring(from - startIndex until stringValue.length)
+}
 
 fun String.firstIndex(of: Char): Int? {
     val index = indexOf(of)
@@ -324,8 +385,26 @@ val String.last: Char?
 val Substring.last: Char?
     get() = stringValue.last
 
+fun String.lastIndex(of: Char): Int? {
+    val index = lastIndexOf(of)
+    return if (index == -1) null else index
+}
+fun String.lastIndex(where: (Char) -> Boolean): Int? {
+    val index = indexOfLast(where)
+    return if (index == -1) null else index
+}
+
 operator fun String.Companion.invoke(format: String, vararg args: Any): String { return format.format(*args) }
 operator fun String.Companion.invoke(format: String, arguments: Array<Any>): String { return format.format(*arguments.toList().toTypedArray()) }
+
+fun zip(sequence1: String, sequence2: String): Array<Tuple2<Char, Char>> {
+    val zipped = sequence1.zip(sequence2)
+    val list = ArrayList<Tuple2<Char, Char>>(zipped.size)
+    for ((c1, c2) in zipped) {
+        list.add(Tuple2(c1, c2))
+    }
+    return Array(list, nocopy = true)
+}
 
 // MARK: - Character
 

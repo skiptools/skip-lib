@@ -125,6 +125,40 @@ final class CollectionsTests: XCTestCase {
         XCTAssertEqual(filtered[1], .three)
     }
 
+    func testFilterMapReduce() {
+        let numbers = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
+        let result = numbers.filter { $0 % 2 == 0 }
+                            .map { $0 * 2 }
+                            .reduce(0, { $0 + $1 })
+        XCTAssertEqual(result, 60)
+    }
+
+    func testZipCompactMap() {
+        #if SKIP
+        throw XCTSkip("testZipCompactMap")
+        #else
+        let names = ["Alice", "Bob", "Charlie"]
+        let ages = [25, nil, 35]
+        let result = zip(names, ages)
+            .compactMap { (name, age) in
+                age.map { "\($0) year old \($0 < 30 ? "youth" : "adult") named \(name)" }
+            }
+        XCTAssertEqual(result, ["25 year old youth named Alice", "35 year old adult named Charlie"])
+        #endif
+    }
+
+    func testLazyFilterMap() {
+        #if SKIP
+        throw XCTSkip("testLazyFilterMap")
+        #else
+        let numbers = sequence(first: 0, next: { $0 + 1 })
+        let result = numbers.lazy.filter { $0 % 2 == 0 }
+                                .map { $0 * 3 }
+                                .prefix(10)
+        XCTAssertEqual(Array(result), [0, 6, 12, 18, 24, 30, 36, 42, 48, 54])
+        #endif
+    }
+
     func testEnumerated() {
         var enumerated: [(Int, String)] = []
         for (index, string) in ["A", "Z", "M"].enumerated() {
@@ -163,22 +197,48 @@ final class CollectionsTests: XCTestCase {
 
         XCTAssertEqual(true, strings.contains(where: { $0 == "Z" }))
         XCTAssertEqual(false, strings.contains(where: { $0 == "Q" }))
+
+        var mstrings = ["A", "Z"]
+        XCTAssertEqual("A", mstrings.removeFirst())
+        XCTAssertEqual(["Z"], mstrings)
+        XCTAssertEqual("Z", mstrings.removeFirst())
+        XCTAssertTrue(mstrings.isEmpty)
+
+        XCTAssertEqual(["M"], strings.drop(while: { $0 == "A" || $0 == "Z" }))
+        XCTAssertEqual([String](), Array(strings.drop(while: { _ in true })))
+
+        let repeatedStrings = strings + strings
+        XCTAssertEqual(repeatedStrings.lastIndex(of: "Z"), 4)
+        XCTAssertNil(repeatedStrings.lastIndex(of: "Q"))
+
+        XCTAssertEqual(repeatedStrings.lastIndex(where: { $0 == "Z" }), 4)
+        XCTAssertNil(repeatedStrings.lastIndex(of: "Q"))
     }
 
-    func testRemoveFirst() {
-        var strings = ["A", "Z"]
-        XCTAssertEqual("A", strings.removeFirst())
-        XCTAssertEqual(["Z"], strings)
-        XCTAssertEqual("Z", strings.removeFirst())
-        XCTAssertTrue(strings.isEmpty)
+    func testPrefixSuffix() {
+        let arr = [1, 2, 3]
+        XCTAssertEqual([Int](), arr.suffix(0))
+        XCTAssertEqual([3], arr.suffix(1))
+        XCTAssertEqual([2, 3], arr.suffix(2))
+        XCTAssertEqual([1, 2, 3], arr.suffix(4))
+
+        XCTAssertEqual([1], arr.prefix(1))
+        XCTAssertEqual([1, 2], arr.prefix(2))
+        XCTAssertEqual([1, 2, 3], arr.prefix(4))
+
+        XCTAssertEqual([1, 2], arr.prefix(while: { $0 != 3 }))
+        XCTAssertEqual([Int](), arr.prefix(while: { _ in false }))
+
+        XCTAssertEqual([3], arr.suffix(from: 2))
+        XCTAssertEqual([1, 2, 3], arr.suffix(from: 0))
     }
 
-    func testFilterMapReduce() {
-        let numbers = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
-        let result = numbers.filter { $0 % 2 == 0 }
-                            .map { $0 * 2 }
-                            .reduce(0, { $0 + $1 })
-        XCTAssertEqual(result, 60)
+    func testElementsEqual() {
+        let arr = [1, 2, 3]
+        XCTAssertTrue(arr.elementsEqual([1, 2, 3]))
+        XCTAssertFalse(arr.elementsEqual([1, 2]))
+        XCTAssertTrue(arr.elementsEqual([1, 2, 3], by: { $0 == $1 }))
+        XCTAssertFalse(arr.elementsEqual([1, 2, 3], by: { $0 != $1 }))
     }
 
     func testReadSlice() {
@@ -253,32 +313,6 @@ final class CollectionsTests: XCTestCase {
         XCTAssertEqual(count, 10)
     }
 
-    func testZipCompactMap() {
-        #if SKIP
-        throw XCTSkip("testZipCompactMap")
-        #else
-        let names = ["Alice", "Bob", "Charlie"]
-        let ages = [25, nil, 35]
-        let result = zip(names, ages)
-            .compactMap { (name, age) in
-                age.map { "\($0) year old \($0 < 30 ? "youth" : "adult") named \(name)" }
-            }
-        XCTAssertEqual(result, ["25 year old youth named Alice", "35 year old adult named Charlie"])
-        #endif
-    }
-
-    func testLazyFilterMap() {
-        #if SKIP
-        throw XCTSkip("testLazyFilterMap")
-        #else
-        let numbers = sequence(first: 0, next: { $0 + 1 })
-        let result = numbers.lazy.filter { $0 % 2 == 0 }
-                                .map { $0 * 3 }
-                                .prefix(10)
-        XCTAssertEqual(Array(result), [0, 6, 12, 18, 24, 30, 36, 42, 48, 54])
-        #endif
-    }
-
     func testJoin() {
         let iarr: [[ElementEnum]] = [[.one, .two], [.three]]
         let ijoined = iarr.joined()
@@ -336,6 +370,19 @@ final class CollectionsTests: XCTestCase {
         arr2.shuffle()
         XCTAssertNotEqual(arr, arr2)
         XCTAssertEqual(Set(arr), Set(arr2))
+    }
+
+    func testZip() {
+        let arr1 = [1, 3, 5]
+        let arr2 = [0, 2, 4, 6]
+        let zipped = zip(arr1, arr2)
+        let expected = [(1, 0), (3, 2), (5, 4)]
+        var i = 0
+        for (a1, a2) in zipped {
+            XCTAssertEqual(a1, expected[i].0)
+            XCTAssertEqual(a2, expected[i].1)
+            i += 1
+        }
     }
 }
 
