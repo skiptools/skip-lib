@@ -11,6 +11,14 @@ public enum Result<Success, Failure> where Failure : Error {
     case success(Success)
     case failure(Failure)
 
+    public init(catching body: () throws -> Success) {
+        do {
+            self = .success(try body())
+        } catch {
+            self = .failure(error as Failure)
+        }
+    }
+    
     public func get() throws -> Success {
         switch self {
         case .success(let success):
