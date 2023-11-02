@@ -53,6 +53,11 @@ class Array<Element>: RandomAccessCollection<Element>, RangeReplaceableCollectio
     }
 
     @Suppress("UNCHECKED_CAST")
+    constructor(repeating: Element, count: Int) {
+        _collection = List(count) { repeating }
+    }
+
+    @Suppress("UNCHECKED_CAST")
     constructor(collection: Sequence<Element>, nocopy: Boolean = false, shared: Boolean = false) {
         if (nocopy) {
             if (collection is Array<Element>) {

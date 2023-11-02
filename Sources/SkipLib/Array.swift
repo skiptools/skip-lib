@@ -14,6 +14,9 @@ public struct Array<Element>: RandomAccessCollection, RangeReplaceableCollection
     public init() {
     }
 
+    public init(repeating: Element, count: Int) {
+    }
+
     public init(_ sequence: any Sequence<Element>) {
     }
 }
