@@ -174,28 +174,28 @@ public struct CGRect: Hashable {
         return CGRect(x: minX, y: minY, width: max(0.0, maxX - minX), height: max(0.0, maxY - minY))
     }
 
-    func intersects(_ other: CGRect) -> Bool {
+    public func intersects(_ other: CGRect) -> Bool {
         return !intersection(other).isEmpty
     }
 
-    func contains(_ point: CGPoint) -> Bool {
+    public func contains(_ point: CGPoint) -> Bool {
         let rect = standardized
         return point.x >= rect.minX && point.x <= rect.maxX && point.y >= rect.minY && point.y <= rect.maxY
     }
 
-    func contains(_ rect: CGRect) -> Bool {
+    public func contains(_ rect: CGRect) -> Bool {
         return intersection(rect) == rect
     }
 
-    var isEmpty: Bool {
+    public var isEmpty: Bool {
         return width == 0.0 && height == 0.0
     }
 
-    var isInfinite: Bool {
+    public var isInfinite: Bool {
         return self == .infinite
     }
 
-    var isNull: Bool {
+    public var isNull: Bool {
         return self == .null
     }
 }
