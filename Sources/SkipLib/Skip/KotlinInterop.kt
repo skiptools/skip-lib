@@ -60,6 +60,16 @@ fun <Key, Value> Map<Key, Value>.swift(nocopy: Boolean = false): Dictionary<Key,
     return Dictionary(this, nocopy = nocopy)
 }
 
+fun IntSet.kotlin(nocopy: Boolean = false): java.util.TreeSet<Int> {
+    val set = java.util.TreeSet<Int>()
+    set.addAll(storage)
+    return set
+}
+
+fun java.util.TreeSet<Int>.swift(nocopy: Boolean = false): IntSet {
+    return IntSet(this)
+}
+
 fun <Element> IteratorProtocol<Element>.kotlin(nocopy: Boolean = false): Iterator<Element> {
     val iter = this
     return object: Iterator<Element> {

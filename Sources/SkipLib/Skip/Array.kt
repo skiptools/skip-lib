@@ -126,10 +126,11 @@ class Array<Element>: RandomAccessCollection<Element>, RangeReplaceableCollectio
         if (other === this) {
             return true
         }
-        if (other as? Array<*> == null) {
+        if (other !is Sequence<*>) {
             return false
         }
-        return other.collection == collection
+        @Suppress("UNCHECKED_CAST")
+        return elementsEqual(other as Sequence<Element>)
     }
 
     override fun hashCode(): Int {
