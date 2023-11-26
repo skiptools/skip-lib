@@ -5,7 +5,7 @@ let package = Package(
     name: "skip-lib",
     platforms: [.iOS(.v16), .macOS(.v13), .tvOS(.v16), .watchOS(.v9), .macCatalyst(.v16)],
     products: [
-        .library(name: "SkipLib", type: .dynamic, targets: ["SkipLib"]),
+        .library(name: "SkipLib", targets: ["SkipLib"]),
     ],
     dependencies: [
         .package(url: "https://source.skip.tools/skip.git", from: "0.7.29"),
