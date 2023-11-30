@@ -123,6 +123,34 @@ class TaskPriority(override val rawValue: Int): RawRepresentable<Int> {
     }
 }
 
+/// Kotlin representation of `Swift.AnyActor`.
+interface AnyActor {
+}
+
+/// Kotlin representation of `Swift.Actor`.
+interface Actor: AnyActor {
+    val isolatedContext: CoroutineContext
+
+    companion object {
+        /// Factory for actor contexts.
+        @OptIn(ExperimentalCoroutinesApi::class)
+        fun isolatedContext(): CoroutineContext {
+            return Dispatchers.Default.limitedParallelism(1)
+        }
+
+        /// Run a block on the given actor.
+        suspend fun <T> run(actor: Actor, body: suspend () -> T): T {
+            if (coroutineContext[ContinuationInterceptor] == actor.isolatedContext[ContinuationInterceptor]) {
+                return body()
+            } else {
+                return withContext(actor.isolatedContext) {
+                    body()
+                }
+            }
+        }
+    }
+}
+
 class MainActor {
     companion object {
         /// Run a block on the main actor.

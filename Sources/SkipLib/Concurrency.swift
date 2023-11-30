@@ -108,6 +108,12 @@ public struct CancellationError: Error {
 public protocol Sendable {
 }
 
+public protocol AnyActor {
+}
+
+public protocol Actor: AnyActor {
+}
+
 public class MainActor {
     @available(*, unavailable)
     public static var shared: MainActor {
