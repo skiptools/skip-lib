@@ -43,3 +43,7 @@ fun <P0, P1, P2, P3, P4, P5, P6, R> linvoke(p0: P0, p1: P1, p2: P2, p3: P3, p4: 
 fun <P0, P1, P2, P3, P4, P5, P6, P7, R> linvoke(p0: P0, p1: P1, p2: P2, p3: P3, p4: P4, p5: P5, p6: P6, p7: P7, l: (P0, P1, P2, P3, P4, P5, P6, P7) -> R): R {
     return l(p0, p1, p2, p3, p4, p5, p6, p7)
 }
+
+suspend fun <R> linvokeSuspend(l: suspend () -> R): R {
+    return l()
+}

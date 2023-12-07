@@ -9,6 +9,7 @@
 #if SKIP
 
 public protocol Error {
+    public var localizedDescription: String { get }
 }
 
 #endif

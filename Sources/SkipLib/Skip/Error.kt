@@ -7,6 +7,8 @@ package skip.lib
 
 /// Kotlin representation of `Swift.Error`.
 interface Error {
+    val localizedDescription: String
+        get() = description
 }
 
 /// Used by the transpiler to give Errors to Swift code expecting them.

@@ -15,7 +15,7 @@ fun String(stringInterpolation: DefaultStringInterpolation): String {
     return stringInterpolation.values.joinToString("")
 }
 
-class DefaultStringInterpolation : StringInterpolationProtocol, CustomStringConvertible {
+class DefaultStringInterpolation : StringInterpolationProtocol {
     var values: MutableList<String> = mutableListOf()
 
     constructor(literalCapacity: Int, interpolationCount: Int) {
