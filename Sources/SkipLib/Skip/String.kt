@@ -394,8 +394,42 @@ fun String.lastIndex(where: (Char) -> Boolean): Int? {
     return if (index == -1) null else index
 }
 
-operator fun String.Companion.invoke(format: String, vararg args: Any): String { return format.format(*args) }
-operator fun String.Companion.invoke(format: String, arguments: Array<Any>): String { return format.format(*arguments.toList().toTypedArray()) }
+operator fun String.Companion.invoke(format: String, vararg args: Any): String {
+    return objcStringFormatToJava(format).format(*args)
+}
+
+operator fun String.Companion.invoke(format: String, arguments: Array<Any>): String {
+    return objcStringFormatToJava(format).format(*arguments.toList().toTypedArray())
+}
+
+// Mapping of valid Objective-C format specifiers into Java format specifiers.
+// In Java, the "%f" specifier is used to format both regular and long double-precision floating-point numbers.
+// Convert: "%@" into "%s", "%llf" into "%f", "%ld" into "%d", and "%2$@ %1$lld %3$lf" into "%2$s %1$d %3$f"
+private val objc2JavaPatterns = mapOf(
+    "@" to "s",
+    "llf" to "f",
+    "lf" to "f",
+    "lld" to "d",
+    "ld" to "d",
+    "u" to "d",
+)
+
+// This will create the regular expression: "(?<!%)%(\\d+\\$)?(@|llf|lf|lld|ld|u)"
+// (?<!%) is a negative lookbehind assertion, ensuring that % is not preceded by another % (which is how literal "%" characters are escaped)
+private val objcPatternSpecifiers = Regex("(?<!%)%(\\d+\\$)?(${objc2JavaPatterns.keys.sorted().joinToString("|")})")
+
+// Convert from Swift String.init(format:) pattern into a Kotlin-compatible format string: https://kotlinlang.org/docs/strings.html#string-formatting
+private fun objcStringFormatToJava(objCFormat: String): String {
+    val javaFormat = objcPatternSpecifiers.replace(objCFormat) { matchResult ->
+        val matchedString = matchResult.value
+        val positionalArg = matchResult.groupValues[1] // may be empty
+        val objCSpecifier = matchResult.groupValues[2]
+        val javaSpecifier = objc2JavaPatterns[objCSpecifier] ?: objCSpecifier
+        "%${positionalArg}${javaSpecifier}"
+    }
+    return javaFormat
+}
+
 
 fun zip(sequence1: String, sequence2: String): Array<Tuple2<Char, Char>> {
     val zipped = sequence1.zip(sequence2)

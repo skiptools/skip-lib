@@ -271,17 +271,21 @@ final class StringTests: XCTestCase {
         XCTAssertEqual(String(format: "%3$d %2$d %d", 1, 2, 3, 4), "3 2 1") // Extra arguments ignored
         //XCTAssertNil(String(format: "%@")) // Missing argument
 
-        #if !SKIP // java.util.UnknownFormatConversionException: Conversion = '@'
         XCTAssertEqual(String(format: "Name: %@, Age: %d", "Alice", 30), "Name: Alice, Age: 30") // Mixed formats
         XCTAssertEqual(String(format: "%@ %d", arguments: ["Answer:", 42]), "Answer: 42") // Arguments in an array
         XCTAssertEqual(String(format: "Hello, %@", "world"), "Hello, world") // Basic substitution
         XCTAssertEqual(String(format: "%@, %@", "Hello", "world"), "Hello, world") // Multiple substitutions
-        //XCTAssertEqual(String(format: "%%@ %s %d", "String", 42), "%@ %s 42") // Mixed literal and format specifiers
+        XCTAssertEqual(String(format: "%%@ %@ %d", "String", 42), "%@ String 42") // Mixed literal and format specifiers
         XCTAssertEqual(String(format: "%@%@%@%@", "a", "b", "c", "d"), "abcd") // Multiple %@ substitutions
         XCTAssertEqual(String(format: "%1$@ %2$@ %1$@", "A", "B"), "A B A") // Reusing arguments
-        //XCTAssertEqual(String(format: "%5$@ %1$d %4$@", 42, "hello", 3.14159, "world"), "world 42 3.14159") // Mixed arguments
-        //XCTAssertEqual(String(format: "The %@ is %@: %2$d", "answer", "forty-two"), "The answer is forty-two: 42") // Mixed substitutions
-        #endif
+
+        XCTAssertEqual(String(format: "%4$@ %1$d %3$.5f", 42, "hello", 3.14159, "world"), "world 42 3.14159") // Mixed arguments
+        XCTAssertEqual(String(format: "The %@ is %3$@: %2$d", "answer", 42, "forty-two"), "The answer is forty-two: 42") // Mixed substitutions
+
+        // format styles used in .xcstrings files
+        XCTAssertEqual(String(format: "Tap: (%1$lld, %2$lld)", 9, 10), "Tap: (9, 10)")
+        XCTAssertEqual(String(format: "String: %1$@ Number: %2$lf", "XXX", 12.34), "String: XXX Number: 12.340000")
+        XCTAssertEqual(String(format: "Tap: (%1$lf, %2$lf)", 12.34, 56.78), "Tap: (12.340000, 56.780000)")
 
         #if !SKIP // java.util.UnknownFormatConversionException: Conversion = '.'
         XCTAssertEqual(String(format: "%.*f", 3, 3.14159), "3.142") // Precision with variable argument
@@ -292,6 +296,12 @@ final class StringTests: XCTestCase {
         XCTAssertEqual(String(format: "The %% is not replaced: %%%d", 42), "The % is not replaced: %42") // Escaping and substitution
 
         XCTAssertEqual(String(format: "The answer is %d", 42), "The answer is 42") // Basic integer substitution
+        XCTAssertEqual(String(format: "The answer is %ld", 42), "The answer is 42") // Long decimal (Java should convert to %d)
+        XCTAssertEqual(String(format: "The answer is %lld", 42), "The answer is 42") // Long long decimal (Java should convert to %d)
+
+        XCTAssertEqual(String(format: "The answer is %lf", 42.2), "The answer is 42.200000") // Long float (Java should convert to %f)
+        XCTAssertEqual(String(format: "The answer is %llf", 42.2), "The answer is 42.200000") // Long long float (Java should convert to %d)
+        XCTAssertEqual(String(format: "The value is %u", 42), "The value is 42") // Unsigned format
 
         #if !SKIP // java.util.UnknownFormatConversionException: Conversion = 'z'
         XCTAssertEqual(String(format: "The answer is %zd", 42), "The answer is 42") // Basic integer substitution (alternative specifier)

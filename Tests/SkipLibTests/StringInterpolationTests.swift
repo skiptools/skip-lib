@@ -1,9 +1,3 @@
-
-// Copyright 2023 Skip
-//
-// This is free software: you can redistribute and/or modify it
-// under the terms of the GNU Lesser General Public License 3.0
-// as published by the Free Software Foundation https://fsf.org
 import XCTest
 
 final class StringInterpolationTests: XCTestCase {
@@ -17,7 +11,7 @@ final class StringInterpolationTests: XCTestCase {
     }
 
     func testManualStringInterpolation() {
-        var str = StringInterpolationExample()
+        var str = StringExpressibleExample.StringInterpolation()
         str.appendLiteral("ABC")
         str.appendInterpolation(1)
         str.appendInterpolation(1.1)
@@ -28,12 +22,7 @@ final class StringInterpolationTests: XCTestCase {
 
     func testAutomaticStringInterpolation() {
         XCTAssertEqual("A string and 1 thing", "A \("string") and \(1) \(Thing())")
-
-        #if SKIP
-        throw XCTSkip("TODO")
-        #else
-        XCTAssertEqual(#"["A ", "string", " and ", 1, " ", thing, ""]"#, intepolate("A \("string") and \(1) \(Thing())"))
-        #endif
+        XCTAssertEqual("A string and 1 thing", intepolate("A \("string") and \(1) \(Thing())"))
     }
 }
 
@@ -47,12 +36,10 @@ func intepolate(_ string: StringExpressibleExample) -> String {
 }
 
 struct StringExpressibleExample : ExpressibleByStringInterpolation {
-    typealias StringInterpolation = StringInterpolationExample
-
     let rawValue: String
 
     init(stringInterpolation: StringInterpolation) {
-        self.rawValue = stringInterpolation.elements.description
+        self.rawValue = stringInterpolation.elements.map({ String(describing: $0) }).joined(separator: "")
     }
 
     init(stringLiteral value: String) {
@@ -66,19 +53,22 @@ struct StringExpressibleExample : ExpressibleByStringInterpolation {
     init(extendedGraphemeClusterLiteral value: String) {
         self.rawValue = value
     }
-}
 
-struct StringInterpolationExample : StringInterpolationProtocol {
-    var elements: [Any] = []
+    typealias StringInterpolation = StringInterpolationExample
 
-    init(literalCapacity: Int = 0, interpolationCount: Int = 0) {
-    }
+    /// An example implementation of StringInterpolationProtocol that merely stores the arguments as an `[Any]` array
+    struct StringInterpolationExample : StringInterpolationProtocol {
+        var elements: [Any] = []
 
-    mutating func appendLiteral(_ literal: String) {
-        elements.append(literal)
-    }
+        init(literalCapacity: Int = 0, interpolationCount: Int = 0) {
+        }
 
-    mutating func appendInterpolation<T>(_ value: T) {
-        elements.append(value as Any)
+        mutating func appendLiteral(_ literal: String) {
+            elements.append(literal)
+        }
+
+        mutating func appendInterpolation<T>(_ value: T) {
+            elements.append(value as Any)
+        }
     }
 }
