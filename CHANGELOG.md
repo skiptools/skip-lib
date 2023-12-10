@@ -1,3 +1,13 @@
+## 0.5.10
+
+Released 2023-12-10
+
+  - Add project changelog
+  - Add example of single-interpolation value not being inferred as ExpressibleByStringInterpolation
+  - Add test for ExpressibleByStringInterpolation; translate ObjC String format specifier tokens into Java-compatible tokens
+  - Add Error.localizedDescription, suspending linvoke version
+  - Basic ExpressibleByStringInterpolation support
+
 ## 0.5.9
 
 Released 2023-11-30
