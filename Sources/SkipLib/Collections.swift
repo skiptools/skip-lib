@@ -669,6 +669,10 @@ public struct Range<Bound> {
     public var isEmpty: Bool {
         fatalError()
     }
+
+    public func map<RE>(_ transform: (Bound) throws -> RE) rethrows -> [RE] {
+        fatalError()
+    }
 }
 
 @available(*, unavailable)

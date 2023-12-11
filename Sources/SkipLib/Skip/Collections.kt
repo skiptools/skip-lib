@@ -758,4 +758,9 @@ val IntRange.upperBound: Int
     get() = if (endInclusive == Int.MAX_VALUE) Int.MAX_VALUE else endInclusive + 1
 val IntRange.lowerBound: Int
     get() = start
+
 // IntRange.isEmpty, IntRange.contains can be used as-is
+
+fun <RE> IntRange.map(transform: (Int) -> RE): Array<RE> {
+    return Array((this as Iterable<Int>).map(transform), nocopy = true)
+}
