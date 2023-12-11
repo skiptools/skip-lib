@@ -21,12 +21,8 @@ final class StringInterpolationTests: XCTestCase {
     }
 
     func testAutomaticStringInterpolation() {
-        #if !SKIP
-        // strings with only a single format argument are not inferred as the ExpressibleByStringInterpolation type
-        // Type mismatch: inferred type is String but StringExpressibleExample was expected
         XCTAssertEqual("string", intepolate("\("string")"))
         XCTAssertEqual("1", intepolate("\(1)"))
-        #endif
         XCTAssertEqual("A string and 1 thing", "A \("string") and \(1) \(Thing())")
         XCTAssertEqual("A string and 2 things", intepolate("A \("string") and \(2) \(Thing())s"))
     }
