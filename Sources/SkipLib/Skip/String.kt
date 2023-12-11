@@ -394,6 +394,14 @@ fun String.lastIndex(where: (Char) -> Boolean): Int? {
     return if (index == -1) null else index
 }
 
+fun String.matches(of: Regex): Array<Regex.Match> {
+    return of.matches(this)
+}
+
+fun String.replacing(regex: Regex, with: String): String {
+    return regex.replace(this, with)
+}
+
 operator fun String.Companion.invoke(format: String, vararg args: Any): String {
     return objcStringFormatToJava(format).format(*args)
 }
@@ -416,7 +424,7 @@ private val objc2JavaPatterns = mapOf(
 
 // This will create the regular expression: "(?<!%)%(\\d+\\$)?(@|llf|lf|lld|ld|u)"
 // (?<!%) is a negative lookbehind assertion, ensuring that % is not preceded by another % (which is how literal "%" characters are escaped)
-private val objcPatternSpecifiers = Regex("(?<!%)%(\\d+\\$)?(${objc2JavaPatterns.keys.sorted().joinToString("|")})")
+private val objcPatternSpecifiers = kotlin.text.Regex("(?<!%)%(\\d+\\$)?(${objc2JavaPatterns.keys.sorted().joinToString("|")})")
 
 // Convert from Swift String.init(format:) pattern into a Kotlin-compatible format string: https://kotlinlang.org/docs/strings.html#string-formatting
 private fun objcStringFormatToJava(objCFormat: String): String {

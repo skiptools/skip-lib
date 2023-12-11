@@ -63,6 +63,14 @@ public struct String: RandomAccessCollection {
     public func split(separator: Character, maxSplits: Int = Int.max, omittingEmptySubsequences: Bool = true) -> [String] {
         fatalError()
     }
+
+    public func matches(of r: Regex) -> [Regex.Match] {
+        fatalError()
+    }
+
+    public func replacing(_ regex: Regex, with: String) -> String {
+        fatalError()
+    }
 }
 
 public struct Substring: RandomAccessCollection {
