@@ -17,7 +17,7 @@ fun <Element> setOf(vararg elements: Element): Set<Element> {
 /// Kotlin representation of a Swift Set.
 ///
 /// - Seealso: `KotlinInterop.kt` for functions to convert to/from Kotlin collection types.
-class Set<Element>: Collection<Element>, SetAlgebra<Set<Element>, Element>, MutableStruct {
+class Set<Element>: Collection<Element>, SetAlgebra<Set<Element>, Element>, MutableStruct, KotlinConverting<MutableSet<*>> {
     // We attempt to avoid copying when possible. This may involve sharing storage. When storage is
     // shared, we copy on write and rely on our sharing partners to do the same
     private var isStorageShared = false
@@ -246,4 +246,16 @@ class Set<Element>: Collection<Element>, SetAlgebra<Set<Element>, Element>, Muta
     override var supdate: ((Any) -> Unit)? = null
     override var smutatingcount = 0
     override fun scopy(): MutableStruct = Set(this, nocopy = true)
+
+    override fun kotlin(nocopy: Boolean): MutableSet<*> {
+        if (nocopy) {
+            return mutableStorage
+        } else {
+            val set = LinkedHashSet<Any?>()
+            for (element in storage) {
+                set.add(element?.kotlin())
+            }
+            return set
+        }
+    }
 }

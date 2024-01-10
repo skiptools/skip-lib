@@ -19,7 +19,7 @@ fun <K, V> dictionaryOf(vararg entries: Tuple2<K, V>): Dictionary<K, V> {
 /// Kotlin representation of a `Swift.Dictionary`.
 ///
 /// - Seealso: `KotlinInterop.kt` for functions to convert to/from Kotlin collection types.
-class Dictionary<K, V>: Collection<Tuple2<K, V>>, MutableStruct {
+class Dictionary<K, V>: Collection<Tuple2<K, V>>, MutableStruct, KotlinConverting<MutableMap<*, *>> {
     // We attempt to avoid copying when possible. This may involve sharing storage. When storage is
     // shared, we copy on write and rely on our sharing partners to do the same. We may also maintain
     // an entry collection view of ourselves for serving Collection API
@@ -192,6 +192,18 @@ class Dictionary<K, V>: Collection<Tuple2<K, V>>, MutableStruct {
     override var supdate: ((Any) -> Unit)? = null
     override var smutatingcount = 0
     override fun scopy(): MutableStruct = Dictionary(this, nocopy = true)
+
+    override fun kotlin(nocopy: Boolean): MutableMap<*, *> {
+        if (nocopy) {
+            return mutableStorage
+        } else {
+            val map = LinkedHashMap<Any?, Any?>()
+            for ((key, value) in storage) {
+                map.put(key?.kotlin(), value?.kotlin())
+            }
+            return map
+        }
+    }
 
     private class EntryCollection<K, V>(val dictionary: Dictionary<K, V>): AbstractMutableCollection<Tuple2<K, V>>() {
         override val size: Int

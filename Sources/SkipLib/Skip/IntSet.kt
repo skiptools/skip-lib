@@ -10,7 +10,7 @@ package skip.lib
 /// We implement this in SkipLib to colocate it with other built-in collection types.
 ///
 /// - Seealso: `KotlinInterop.kt` for functions to convert to/from Kotlin collection types.
-class IntSet: BidirectionalCollection<Int>, MutableCollection<Int>, SetAlgebra<IntSet, Int>, MutableStruct {
+class IntSet: BidirectionalCollection<Int>, MutableCollection<Int>, SetAlgebra<IntSet, Int>, MutableStruct, KotlinConverting<MutableList<Int>> {
     // We attempt to avoid copying when possible. This may involve sharing storage. When storage is
     // shared, we copy on write and rely on our sharing partners to do the same
     private var isStorageShared = false
@@ -80,7 +80,7 @@ class IntSet: BidirectionalCollection<Int>, MutableCollection<Int>, SetAlgebra<I
     fun integerGreaterThan(integer: Int): Int? {
         val index = storage.binarySearch(integer)
         val nextIndex = if (index < 0) -index - 1 else index + 1
-        return if (nextIndex < count) mutableList[nextIndex] else null
+        return if (nextIndex < count) storage[nextIndex] else null
     }
 
     fun integerLessThan(integer: Int): Int? {
@@ -309,15 +309,25 @@ class IntSet: BidirectionalCollection<Int>, MutableCollection<Int>, SetAlgebra<I
     }
 
     override fun hashCode(): Int {
-        return mutableList.hashCode()
+        return storage.hashCode()
     }
 
     override fun toString(): String {
-        return mutableList.joinToString()
+        return storage.joinToString()
     }
 
     override var supdate: ((Any) -> Unit)? = null
     override var smutatingcount = 0
     override fun scopy(): MutableStruct = IntSet(this, nocopy = true, shared = true)
+
+    override fun kotlin(nocopy: Boolean): MutableList<Int> {
+        if (nocopy) {
+            return mutableList
+        } else {
+            val list = ArrayList<Int>()
+            list.addAll(storage)
+            return list
+        }
+    }
 }
 

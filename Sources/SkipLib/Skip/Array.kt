@@ -17,7 +17,7 @@ fun <Element> arrayOf(vararg elements: Element): Array<Element> {
 /// Kotlin representation of a `Swift.Array`.
 ///
 /// - Seealso: `KotlinInterop.kt` for functions to convert to/from Kotlin collection types.
-class Array<Element>: RandomAccessCollection<Element>, RangeReplaceableCollection<Element>, MutableCollection<Element>, MutableStruct {
+class Array<Element>: RandomAccessCollection<Element>, RangeReplaceableCollection<Element>, MutableCollection<Element>, MutableStruct, KotlinConverting<MutableList<*>> {
     // We attempt to avoid copying when possible. This may involve sharing storage. When storage is
     // shared, we copy on write and rely on our sharing partners to do the same. We may also maintain
     // a given read-only collection until write. One of _mutableList or _collection will always be non-nil
@@ -144,4 +144,16 @@ class Array<Element>: RandomAccessCollection<Element>, RangeReplaceableCollectio
     override var supdate: ((Any) -> Unit)? = null
     override var smutatingcount = 0
     override fun scopy(): MutableStruct = Array(this, nocopy = true, shared = true)
+
+    override fun kotlin(nocopy: Boolean): MutableList<*> {
+        if (nocopy) {
+            return mutableList
+        } else {
+            val list = ArrayList<Any?>()
+            for (element in collection) {
+                list.add(element?.kotlin())
+            }
+            return list
+        }
+    }
 }
