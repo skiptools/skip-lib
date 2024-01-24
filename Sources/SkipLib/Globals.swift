@@ -25,7 +25,7 @@ public func preconditionFailure(_ message: String? = nil) -> Never {
     fatalError()
 }
 
-public func type(of: Any) -> Any.Type {
+public func type<T>(of: T) -> T.Type {
     fatalError()
 }
 
