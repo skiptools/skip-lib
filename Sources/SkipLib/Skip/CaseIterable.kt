@@ -5,7 +5,9 @@
 // as published by the Free Software Foundation https://fsf.org
 package skip.lib
 
-/// Marker for `Swift.CaseIterable` enums.
+/// Kotlin equivalent of `Swift.CaseIterable`.
 interface CaseIterable {
-    // We cannot define allCases because Kotlin does not support static protocol requirements
+}
+interface CaseIterableCompanion<T> {
+    val allCases: Array<T>
 }
