@@ -49,7 +49,9 @@ final class ConcurrencyTests: XCTestCase {
             let _ = try await task.value
             XCTFail("Expected cancellation error")
         } catch {
-            XCTAssertTrue(error is CancellationError)
+            // this has been seen to fail when running against the emulator on CI:
+            // skip.lib.ConcurrencyTests > runtestTaskCancelWithException$SkipLib_debugAndroidTest[Pixel_3a_API_30(AVD) - 11] FAILED
+            XCTAssertTrue(error is CancellationError, "expected CancellationError but got: \(error)")
         }
     }
 
