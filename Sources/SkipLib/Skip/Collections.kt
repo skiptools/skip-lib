@@ -556,12 +556,19 @@ interface BidirectionalCollection<Element>: Collection<Element>, MutableListStor
 
     fun popLast(): Element? {
         willMutateStorage()
+        val lastElement = mutableList.removeLastOrNull().sref()
+        didMutateStorage()
+        return lastElement
+    }
+
+    fun removeLast(): Element {
+        willMutateStorage()
         val lastElement = mutableList.removeLast().sref()
         didMutateStorage()
         return lastElement
     }
 
-    fun removeLast(k: Int = 1) {
+    fun removeLast(k: Int) {
         if (k > 0) {
             willMutateStorage()
             mutableList.subList(mutableList.size - k, mutableList.size).clear()

@@ -384,7 +384,11 @@ extension BidirectionalCollection {
         fatalError()
     }
 
-    public mutating func removeLast(_ k: Int = 1) {
+    public mutating func removeLast() -> Element {
+        fatalError()
+    }
+
+    public mutating func removeLast(_ k: Int) {
     }
 
     @available(*, unavailable)
