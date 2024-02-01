@@ -24,43 +24,44 @@ public protocol Encoder {
 }
 
 public protocol KeyedEncodingContainerProtocol {
+    associatedtype Key: CodingKey
     var codingPath: [CodingKey] { get }
-    mutating func encodeNil(forKey key: CodingKey) throws
-    mutating func encode(_ value: Bool, forKey key: CodingKey) throws
-    mutating func encode(_ value: String, forKey key: CodingKey) throws
-    mutating func encode(_ value: Double, forKey key: CodingKey) throws
-    mutating func encode(_ value: Float, forKey key: CodingKey) throws
-    mutating func encode(_ value: Int, forKey key: CodingKey) throws
-    mutating func encode(_ value: Int8, forKey key: CodingKey) throws
-    mutating func encode(_ value: Int16, forKey key: CodingKey) throws
-    mutating func encode(_ value: Int32, forKey key: CodingKey) throws
-    mutating func encode(_ value: Int64, forKey key: CodingKey) throws
-    mutating func encode(_ value: UInt, forKey key: CodingKey) throws
-    mutating func encode(_ value: UInt8, forKey key: CodingKey) throws
-    mutating func encode(_ value: UInt16, forKey key: CodingKey) throws
-    mutating func encode(_ value: UInt32, forKey key: CodingKey) throws
-    mutating func encode(_ value: UInt64, forKey key: CodingKey) throws
-    mutating func encode<T>(_ value: T, forKey key: CodingKey) throws where T: Any
-    mutating func encodeConditional<T>(_ object: T, forKey key: CodingKey) throws where T: Any
-    mutating func encodeIfPresent(_ value: Bool?, forKey key: CodingKey) throws
-    mutating func encodeIfPresent(_ value: String?, forKey key: CodingKey) throws
-    mutating func encodeIfPresent(_ value: Double?, forKey key: CodingKey) throws
-    mutating func encodeIfPresent(_ value: Float?, forKey key: CodingKey) throws
-    mutating func encodeIfPresent(_ value: Int?, forKey key: CodingKey) throws
-    mutating func encodeIfPresent(_ value: Int8?, forKey key: CodingKey) throws
-    mutating func encodeIfPresent(_ value: Int16?, forKey key: CodingKey) throws
-    mutating func encodeIfPresent(_ value: Int32?, forKey key: CodingKey) throws
-    mutating func encodeIfPresent(_ value: Int64?, forKey key: CodingKey) throws
-    mutating func encodeIfPresent(_ value: UInt?, forKey key: CodingKey) throws
-    mutating func encodeIfPresent(_ value: UInt8?, forKey key: CodingKey) throws
-    mutating func encodeIfPresent(_ value: UInt16?, forKey key: CodingKey) throws
-    mutating func encodeIfPresent(_ value: UInt32?, forKey key: CodingKey) throws
-    mutating func encodeIfPresent(_ value: UInt64?, forKey key: CodingKey) throws
-    mutating func encodeIfPresent<T>(_ value: T?, forKey key: CodingKey) throws where T: Any
-    mutating func nestedContainer<NestedKey>(keyedBy keyType: NestedKey.Type, forKey key: CodingKey) -> KeyedEncodingContainer<NestedKey> where NestedKey : CodingKey
-    mutating func nestedUnkeyedContainer(forKey key: CodingKey) -> UnkeyedEncodingContainer
+    mutating func encodeNil(forKey key: Key) throws
+    mutating func encode(_ value: Bool, forKey key: Key) throws
+    mutating func encode(_ value: String, forKey key: Key) throws
+    mutating func encode(_ value: Double, forKey key: Key) throws
+    mutating func encode(_ value: Float, forKey key: Key) throws
+    mutating func encode(_ value: Int, forKey key: Key) throws
+    mutating func encode(_ value: Int8, forKey key: Key) throws
+    mutating func encode(_ value: Int16, forKey key: Key) throws
+    mutating func encode(_ value: Int32, forKey key: Key) throws
+    mutating func encode(_ value: Int64, forKey key: Key) throws
+    mutating func encode(_ value: UInt, forKey key: Key) throws
+    mutating func encode(_ value: UInt8, forKey key: Key) throws
+    mutating func encode(_ value: UInt16, forKey key: Key) throws
+    mutating func encode(_ value: UInt32, forKey key: Key) throws
+    mutating func encode(_ value: UInt64, forKey key: Key) throws
+    mutating func encode<T>(_ value: T, forKey key: Key) throws where T: Any
+    mutating func encodeConditional<T>(_ object: T, forKey key: Key) throws where T: Any
+    mutating func encodeIfPresent(_ value: Bool?, forKey key: Key) throws
+    mutating func encodeIfPresent(_ value: String?, forKey key: Key) throws
+    mutating func encodeIfPresent(_ value: Double?, forKey key: Key) throws
+    mutating func encodeIfPresent(_ value: Float?, forKey key: Key) throws
+    mutating func encodeIfPresent(_ value: Int?, forKey key: Key) throws
+    mutating func encodeIfPresent(_ value: Int8?, forKey key: Key) throws
+    mutating func encodeIfPresent(_ value: Int16?, forKey key: Key) throws
+    mutating func encodeIfPresent(_ value: Int32?, forKey key: Key) throws
+    mutating func encodeIfPresent(_ value: Int64?, forKey key: Key) throws
+    mutating func encodeIfPresent(_ value: UInt?, forKey key: Key) throws
+    mutating func encodeIfPresent(_ value: UInt8?, forKey key: Key) throws
+    mutating func encodeIfPresent(_ value: UInt16?, forKey key: Key) throws
+    mutating func encodeIfPresent(_ value: UInt32?, forKey key: Key) throws
+    mutating func encodeIfPresent(_ value: UInt64?, forKey key: Key) throws
+    mutating func encodeIfPresent<T>(_ value: T?, forKey key: Key) throws where T: Any
+    mutating func nestedContainer<NestedKey>(keyedBy keyType: NestedKey.Type, forKey key: Key) -> KeyedEncodingContainer<NestedKey> where NestedKey : CodingKey
+    mutating func nestedUnkeyedContainer(forKey key: Key) -> UnkeyedEncodingContainer
     mutating func superEncoder() -> Encoder
-    mutating func superEncoder(forKey key: CodingKey) -> Encoder
+    mutating func superEncoder(forKey key: Key) -> Encoder
 }
 
 public struct KeyedEncodingContainer<Key: CodingKey> : KeyedEncodingContainerProtocol {
@@ -125,44 +126,45 @@ public protocol Decoder {
 }
 
 public protocol KeyedDecodingContainerProtocol {
+    associatedtype Key: CodingKey
     var codingPath: [CodingKey] { get }
-    var allKeys: [CodingKey] { get }
-    func contains(_ key: CodingKey) -> Bool
-    func decodeNil(forKey key: CodingKey) throws -> Bool
-    func decode(_ type: Bool.Type, forKey key: CodingKey) throws -> Bool
-    func decode(_ type: String.Type, forKey key: CodingKey) throws -> String
-    func decode(_ type: Float.Type, forKey key: CodingKey) throws -> Float
-    func decode(_ type: Double.Type, forKey key: CodingKey) throws -> Double
-    func decode(_ type: Int.Type, forKey key: CodingKey) throws -> Int
-    func decode(_ type: Int8.Type, forKey key: CodingKey) throws -> Int8
-    func decode(_ type: Int16.Type, forKey key: CodingKey) throws -> Int16
-    func decode(_ type: Int32.Type, forKey key: CodingKey) throws -> Int32
-    func decode(_ type: Int64.Type, forKey key: CodingKey) throws -> Int64
-    func decode(_ type: UInt.Type, forKey key: CodingKey) throws -> UInt
-    func decode(_ type: UInt8.Type, forKey key: CodingKey) throws -> UInt8
-    func decode(_ type: UInt16.Type, forKey key: CodingKey) throws -> UInt16
-    func decode(_ type: UInt32.Type, forKey key: CodingKey) throws -> UInt32
-    func decode(_ type: UInt64.Type, forKey key: CodingKey) throws -> UInt64
-    func decode<T>(_ type: T.Type, forKey key: CodingKey) throws -> T
-    func decodeIfPresent(_ type: Bool.Type, forKey key: CodingKey) throws -> Bool?
-    func decodeIfPresent(_ type: String.Type, forKey key: CodingKey) throws -> String?
-    func decodeIfPresent(_ type: Float.Type, forKey key: CodingKey) throws -> Float?
-    func decodeIfPresent(_ type: Double.Type, forKey key: CodingKey) throws -> Double?
-    func decodeIfPresent(_ type: Int.Type, forKey key: CodingKey) throws -> Int?
-    func decodeIfPresent(_ type: Int8.Type, forKey key: CodingKey) throws -> Int8?
-    func decodeIfPresent(_ type: Int16.Type, forKey key: CodingKey) throws -> Int16?
-    func decodeIfPresent(_ type: Int32.Type, forKey key: CodingKey) throws -> Int32?
-    func decodeIfPresent(_ type: Int64.Type, forKey key: CodingKey) throws -> Int64?
-    func decodeIfPresent(_ type: UInt.Type, forKey key: CodingKey) throws -> UInt?
-    func decodeIfPresent(_ type: UInt8.Type, forKey key: CodingKey) throws -> UInt8?
-    func decodeIfPresent(_ type: UInt16.Type, forKey key: CodingKey) throws -> UInt16?
-    func decodeIfPresent(_ type: UInt32.Type, forKey key: CodingKey) throws -> UInt32?
-    func decodeIfPresent(_ type: UInt64.Type, forKey key: CodingKey) throws -> UInt64?
-    func decodeIfPresent<T>(_ type: T.Type, forKey key: CodingKey) throws -> T?
-    func nestedContainer<NestedKey>(keyedBy type: NestedKey.Type, forKey key: CodingKey) throws -> KeyedDecodingContainer<NestedKey> where NestedKey : CodingKey
-    func nestedUnkeyedContainer(forKey key: CodingKey) throws -> UnkeyedDecodingContainer
+    var allKeys: [Key] { get }
+    func contains(_ key: Key) -> Bool
+    func decodeNil(forKey key: Key) throws -> Bool
+    func decode(_ type: Bool.Type, forKey key: Key) throws -> Bool
+    func decode(_ type: String.Type, forKey key: Key) throws -> String
+    func decode(_ type: Float.Type, forKey key: Key) throws -> Float
+    func decode(_ type: Double.Type, forKey key: Key) throws -> Double
+    func decode(_ type: Int.Type, forKey key: Key) throws -> Int
+    func decode(_ type: Int8.Type, forKey key: Key) throws -> Int8
+    func decode(_ type: Int16.Type, forKey key: Key) throws -> Int16
+    func decode(_ type: Int32.Type, forKey key: Key) throws -> Int32
+    func decode(_ type: Int64.Type, forKey key: Key) throws -> Int64
+    func decode(_ type: UInt.Type, forKey key: Key) throws -> UInt
+    func decode(_ type: UInt8.Type, forKey key: Key) throws -> UInt8
+    func decode(_ type: UInt16.Type, forKey key: Key) throws -> UInt16
+    func decode(_ type: UInt32.Type, forKey key: Key) throws -> UInt32
+    func decode(_ type: UInt64.Type, forKey key: Key) throws -> UInt64
+    func decode<T>(_ type: T.Type, forKey key: Key) throws -> T
+    func decodeIfPresent(_ type: Bool.Type, forKey key: Key) throws -> Bool?
+    func decodeIfPresent(_ type: String.Type, forKey key: Key) throws -> String?
+    func decodeIfPresent(_ type: Float.Type, forKey key: Key) throws -> Float?
+    func decodeIfPresent(_ type: Double.Type, forKey key: Key) throws -> Double?
+    func decodeIfPresent(_ type: Int.Type, forKey key: Key) throws -> Int?
+    func decodeIfPresent(_ type: Int8.Type, forKey key: Key) throws -> Int8?
+    func decodeIfPresent(_ type: Int16.Type, forKey key: Key) throws -> Int16?
+    func decodeIfPresent(_ type: Int32.Type, forKey key: Key) throws -> Int32?
+    func decodeIfPresent(_ type: Int64.Type, forKey key: Key) throws -> Int64?
+    func decodeIfPresent(_ type: UInt.Type, forKey key: Key) throws -> UInt?
+    func decodeIfPresent(_ type: UInt8.Type, forKey key: Key) throws -> UInt8?
+    func decodeIfPresent(_ type: UInt16.Type, forKey key: Key) throws -> UInt16?
+    func decodeIfPresent(_ type: UInt32.Type, forKey key: Key) throws -> UInt32?
+    func decodeIfPresent(_ type: UInt64.Type, forKey key: Key) throws -> UInt64?
+    func decodeIfPresent<T>(_ type: T.Type, forKey key: Key) throws -> T?
+    func nestedContainer<NestedKey>(keyedBy type: NestedKey.Type, forKey key: Key) throws -> KeyedDecodingContainer<NestedKey> where NestedKey : CodingKey
+    func nestedUnkeyedContainer(forKey key: Key) throws -> UnkeyedDecodingContainer
     func superDecoder() throws -> Decoder
-    func superDecoder(forKey key: CodingKey) throws -> Decoder
+    func superDecoder(forKey key: Key) throws -> Decoder
 }
 
 public struct KeyedDecodingContainer<Key: CodingKey> : KeyedDecodingContainerProtocol {
