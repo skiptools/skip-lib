@@ -41,7 +41,7 @@ public protocol KeyedEncodingContainerProtocol {
     mutating func encode(_ value: UInt16, forKey key: Key) throws
     mutating func encode(_ value: UInt32, forKey key: Key) throws
     mutating func encode(_ value: UInt64, forKey key: Key) throws
-    mutating func encode<T>(_ value: T, forKey key: Key) throws where T: Any
+    mutating func encode<T>(_ value: T?, forKey key: Key) throws where T: Any
     mutating func encodeConditional<T>(_ object: T, forKey key: Key) throws where T: Any
     mutating func encodeIfPresent(_ value: Bool?, forKey key: Key) throws
     mutating func encodeIfPresent(_ value: String?, forKey key: Key) throws

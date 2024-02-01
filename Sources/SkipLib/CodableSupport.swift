@@ -74,21 +74,6 @@ public enum DecodingError : Error {
     case valueNotFound(Any.Type, DecodingError.Context)
     case keyNotFound(CodingKey, DecodingError.Context)
     case dataCorrupted(DecodingError.Context)
-
-    public static func dataCorruptedError<C>(forKey key: CodingKey, in container: C, debugDescription: String) -> DecodingError where C : KeyedDecodingContainerProtocol {
-        let context = Context(codingPath: container.codingPath, debugDescription: key.debugDescription)
-        return DecodingError.dataCorrupted(context)
-    }
-
-    public static func dataCorruptedError(in container: UnkeyedDecodingContainer, debugDescription: String) -> DecodingError {
-        let context = Context(codingPath: container.codingPath, debugDescription: debugDescription)
-        return DecodingError.dataCorrupted(context)
-    }
-
-    public static func dataCorruptedError(in container: SingleValueDecodingContainer, debugDescription: String) -> DecodingError {
-        let context = Context(codingPath: container.codingPath, debugDescription: debugDescription)
-        return DecodingError.dataCorrupted(context)
-    }
 }
 
 #endif

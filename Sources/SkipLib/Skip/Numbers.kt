@@ -128,6 +128,24 @@ fun Double.Companion.random(in_: ClosedFloatingPointRange<Double>): Double {
     }
     return in_.start + diff * systemRandom.rawValue.nextDouble()
 }
+fun Double.rounded(): Double = kotlin.math.round(this)
+fun Double.rounded(rule: FloatingPointRoundingRule): Double {
+    return when (rule) {
+        FloatingPointRoundingRule.toNearestOrAwayFromZero -> {
+            val rounded = kotlin.math.round(this)
+            if (kotlin.math.abs(this - rounded) == .5) {
+                return if (this > 0) kotlin.math.ceil(this) else kotlin.math.floor(this)
+            } else {
+                return rounded
+            }
+        }
+        FloatingPointRoundingRule.toNearestOrEven -> kotlin.math.round(this)
+        FloatingPointRoundingRule.up -> kotlin.math.ceil(this)
+        FloatingPointRoundingRule.down -> kotlin.math.floor(this)
+        FloatingPointRoundingRule.towardZero -> if (this > 0) kotlin.math.floor(this) else kotlin.math.ceil(this)
+        FloatingPointRoundingRule.awayFromZero -> if (this > 0) kotlin.math.ceil(this) else kotlin.math.floor(this)
+    }
+}
 
 val Float.Companion.nan: Float get() = Float.NaN
 val Float.isNaN: Boolean get() = isNaN()
@@ -143,6 +161,24 @@ fun Float.Companion.random(in_: ClosedFloatingPointRange<Float>): Float {
         return in_.start
     }
     return in_.start + diff * systemRandom.rawValue.nextFloat()
+}
+fun Float.rounded(): Float = kotlin.math.round(this)
+fun Float.rounded(rule: FloatingPointRoundingRule): Float {
+    return when (rule) {
+        FloatingPointRoundingRule.toNearestOrAwayFromZero -> {
+            val rounded = kotlin.math.round(this)
+            if (kotlin.math.abs(this - rounded) == .5f) {
+                return if (this > 0) kotlin.math.ceil(this) else kotlin.math.floor(this)
+            } else {
+                return rounded
+            }
+        }
+        FloatingPointRoundingRule.toNearestOrEven -> kotlin.math.round(this)
+        FloatingPointRoundingRule.up -> kotlin.math.ceil(this)
+        FloatingPointRoundingRule.down -> kotlin.math.floor(this)
+        FloatingPointRoundingRule.towardZero -> if (this > 0) kotlin.math.floor(this) else kotlin.math.ceil(this)
+        FloatingPointRoundingRule.awayFromZero -> if (this > 0) kotlin.math.ceil(this) else kotlin.math.floor(this)
+    }
 }
 
 fun Byte(number: Number): Byte = number.toByte()

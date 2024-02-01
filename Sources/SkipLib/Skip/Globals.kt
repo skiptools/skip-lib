@@ -14,6 +14,8 @@ fun type(of: Any): kotlin.reflect.KClass<*> = of::class
 
 fun fatalError(message: String = "fatalError"): Nothing = error(message)
 fun assertionFailure(message: String = "assertionFailure"): Nothing = error(message)
+// We can use Kotlin's assert(value: Boolean) function as-is
+fun assert(value: Boolean, message: String): Unit = kotlin.assert(value, { message })
 fun preconditionFailure(message: String = "preconditionFailure"): Nothing = error(message)
 fun precondition(condition: Boolean, message: String = "precondition"): Unit = require(condition, { message })
 

@@ -11,6 +11,15 @@ import kotlin.math.pow
 import kotlin.math.IEEErem
 #endif
 
+public enum FloatingPointRoundingRule: Hashable {
+    case toNearestOrAwayFromZero
+    case toNearestOrEven
+    case up
+    case down
+    case towardZero
+    case awayFromZero
+}
+
 public func acosf(_ x: Float) -> Float {
     #if !SKIP
     fatalError() // Darwin.acosf(x)

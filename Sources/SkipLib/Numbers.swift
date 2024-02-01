@@ -99,6 +99,8 @@ extension Float: CustomStringConvertible {
     public static func random(in range: Range<Float>) -> Float { fatalError() }
     @available(*, unavailable)
     public static func random(in range: Range<Float>, using gen: inout RandomNumberGenerator) -> Float { fatalError() }
+    public func rounded() -> Float
+    public func rounded(_ rule: FloatingPointRoundingRule) -> Float
 }
 
 extension Double: CustomStringConvertible {
@@ -112,6 +114,8 @@ extension Double: CustomStringConvertible {
     public static func random(in range: Range<Double>) -> Double { fatalError() }
     @available(*, unavailable)
     public static func random(in range: Range<Double>, using gen: inout RandomNumberGenerator) -> Double { fatalError() }
+    public func rounded() -> Double
+    public func rounded(_ rule: FloatingPointRoundingRule) -> Double
 }
 
 public let M_E: Double = 0.0
