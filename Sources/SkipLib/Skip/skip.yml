@@ -3,15 +3,23 @@
 #skip:
 #  package: 'skip.lib'
 
+# the blocks to add to the settings.gradle.kts
+settings:
+  contents:
+    - block: 'dependencyResolutionManagement'
+      contents:
+        - block: 'versionCatalogs'
+          contents:
+            - block: 'create("libs")'
+              contents:
+                - 'library("kotlin-reflect", "org.jetbrains.kotlin", "kotlin-reflect").withoutVersion()'
+
 # the blocks to add to the build.gradle.kts
 build:
   contents:
     - block: 'dependencies'
       export: false
       contents:
-        - 'api(platform("org.jetbrains.kotlin:kotlin-bom:1.9.0"))'
-        - 'api("org.jetbrains.kotlin:kotlin-reflect")'
-        - 'api("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.7.3")'
-        - 'api("org.jetbrains.kotlinx:kotlinx-coroutines-android:1.7.3")'
-        - 'testImplementation("org.jetbrains.kotlinx:kotlinx-coroutines-test:1.7.3")'
-        - 'androidTestImplementation("org.jetbrains.kotlinx:kotlinx-coroutines-test:1.7.3")'
+        - 'api(libs.kotlin.reflect)'
+        - 'api(libs.kotlinx.coroutines.core)'
+        - 'implementation(libs.kotlinx.coroutines.android)'
