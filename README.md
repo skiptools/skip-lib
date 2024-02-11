@@ -23,7 +23,7 @@ The module is transparently adopted through the automatic addition of `import sk
 - SkipLib's Swift symbol files (see [Implementation Strategy](#implementation-strategy)) are nominally complete. They should declare all Swift standard library API. This is difficult to validate, however, so if you find anything missing, please [report it](https://github.com/skiptools/skip-lib/issues) to us.
 - Unimplemented API is appropriately marked with `@available(*, unavailable)` annotations. Skip will generate an error when you attempt to use an unimplemented API.
 - In particular, a significant portion of the [collections](#collections) API is not yet implemented.
-- Unit testing is not comprehensive. See [Tests](#tests) for the current test run status.
+- Unit testing is not comprehensive.
 
 See [Swift Standard Library Support](#swift-standard-library-support).
 
