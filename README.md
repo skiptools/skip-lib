@@ -25,6 +25,8 @@ The module is transparently adopted through the automatic addition of `import sk
 - In particular, a significant portion of the [collections](#collections) API is not yet implemented.
 - Unit testing is not comprehensive. See [Tests](#tests) for the current test run status.
 
+See [Swift Standard Library Support](#swift-standard-library-support).
+
 ## Contributing
 
 We welcome contributions to SkipLib. The Skip product [documentation](https://skip.tools/docs/contributing/) includes helpful instructions and tips on local Skip library development. 
