@@ -31,11 +31,11 @@ public struct Regex : RegexComponent {
 
         fileprivate let match: kotlin.text.MatchResult
 
-        var count: Int {
+        public var count: Int {
             match.groups.size
         }
 
-        subscript(index: Int) -> MatchGroup {
+        public subscript(index: Int) -> MatchGroup {
             MatchGroup(group: match.groups.get(index))
         }
 
@@ -54,7 +54,7 @@ public struct Regex : RegexComponent {
         }
     }
 
-    func matches(_ string: String) -> [Match] {
+    public func matches(_ string: String) -> [Match] {
         var matches: [Match] = []
         for match in _regex.findAll(string) {
             matches.append(Match(match: match))
@@ -62,7 +62,7 @@ public struct Regex : RegexComponent {
         return matches
     }
 
-    func replace(_ string: String, with replacement: String) -> String {
+    public func replace(_ string: String, with replacement: String) -> String {
         return _regex.replace(string, replacement)
     }
 }

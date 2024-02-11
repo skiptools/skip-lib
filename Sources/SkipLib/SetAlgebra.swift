@@ -28,7 +28,7 @@ extension SetAlgebra {
         fatalError()
     }
 
-    func symmetricDifference(_ other: Self) -> Self {
+    public func symmetricDifference(_ other: Self) -> Self {
         fatalError()
     }
 

@@ -2,6 +2,8 @@
 
 Swift standard library for [Skip](https://skip.tools) apps.
 
+See what API is currently implemented [here](#swift-standard-library-support).
+
 ## About 
 
 SkipLib vends the `skip.lib` Kotlin package. It serves two purposes:
@@ -47,6 +49,863 @@ Most Skip libraries *call* Kotlin API, but are *written* in Swift, relying on th
 
 This pattern is used for most Swift types throughout SkipLib. Meanwhile, SwiftLib implementations of constructs built directly into the Swift language - e.g. tuples or `inout` parameters - only have a Kotlin file, with no corresponding Swift symbol file.
 
+## Swift Standard Library Support
+
+The following table summarizes SkipLib's Swift Standard Library API support on Android. Anything not listed here is likely not supported. Note that in your iOS-only code - i.e. code within `#if !SKIP` blocks - you can use any API you want.
+
+Support levels:
+
+  - ✅ – Full
+  - 🟢 – High
+  - 🟡 – Medium 
+  - 🔴 – Low
+
+<table>
+  <thead><th>Support</th><th>API</th></thead>
+  <tbody>
+    <tr>
+      <td>🟢</td>
+      <td>
+        <details>
+          <summary><code>Actor</code></summary>
+          <ul>
+            <li>Non-private mutable properties are not supported</li>
+          </ul>
+        </details> 
+      </td>
+    </tr>
+    <tr>
+      <td>✅</td>
+      <td><code>Any</code></td>
+    </tr>
+    <tr>
+      <td>✅</td>
+      <td><code>AnyActor</code></td>
+    </tr>
+    <tr>
+      <td>✅</td>
+      <td><code>AnyHashable</code></td>
+    </tr>
+    <tr>
+      <td>🟢</td>
+      <td>
+        <details>
+          <summary><code>Array</code></summary>
+          <ul>
+            <li><code>init()</code></li>
+            <li><code>init(repeating: Element, count: Int)</code></li>
+            <li><code>init(_ sequence: any Sequence<Element>)</code></li>
+            <li>See <code>Collection</code> for collection API support</li>
+          </ul>
+        </details> 
+      </td>
+    </tr>
+    <tr>
+      <td>✅</td>
+      <td><code>assert</code></td>
+    </tr>
+    <tr>
+      <td>✅</td>
+      <td><code>assertionFailure</code></td>
+    </tr>
+    <tr>
+      <td>🟢</td>
+      <td>
+        <details>
+          <summary><code>Bool</code></summary>
+          <ul>
+            <li><code>static func random() -> Bool</code></li>
+            <li><code>static func random(using gen: inout RandomNumberGenerator) -> Bool</code></li>
+          </ul>
+        </details> 
+      </td>
+    </tr>
+    <tr>
+      <td>✅</td>
+      <td><code>CaseIterable</code></td>
+    </tr>
+    <tr>
+      <td>✅</td>
+      <td><code>CGAffineTransform</code></td>
+    </tr>
+    <tr>
+      <td>✅</td>
+      <td><code>CGFloat</code></td>
+    </tr>
+    <tr>
+      <td>✅</td>
+      <td><code>CGPoint</code></td>
+    </tr>
+    <tr>
+      <td>✅</td>
+      <td><code>CGRect</code></td>
+    </tr>
+    <tr>
+      <td>✅</td>
+      <td><code>CGSize</code></td>
+    </tr>
+    <tr>
+      <td>🟢</td>
+      <td>
+        <details>
+          <summary><code>Codable</code></summary>
+          <ul>
+            <li>See [Codable](#codable)</li>
+          </ul>
+        </details> 
+      </td>
+    </tr>
+    <tr>
+      <td>🟡</td>
+      <td>
+        <details>
+          <summary><code>Collection</code></summary>
+          <ul>
+<li>Note: This list represents the combined supported API of Swift's many collection types: <code>Sequence</code>, <code>Collection</code>, <code>BidirectionalCollection</code>, etc</li>
+<li><code>func allSatisfy(_ predicate: (Element) throws -&gt; Bool) rethrows -&gt; Bool</code></li>
+<li><code>mutating func append(_ newElement: Element)</code></li>
+<li><code>mutating func append(contentsOf newElements: any Sequence&lt;Element&gt;)</code></li>
+<li><code>func contains(_ element: Element) -&gt; Bool</code></li>
+<li><code>func contains(where predicate: (Element) throws -&gt; Bool) rethrows -&gt; Bool</code></li>
+<li><code>func distance(from start: Int, to end: Int) -&gt; Int</code></li>
+<li><code>func drop(while predicate: (Element) throws -&gt; Bool) rethrows -&gt; [Element]</code></li>
+<li><code>func dropFirst(_ k: Int = 1) -&gt; [Element]</code></li>
+<li><code>func dropLast(_ k: Int = 1) -&gt; [Element]</code></li>
+<li><code>func elementsEqual(_ other: any Sequence&lt;Element&gt;) -&gt; Bool</code></li>
+<li><code>func elementsEqual(_ other: any Sequence&lt;Element&gt;, by areEquivalent: (Element, Element) throws -&gt; Bool) rethrows -&gt; Bool</code></li>
+<li><code>func enumerated() -&gt; any Sequence&lt;(offset: Int, element: Element)&gt;</code></li>
+<li><code>var endIndex: Int</code></li>
+<li><code>func filter(_ isIncluded: (Element) throws -&gt; Bool) rethrows -&gt; [Element]</code></li>
+<li><code>func first(where predicate: (Element) throws -&gt; Bool) rethrows -&gt; Element?</code></li>
+<li><code>func firstIndex(of element: Element) -&gt; Int?</code></li>
+<li><code>func firstIndex(where predicate: (Element) throws -&gt; Bool) rethrows -&gt; Int?</code></li>
+<li><code>var first: Element?</code></li>
+<li><code>func flatMap&lt;RE&gt;(_ transform: (Element) throws -&gt; any Sequence&lt;RE&gt;) rethrows -&gt; [RE]</code></li>
+<li><code>func formIndex(_ i: inout Int, offsetBy distance: Int)</code></li>
+<li><code>func formIndex(after i: inout Int)</code></li>
+<li><code>func index(_ i: Int, offsetBy distance: Int) -&gt; Int</code></li>
+<li><code>func index(after i: Int) -&gt; Int</code></li>
+<li><code>var indices: any Sequence&lt;Int&gt;</code></li>
+<li><code>var isEmpty: Bool</code></li>
+<li><code>func joined&lt;RE&gt;() -&gt; [RE] where Element: Sequence&lt;RE&gt;</code></li>
+<li><code>func joined&lt;RE&gt;(separator: any Sequence&lt;RE&gt;) -&gt; [RE] where Element: Sequence&lt;RE&gt;</code></li>
+<li><code>func joined(separator: String) -&gt; String</code></li>
+<li><code>func makeIterator() -&gt; any IteratorProtocol&lt;Element&gt;</code></li>
+<li><code>func map&lt;RE&gt;(_ transform: (Element) throws -&gt; RE) rethrows -&gt; [RE]</code></li>
+<li><code>func max() -&gt; Element?</code></li>
+<li><code>func max(by areInIncreasingOrder: (Element, Element) throws -&gt; Bool) rethrows -&gt; Element?</code></li>
+<li><code>func min() -&gt; Element?</code></li>
+<li><code>func min(by areInIncreasingOrder: (Element, Element) throws -&gt; Bool) rethrows -&gt; Element?</code></li>
+<li><code>var underestimatedCount: Int</code></li>
+<li><code>func prefix(_ maxLength: Int) -&gt; [Element]</code></li>
+<li><code>func prefix(through end: Int) -&gt; [Element]</code></li>
+<li><code>func prefix(upTo end: Int) -&gt; [Element]</code></li>
+<li><code>mutating func popFirst() -&gt; Element?</code></li>
+<li><code>mutating func popLast() -&gt; Element?</code></li>
+<li><code>func randomElement() -&gt; Element?</code></li>
+<li><code>func randomElement(using generator: inout any RandomNumberGenerator) -&gt; Element?</code></li>
+<li><code>func reduce&lt;R&gt;(_ initialResult: R, _ nextPartialResult: (_ partialResult: R, Element) throws -&gt; R) rethrows -&gt; R</code></li>
+<li><code>func reduce&lt;R&gt;(into initialResult: R, _ updateAccumulatingResult: (_ partialResult: inout R, Element) throws -&gt; Void) rethrows -&gt; R</code></li>
+<li><code>func remove(at i: Int) -&gt; Element</code></li>
+<li><code>mutating func removeAll(keepingCapacity keepCapacity: Bool = false)</code></li>
+<li><code>mutating func removeAll(where shouldBeRemoved: (Element) throws -&gt; Bool) rethrows</code></li>
+<li><code>mutating func removeFirst() -&gt; Element</code></li>
+<li><code>mutating func removeFirst(_ k: Int)</code></li>
+<li><code>mutating func removeLast() -&gt; Element</code></li>
+<li><code>mutating func removeLast(_ k: Int)</code></li>
+<li><code>mutating func reverse()</code></li>
+<li><code>func reversed() -&gt; [Element]</code></li>
+<li><code>mutating func shuffle()</code></li>
+<li><code>mutating func shuffle&lt;T: RandomNumberGenerator&gt;(using generator: inout T)</code></li>
+<li><code>mutating func sort()</code></li>
+<li><code>mutating func sort(by areIncreasingOrder: (Element, Element) throws -&gt; Bool) rethrows</code></li>
+<li><code>mutating func swapAt(_ i: Int, _ j: Int)</code></li>
+<li><code>subscript(bounds: Range&lt;Int&gt;) -&gt; any Collection&lt;Element&gt;</code></li>
+<li><code>subscript(position: Int) -&gt; Element</code></li>
+<li><code>func starts(with possiblePrefix: Any) -&gt; Bool</code></li>
+<li><code>func starts(with possiblePrefix: Any, by areEquivalent: (Element, Element) throws -&gt; Bool) rethrows -&gt; Bool</code></li>
+<li><code>func suffix(from start: Int) -&gt; [Element]</code></li>
+<li><code>func suffix(_ maxLength: Int) -&gt; [Element]</code></li>
+<li><code>func sorted() -&gt; [Element]</code></li>
+<li><code>func sorted(by areInIncreasingOrder: (Element, Element) throws -&gt; Bool) rethrows -&gt; [Element]</code></li>
+<li><code>var startIndex: Int</code></li>
+<li><code>var count: Int</code></li>
+<li><code>func withContiguousStorageIfAvailable&lt;R&gt;(_ body: (Any) throws -&gt; R) rethrows -&gt; R?</code></li>
+<li><code>func forEach(_ body: (Element) throws -&gt; Void) rethrows</code></li>
+<li><code>func drop(while predicate: (Element) throws -&gt; Bool) rethrows -&gt; [Element]</code></li>
+<li><code>func dropFirst(_ k: Int = 1) -&gt; [Element]</code></li>
+<li><code>func dropLast(_ k: Int = 1) -&gt; [Element]</code></li>
+<li><code>func enumerated() -&gt; any Sequence&lt;(offset: Int, element: Element)&gt;</code></li>
+<li><code>func filter(_ isIncluded: (Element) throws -&gt; Bool) rethrows -&gt; [Element]</code></li>
+<li><code>func first(where predicate: (Element) throws -&gt; Bool) rethrows -&gt; Element?</code></li>
+<li><code>func map&lt;RE&gt;(_ transform: (Element) throws -&gt; RE) rethrows -&gt; [RE]</code></li>
+<li><code>func max(by areInIncreasingOrder: (Element, Element) throws -&gt; Bool) rethrows -&gt; Element?</code></li>
+<li><code>func min(by areInIncreasingOrder: (Element, Element) throws -&gt; Bool) rethrows -&gt; Element?</code></li>
+<li><code>func reduce&lt;R&gt;(_ initialResult: R, _ nextPartialResult: (_ partialResult: R, Element) throws -&gt; R) rethrows -&gt; R</code></li>
+<li><code>func reduce&lt;R&gt;(into initialResult: R, _ updateAccumulatingResult: (_ partialResult: inout R, Element) throws -&gt; Void) rethrows -&gt; R</code></li>
+<li><code>func reversed() -&gt; [Element]</code></li>
+<li><code>func shuffled() -&gt; [Element]</code></li>
+<li><code>func shuffled&lt;T: RandomNumberGenerator&gt;(using generator: inout T) -&gt; [Element]</code></li>
+<li><code>func flatMap&lt;RE&gt;(_ transform: (Element) throws -&gt; any Sequence&lt;RE&gt;) rethrows -&gt; [RE]</code></li>
+<li><code>func compactMap&lt;RE&gt;(_ transform: (Element) throws -&gt; RE?) rethrows -&gt; [RE]</code></li>
+<li><code>func sorted(by areInIncreasingOrder: (Element, Element) throws -&gt; Bool) rethrows -&gt; [Element]</code></li>
+<li><code>func joined&lt;RE&gt;() -&gt; [RE] where Element: Sequence&lt;RE&gt;</code></li>
+<li><code>func joined&lt;RE&gt;(separator: any Sequence&lt;RE&gt;) -&gt; [RE] where Element: Sequence&lt;RE&gt;</code></li>
+<li><code>func joined(separator: String) -&gt; String</code></li>
+<li><code>func starts(with possiblePrefix: Any) -&gt; Bool</code></li>
+<li><code>func contains(_ element: Element) -&gt; Bool</code></li>
+<li><code>func min() -&gt; Element?</code></li>
+<li><code>func max() -&gt; Element?</code></li>
+<li><code>func sorted() -&gt; [Element]</code></li>
+<li><code>var startIndex: Int</code></li>
+<li><code>var endIndex: Int</code></li>
+<li><code>var indices: any Sequence&lt;Int&gt;</code></li>
+<li><code>func index(_ i: Int, offsetBy distance: Int) -&gt; Int</code></li>
+<li><code>func distance(from start: Int, to end: Int) -&gt; Int</code></li>
+<li><code>func index(after i: Int) -&gt; Int</code></li>
+<li><code>func formIndex(after i: inout Int)</code></li>
+<li><code>func formIndex(_ i: inout Int, offsetBy distance: Int)</code></li>
+<li><code>func randomElement() -&gt; Element?</code></li>
+<li><code>func randomElement(using generator: inout any RandomNumberGenerator) -&gt; Element?</code></li>
+<li><code>mutating func popFirst() -&gt; Element?</code></li>
+<li><code>var first: Element?</code></li>
+<li><code>func prefix(upTo end: Int) -&gt; [Element]</code></li>
+<li><code>func suffix(from start: Int) -&gt; [Element]</code></li>
+<li><code>func prefix(through end: Int) -&gt; [Element]</code></li>
+<li><code>mutating func removeFirst() -&gt; Element</code></li>
+<li><code>mutating func removeFirst(_ k: Int)</code></li>
+<li><code>func firstIndex(of element: Element) -&gt; Int?</code></li>
+<li><code>func firstIndex(where predicate: (Element) throws -&gt; Bool) rethrows -&gt; Int?</code></li>
+<li><code>mutating func shuffle()</code></li>
+<li><code>mutating func shuffle&lt;T: RandomNumberGenerator&gt;(using generator: inout T)</code></li>
+<li><code>mutating func sort()</code></li>
+<li><code>mutating func sort(by areIncreasingOrder: (Element, Element) throws -&gt; Bool) rethrows</code></li>
+<li><code>mutating func reverse()</code></li>
+<li><code>mutating func swapAt(_ i: Int, _ j: Int)</code></li>
+<li><code>mutating func append(_ newElement: Element)</code></li>
+<li><code>mutating func append(contentsOf newElements: any Sequence&lt;Element&gt;)</code></li>
+<li><code>mutating func insert(_ newElement: Element, at i: Int)</code></li>
+<li><code>mutating func insert(contentsOf newElements: any Sequence&lt;Element&gt;, at i: Int)</code></li>
+<li><code>mutating func remove(at i: Int) -&gt; Element</code></li>
+<li><code>mutating func removeAll(keepingCapacity keepCapacity: Bool = false)</code></li>
+<li><code>mutating func removeAll(where shouldBeRemoved: (Element) throws -&gt; Bool) rethrows</code></li>
+<li><code>mutating func popLast() -&gt; Element?</code></li>
+<li><code>mutating func removeLast() -&gt; Element</code></li>
+<li><code>mutating func removeLast(_ k: Int)</code></li>
+<li><code>subscript(bounds: Range&lt;Int&gt;) -&gt; any Collection&lt;Element&gt;</code></li>
+<li><code>subscript(position: Int) -&gt; Element</code></li>
+</ul>
+        </details> 
+      </td>
+    </tr>
+    <tr>
+      <td>✅</td>
+      <td><code>CustomDebugStringConvertible</code></td>
+    </tr>
+    <tr>
+      <td>✅</td>
+      <td><code>CustomStringConvertible</code></td>
+    </tr>
+    <tr>
+      <td>🟢</td>
+      <td>
+        <details>
+          <summary><code>Decodable</code></summary>
+          <ul>
+            <li>See [Codable](#codable)</li>
+          </ul>
+        </details> 
+      </td>
+    </tr>
+    <tr>
+      <td>🟢</td>
+      <td>
+        <details>
+          <summary><code>Dictionary</code></summary>
+          <ul>
+            <li><code>init()</code></li>
+            <li><code>init(minimumCapacity: Int)</code></li>
+            <li><code>init(uniqueKeysWithValues keysAndValues: any Sequence<(Key, Value)>)</code></li>
+            <li><code>func filter(_ isIncluded: ((Key, Value)) throws -> Bool) rethrows -> Dictionary<Key, Value></code></li>
+            <li><code>subscript(key: Key) -> Value?</code></li>
+            <li><code>subscript(key: Key, default defaultValue: Value) -> Value</code></li>
+            <li><code>func mapValues<T>(_ transform: (Value) throws -> T) rethrows -> Dictionary<Key, T></code></li>
+            <li><code>func compactMapValues<T>(_ transform: (Value) throws -> T?) rethrows -> Dictionary<Key, T></code></li>
+            <li><code>mutating func updateValue(_ value: Value, forKey key: Key) -> Value?</code></li>
+            <li><code>mutating func removeValue(forKey key: Key) -> Value?</code></li>
+            <li><code>var keys: any Collection<Key>)</code></li>
+            <li><code>var values: any Collection<Value></code></li>
+            <li><code>mutating func removeAll(keepingCapacity keepCapacity: Bool = false) </code></li>
+            <li>See <code>Collection</code> for collection API support</li>
+          </ul>
+        </details> 
+      </td>
+    </tr>
+    <tr>
+      <td>🟢</td>
+      <td>
+        <details>
+          <summary><code>Double</code></summary>
+          <ul>
+            <li><code>static var nan: Double </code></li>
+            <li><code>static var infinity: Double </code></li>
+            <li><code>static var pi: Double </code></li>
+            <li><code>var isNan: Bool</code></li>
+            <li><code>var isFinite: Bool </code></li>
+            <li><code>var isInfinite: Bool </code></li>
+            <li><code>static func random(in range: Range<Double>) -> Double</code></li>
+            <li><code>func rounded() -> Double </code></li>
+            <li><code>func rounded(_ rule: FloatingPointRoundingRule) -> Double</code></li>
+          </ul>
+        </details> 
+      </td>
+    </tr>
+    <tr>
+      <td>🟢</td>
+      <td>
+        <details>
+          <summary><code>Encodable</code></summary>
+          <ul>
+            <li>See [Codable](#codable)</li>
+          </ul>
+        </details> 
+      </td>
+    </tr>
+    <tr>
+      <td>✅</td>
+      <td><code>Equatable</code></td>
+    </tr>
+    <tr>
+      <td>✅</td>
+      <td><code>Error</code></td>
+    </tr>
+    <tr>
+      <td>✅</td>
+      <td><code>fatalError</code></td>
+    </tr>
+    <tr>
+      <td>🟢</td>
+      <td>
+        <details>
+          <summary><code>Float</code></summary>
+          <ul>
+            <li><code>static var nan: Float</code></li>
+            <li><code>static var infinity: Float</code></li>
+            <li><code>static var pi: Float</code></li>
+            <li><code>var isNan: Bool</code></li>
+            <li><code>var isFinite: Bool </code></li>
+            <li><code>var isInfinite: Bool </code></li>
+            <li><code>static func random(in range: Range<Float>) -> Float</code></li>
+            <li><code>func rounded() -> Float</code></li>
+            <li><code>func rounded(_ rule: FloatingPointRoundingRule) -> Float</code></li>
+          </ul>
+        </details> 
+      </td>
+    </tr>
+   <tr>
+      <td>✅</td>
+      <td><code>Hashable</code></td>
+    </tr>
+   <tr>
+      <td>✅</td>
+      <td><code>Hasher</code></td>
+    </tr>
+   <tr>
+      <td>✅</td>
+      <td><code>Identifiable</code></td>
+    </tr>
+    <tr>
+      <td>🟢</td>
+      <td>
+        <details>
+          <summary><code>Int8</code></summary>
+          <ul>
+            <li><code>static var min: Int8</code></li>
+            <li><code>static var max: Int8</code></li>
+            <li><code>static func random(in range: Range<Int8>) -> Int8</code></li>
+            <li><code>static func random(in range: Range<Int8>, using gen: inout RandomNumberGenerator) -> Int8</code></li>
+          </ul>
+        </details> 
+      </td>
+    </tr>
+    <tr>
+      <td>🟢</td>
+      <td>
+        <details>
+          <summary><code>Int16</code></summary>
+          <ul>
+            <li><code>static var min: Int16 </code></li>
+            <li><code>static var max: Int16 </code></li>
+            <li><code>static func random(in range: Range<Int16>) -> Int16 </code></li>
+            <li><code>static func random(in range: Range<Int16>, using gen: inout RandomNumberGenerator) -> Int16</code></li>
+          </ul>
+        </details> 
+      </td>
+    </tr>
+    <tr>
+      <td>🟢</td>
+      <td>
+        <details>
+          <summary><code>Int32</code></summary>
+          <ul>
+            <li><code>static var min: Int32 </code></li>
+            <li><code>static var max: Int32 </code></li>
+            <li><code>static func random(in range: Range<Int32>) -> Int32 </code></li>
+            <li><code>static func random(in range: Range<Int32>, using gen: inout RandomNumberGenerator) -> Int32</code></li>
+          </ul>
+        </details> 
+      </td>
+    </tr>
+    <tr>
+      <td>🟢</td>
+      <td>
+        <details>
+          <summary><code>Int</code></summary>
+          <ul>
+            <li>Kotlin <code>Ints</code> are 32 bit</li>
+            <li><code>static var min: Int </code></li>
+            <li><code>static var max: Int </code></li>
+            <li><code>static func random(in range: Range<Int>) -> Int </code></li>
+            <li><code>static func random(in range: Range<Int>, using gen: inout RandomNumberGenerator) -> Int </code></li>
+          </ul>
+        </details> 
+      </td>
+    </tr>
+    <tr>
+      <td>🟢</td>
+      <td>
+        <details>
+          <summary><code>Int64</code></summary>
+          <ul>
+            <li><code>static var min: Int64 </code></li>
+            <li><code>static var max: Int64 </code></li>
+            <li><code>static func random(in range: Range<Int64>) -> Int64 </code></li>
+            <li><code>static func random(in range: Range<Int64>, using gen: inout RandomNumberGenerator) -> Int64 </code></li>
+          </ul>
+        </details> 
+      </td>
+    </tr>
+    <tr>
+      <td>🟢</td>
+      <td><code>@MainActor</code></td>
+    </tr>
+    <tr>
+      <td>🟢</td>
+      <td>
+        <details>
+          <summary><code>MainActor</code></summary>
+          <ul>
+            <li><code>static func run<T>(body: () throws -> T) async -> T</code></li>
+          </ul>
+        </details> 
+      </td>
+    </tr>
+    <tr>
+      <td>🟢</td>
+      <td>
+       <details>
+          <summary><code>math.h</code></summary>
+<ul>
+<li><code>var M_E: Double</code></li>
+<li><code>var M_LOG2E: Double</code></li>
+<li><code>var M_LOG10E: Double</code></li>
+<li><code>var M_LN2: Double</code></li>
+<li><code>var M_LN10: Double</code></li>
+<li><code>var M_PI: Double</code></li>
+<li><code>func acosf(_ x: Float) -> Float</code></li>
+<li><code>func acos(_ x: Double) -> Double</code></li>
+<li><code>func acosl(_ x: Double) -> Double</code></li>
+<li><code>func asinf(_ x: Float) -> Float</code></li>
+<li><code>func asin(_ x: Double) -> Double</code></li>
+<li><code>func asinl(_ x: Double) -> Double</code></li>
+<li><code>func atanf(_ x: Float) -> Float</code></li>
+<li><code>func atan(_ x: Double) -> Double</code></li>
+<li><code>func atanl(_ x: Double) -> Double</code></li>
+<li><code>func atan2f(_ x: Float, _ y: Float) -> Float</code></li>
+<li><code>func atan2(_ x: Double, _ y: Double) -> Double</code></li>
+<li><code>func atan2l(_ x: Double, _ y: Double) -> Double</code></li>
+<li><code>func cosf(_ x: Float) -> Float</code></li>
+<li><code>func cos(_ x: Double) -> Double</code></li>
+<li><code>func cosl(_ x: Double) -> Double</code></li>
+<li><code>func sinf(_ x: Float) -> Float</code></li>
+<li><code>func sin(_ x: Double) -> Double</code></li>
+<li><code>func sinl(_ x: Double) -> Double</code></li>
+<li><code>func tanf(_ x: Float) -> Float</code></li>
+<li><code>func tan(_ x: Double) -> Double</code></li>
+<li><code>func tanl(_ x: Double) -> Double</code></li>
+<li><code>func acoshf(_ x: Float) -> Float</code></li>
+<li><code>func acosh(_ x: Double) -> Double</code></li>
+<li><code>func acoshl(_ x: Double) -> Double</code></li>
+<li><code>func asinhf(_ x: Float) -> Float</code></li>
+<li><code>func asinh(_ x: Double) -> Double</code></li>
+<li><code>func asinhl(_ x: Double) -> Double</code></li>
+<li><code>func atanhf(_ x: Float) -> Float</code></li>
+<li><code>func atanh(_ x: Double) -> Double</code></li>
+<li><code>func atanhl(_ x: Double) -> Double</code></li>
+<li><code>func coshf(_ x: Float) -> Float</code></li>
+<li><code>func cosh(_ x: Double) -> Double</code></li>
+<li><code>func coshl(_ x: Double) -> Double</code></li>
+<li><code>func sinhf(_ x: Float) -> Float</code></li>
+<li><code>func sinh(_ x: Double) -> Double</code></li>
+<li><code>func sinhl(_ x: Double) -> Double</code></li>
+<li><code>func tanhf(_ x: Float) -> Float</code></li>
+<li><code>func tanh(_ x: Double) -> Double</code></li>
+<li><code>func tanhl(_ x: Double) -> Double</code></li>
+<li><code>func expf(_ x: Float) -> Float</code></li>
+<li><code>func exp(_ x: Double) -> Double</code></li>
+<li><code>func expl(_ x: Double) -> Double</code></li>
+<li><code>func exp2f(_ x: Float) -> Float</code></li>
+<li><code>func exp2(_ x: Double) -> Double</code></li>
+<li><code>func exp2l(_ x: Double) -> Double</code></li>
+<li><code>func expm1f(_ x: Float) -> Float</code></li>
+<li><code>func expm1(_ x: Double) -> Double</code></li>
+<li><code>func expm1l(_ x: Double) -> Double</code></li>
+<li><code>func logf(_ x: Float) -> Float</code></li>
+<li><code>func log(_ x: Double) -> Double</code></li>
+<li><code>func logl(_ x: Double) -> Double</code></li>
+<li><code>func log10f(_ x: Float) -> Float</code></li>
+<li><code>func log10(_ x: Double) -> Double</code></li>
+<li><code>func log10l(_ x: Double) -> Double</code></li>
+<li><code>func log2f(_ x: Float) -> Float</code></li>
+<li><code>func log2(_ x: Double) -> Double</code></li>
+<li><code>func log2l(_ x: Double) -> Double</code></li>
+<li><code>func log1pf(_ x: Float) -> Float</code></li>
+<li><code>func log1p(_ x: Double) -> Double</code></li>
+<li><code>func log1pl(_ x: Double) -> Double</code></li>
+<li><code>func logbf(_ x: Float) -> Float</code></li>
+<li><code>func logb(_ x: Double) -> Double</code></li>
+<li><code>func logbl(_ x: Double) -> Double</code></li>
+<li><code>func abs(_ x: Double) -> Double</code></li>
+<li><code>func abs(_ x: Int) -> Int</code></li>
+<li><code>func abs(_ x: Int64) -> Int64</code></li>
+<li><code>func fabsf(_ x: Float) -> Float</code></li>
+<li><code>func fabs(_ x: Double) -> Double</code></li>
+<li><code>func fabsl(_ x: Double) -> Double</code></li>
+<li><code>func cbrtf(_ x: Float) -> Float</code></li>
+<li><code>func cbrt(_ x: Double) -> Double</code></li>
+<li><code>func cbrtl(_ x: Double) -> Double</code></li>
+<li><code>func hypotf(_ x: Float, _ y: Float) -> Float</code></li>
+<li><code>func hypot(_ x: Double, _ y: Double) -> Double</code></li>
+<li><code>func hypotl(_ x: Double, _ y: Double) -> Double</code></li>
+<li><code>func powf(_ x: Float, _ y: Float) -> Float</code></li>
+<li><code>func pow(_ x: Double, _ y: Double) -> Double</code></li>
+<li><code>func powl(_ x: Double, _ y: Double) -> Double</code></li>
+<li><code>func sqrtf(_ x: Float) -> Float</code></li>
+<li><code>func sqrt(_ x: Double) -> Double</code></li>
+<li><code>func sqrtl(_ x: Double) -> Double</code></li>
+<li><code>func ceilf(_ x: Float) -> Float</code></li>
+<li><code>func ceil(_ x: Double) -> Double</code></li>
+<li><code>func ceill(_ x: Double) -> Double</code></li>
+<li><code>func floorf(_ x: Float) -> Float</code></li>
+<li><code>func floor(_ x: Double) -> Double</code></li>
+<li><code>func floorl(_ x: Double) -> Double</code></li>
+<li><code>func roundf(_ x: Float) -> Float</code></li>
+<li><code>func round(_ x: Double) -> Double</code></li>
+<li><code>func roundl(_ x: Double) -> Double</code></li>
+<li><code>func fmodf(_ x: Float, _ y: Float) -> Float</code></li>
+<li><code>func fmod(_ x: Double, _ y: Double) -> Double</code></li>
+<li><code>func fmodl(_ x: Double, _ y: Double) -> Double</code></li>
+<li><code>func remainderf(_ x: Float, _ y: Float) -> Float</code></li>
+<li><code>func remainder(_ x: Double, _ y: Double) -> Double</code></li>
+<li><code>func remainderl(_ x: Double, _ y: Double) -> Double</code></li>
+<li><code>func fmaxf(_ x: Float, _ y: Float) -> Float</code></li>
+<li><code>func fmax(_ x: Double, _ y: Double) -> Double</code></li>
+<li><code>func fmaxl(_ x: Double, _ y: Double) -> Double</code></li>
+<li><code>func fminf(_ x: Float, _ y: Float) -> Float</code></li>
+<li><code>func fmin(_ x: Double, _ y: Double) -> Double</code></li>
+<li><code>func fminl(_ x: Double, _ y: Double) -> Double</code></li>
+</ul>
+        </details> 
+      </td>
+    </tr>
+    <tr>
+      <td>✅</td>
+      <td><code>max(_:_:)</code></td>
+    </tr>
+    <tr>
+      <td>✅</td>
+      <td><code>min(_:_:)</code></td>
+    </tr>
+    <tr>
+      <td>✅</td>
+      <td><code>ObjectIdentifier</code></td>
+    </tr>
+    <tr>
+      <td>✅</td>
+      <td><code>OptionSet</code></td>
+    </tr>
+    <tr>
+      <td>✅</td>
+      <td><code>precondition</code></td>
+    </tr>
+    <tr>
+      <td>✅</td>
+      <td><code>preconditionFailure</code></td>
+    </tr>
+    <tr>
+      <td>✅</td>
+      <td><code>RandomNumberGenerator</code></td>
+    </tr>
+    <tr>
+      <td>🔴</td>
+      <td>
+        <details>
+          <summary><code>Range</code></summary>
+          <ul>
+            <li>Only <code>Range&lt;Int&gt;</code> is generally supported</li>
+            <li><code>var lowerBound: Bound</code></li>
+            <li><code>var upperBound: Bound</code></li>
+            <li><code>func contains(_ element: Bound) -> Bool</code></li>
+            <li><code>var isEmpty: Bool</code></li>
+            <li><code>func map<RE>(_ transform: (Bound) throws -> RE) rethrows -> [RE]</code></li>
+          </ul>
+        </details> 
+      </td>
+    </tr>
+    <tr>
+      <td>✅</td>
+      <td><code>RawRepresentable</code></td>
+    </tr>
+    <tr>
+      <td>🔴</td>
+      <td>
+       <details>
+          <summary><code>Regex</code></summary>
+          <ul>
+            <li><code>init(_ string: String)</code></li>
+            <li><code>func matches(_ string: String) -> [Match]</code></li>
+            <li><code>func replace(_ string: String, with replacement: String) -> String</code></li>
+          </ul>
+        </details> 
+      </td>
+    </tr>
+    <tr>
+      <td>🔴</td>
+      <td>
+       <details>
+          <summary><code>Regex.Match</code></summary>
+          <ul>
+            <li><code>var count: Int</code></li>
+            <li><code>subscript(index: Int) -> MatchGroup</code></li>
+          </ul>
+        </details> 
+      </td>
+    </tr>
+    <tr>
+      <td>🔴</td>
+      <td>
+       <details>
+          <summary><code>Regex.MatchGroup</code></summary>
+          <ul>
+            <li><code>var substring: Substring?</code></li>
+          </ul>
+        </details> 
+      </td>
+    </tr>
+    <tr>
+      <td>✅</td>
+      <td><code>Result</code></td>
+    </tr>
+    <tr>
+      <td>🟡</td>
+      <td>
+       <details>
+          <summary><code>swap(_:_:)</code></summary>
+          <ul>
+            <li>Does not support swapping values in arrays and other data structures</li>
+          </ul>
+        </details> 
+      </td>
+    </tr>
+    <tr>
+      <td>🟢</td>
+      <td>
+       <details>
+          <summary><code>Set</code></summary>
+          <ul>
+            <li><code>init()</code></li>
+            <li><code>init(_ sequence: any Sequence<Element>)</code></li>
+            <li>See <code>Collection</code></li>
+            <li>See <code>SetAlgebra</code></li>
+          </ul>
+        </details> 
+      </td>
+    </tr>
+    <tr>
+      <td>🟢</td>
+      <td>
+       <details>
+          <summary><code>SetAlgebra</code></summary>
+          <ul>
+<li><code>func contains(_ element: Element) -&gt; Bool</code></li>
+<li><code>func union(_ other: Self) -&gt; Self</code></li>
+<li><code>func intersection(_ other: Self) -&gt; Self</code></li>
+<li><code>func symmetricDifference(_ other: Self) -&gt; Self</code></li>
+<li><code>mutating func insert(_ newMember: Element) -&gt; (inserted: Bool, memberAfterInsert: Element)</code></li>
+<li><code>mutating func remove(_ member: Element) -&gt; Element?</code></li>
+<li><code>mutating func update(with newMember: Element) -&gt; Element?</code></li>
+<li><code>mutating func formUnion(_ other: Self)</code></li>
+<li><code>mutating func formIntersection(_ other: Self)</code></li>
+<li><code>mutating func formSymmetricDifference(_ other: Self)</code></li>
+<li><code>func subtracting(_ other: Self) -&gt; Self</code></li>
+<li><code>func isSubset(of other: Self) -&gt; Bool</code></li>
+<li><code>func isDisjoint(with other: Self) -&gt; Bool</code></li>
+<li><code>func isSuperset(of other: Self) -&gt; Bool</code></li>
+<li><code>var isEmpty: Bool</code></li>
+<li><code>mutating func subtract(_ other: Self)</code></li>
+<li><code>func isStrictSubset(of other: Self) -&gt; Bool</code></li>
+<li><code>func isStrictSuperset(of other: Self) -&gt; Bool</code></li>
+          </ul>
+        </details> 
+      </td>
+    </tr>
+    <tr>
+      <td>🟢</td>
+      <td>
+       <details>
+          <summary><code>String</code></summary>
+          <ul>
+            <li>Kotlin strings are **not** mutable</li>
+            <li><code>init(data: Data, encoding: StringEncoding)</code></li>
+            <li><code>init(bytes: [UInt8], encoding: StringEncoding)</code></li>
+            <li><code>init(contentsOf: URL)</code></li>
+            <li><code>var capitalized: String</code></li>
+            <li><code>var deletingLastPathComponent: String</code></li>
+            <li><code>func replacingOccurrences(of search: String, with replacement: String) -> String</code></li>
+            <li><code>func components(separatedBy separator: String) -> [String]</code></li>
+            <li><code>func trimmingCharacters(in set: CharacterSet) -> String</code></li>
+            <li><code>var utf8Data: Data</code></li>
+            <li><code>func data(using: StringEncoding, allowLossyConversion: Bool = true) -> Data?</code></li>
+            <li><code>var utf8: [UInt8]</code></li>
+            <li><code>var utf16: [UInt8]</code></li>
+            <li><code>var unicodeScalars: [UInt8]</code></li>
+            <li>See <code>Collection</code></li>
+            <li>See <code>SkipFoundation</code> for additional string API from <code>Foundation</code></li>
+          </ul>
+        </details> 
+      </td>
+    </tr>
+    <tr>
+      <td>✅</td>
+      <td><code>strlen</code></td>
+    </tr>
+    <tr>
+      <td>✅</td>
+      <td><code>strncmp</code></td>
+    </tr>
+    <tr>
+      <td>🟢</td>
+      <td>
+       <details>
+          <summary><code>Substring</code></summary>
+          <ul>
+            <li>See <code>String</code></li>
+          </ul>
+        </details> 
+      </td>
+    </tr>
+    <tr>
+      <td>✅</td>
+      <td><code>SystemRandomNumberGenerator</code></td>
+    </tr>
+    <tr>
+      <td>🟡</td>
+      <td>
+        <details>
+          <summary><code>Task</code></summary>
+          <ul>
+            <li><code>init(priority: TaskPriority? = nil, operation: @escaping () async throws -> Success)</li></code>
+            <li><code>static func detached(priority: TaskPriority? = nil, operation: @escaping () async -> Success) -> Task<Success, Failure></li></code>
+            <li><code>var value: Success</code></li>
+            <li><code>func cancel()</code></li>
+            <li><code>static func yield() async</code></li>
+            <li><code>var isCancelled: Bool</code></li>
+            <li><code>static var isCancelled: Bool</code></li>
+            <li><code>static func checkCancellation() throws</code></li>
+            <li><code>static func sleep(nanoseconds duration: UInt64) async throws</code></li>
+            <li><code>static var min: UInt8 </code></li>
+          </ul>
+        </details> 
+      </td>
+    </tr>
+    <tr>
+      <td>✅</td>
+      <td><code>type(of:)</code></td>
+    </tr>
+    <tr>
+      <td>🟢</td>
+      <td>
+        <details>
+          <summary><code>UInt8</code></summary>
+          <ul>
+            <li><code>static var min: UInt8 </code></li>
+            <li><code>static var max: UInt8 </code></li>
+            <li><code>static func random(in range: Range<UInt8>) -> UInt8 </code></li>
+            <li><code>static func random(in range: Range<UInt8>, using gen: inout RandomNumberGenerator) -> UInt8 </code></li>
+          </ul>
+        </details> 
+      </td>
+    </tr>
+    <tr>
+      <td>🟢</td>
+      <td>
+        <details>
+          <summary><code>UInt16</code></summary>
+          <ul>
+            <li><code>static var min: UInt16 </code></li>
+            <li><code>static var max: UInt16 </code></li>
+            <li><code>static func random(in range: Range<UInt16>) -> UInt16 </code></li>
+            <li><code>static func random(in range: Range<UInt16>, using gen: inout RandomNumberGenerator) -> UInt16 </code></li>
+          </ul>
+        </details> 
+      </td>
+    </tr>
+    <tr>
+      <td>🟢</td>
+      <td>
+        <details>
+          <summary><code>UInt32</code></summary>
+          <ul>
+            <li><code>static var min: UInt32 </code></li>
+            <li><code>static var max: UInt32 </code></li>
+            <li><code>static func random(in range: Range<UInt32>) -> UInt32 </code></li>
+            <li><code>static func random(in range: Range<UInt32>, using gen: inout RandomNumberGenerator) -> UInt32 </code></li>
+          </ul>
+        </details> 
+      </td>
+    </tr>
+    <tr>
+      <td>🟢</td>
+      <td>
+        <details>
+          <summary><code>UInt</code></summary>
+          <ul>
+            <li>Kotlin <code>UInts</code> are 32 bit</li>
+            <li><code>static var min: UInt </code></li>
+            <li><code>static var max: UInt </code></li>
+            <li><code>static func random(in range: Range<UInt>) -> UInt </code></li>
+            <li><code>static func random(in range: Range<UInt>, using gen: inout RandomNumberGenerator) -> UInt </code></li>
+          </ul>
+        </details> 
+      </td>
+    </tr>
+    <tr>
+      <td>🟢</td>
+      <td>
+        <details>
+          <summary><code>UInt64</code></summary>
+          <ul>
+            <li><code>static var min: UInt64 </code></li>
+            <li><code>static var max: UInt64 </code></li>
+            <li><code>static func random(in range: Range<UInt64>) -> UInt64 </code></li>
+            <li><code>static func random(in range: Range<UInt64>, using gen: inout RandomNumberGenerator) -> UInt64 </code></li>
+          </ul>
+        </details> 
+      </td>
+    </tr>
+  </body>
+</table>
+
 ## Topics
 
 ### Collections
@@ -57,115 +916,35 @@ Corresponding Kotlin types - `List`, `Set`, `Map`, `String`, etc - do not share 
 
 See the explanatory comments in `Collections.kt` for more information on the design of SkipLib's internal collections support.
 
-## Tests
+### Codable
 
-The following table shows SkipLib's current test status. Test [contributions](#contributing) are welcome.
+Skip supports your custom `CodingKeys` as well as your custom `encode(to:)` and `init(from:)` functions for encoding and decoding. Skip is also able to synthesize default `Codable` conformance for the Android versions of your Swift types. The Android versions will encode and decode exactly like their Swift source types.
 
-| Test               | Case                      | Swift | Kotlin |
-| ------------------ | ------------------------- | ----- | ------ |
-| ArrayTests         | testAdd                   | PASS  | PASS   |
-| ArrayTests         | testAddDidSet             | PASS  | PASS   |
-| ArrayTests         | testAppend                | PASS  | PASS   |
-| ArrayTests         | testAppendDidSet          | PASS  | PASS   |
-| ArrayTests         | testArrayIndex            | PASS  | PASS   |
-| ArrayTests         | testArrayLiteralInit      | PASS  | PASS   |
-| ArrayTests         | testArrayReferences       | PASS  | PASS   |
-| ArrayTests         | testDeepNestedArrays      | PASS  | PASS   |
-| ArrayTests         | testInsert                | PASS  | PASS   |
-| ArrayTests         | testNestedSubscriptDidSet | PASS  | PASS   |
-| ArrayTests         | testOptionalElements      | PASS  | PASS   |
-| ArrayTests         | testSubscriptDidSet       | PASS  | PASS   |
-| CollectionsTests   | testCompactMap            | PASS  | PASS   |
-| CollectionsTests   | testDictionaryForEach     | PASS  | PASS   |
-| CollectionsTests   | testDoubleStride          | PASS  | PASS   |
-| CollectionsTests   | testEmptyStride           | PASS  | PASS   |
-| CollectionsTests   | testEnumerated            | PASS  | PASS   |
-| CollectionsTests   | testFilter                | PASS  | PASS   |
-| CollectionsTests   | testFilterMapReduce       | PASS  | PASS   |
-| CollectionsTests   | testFirstLast             | PASS  | PASS   |
-| CollectionsTests   | testFlatMap               | PASS  | PASS   |
-| CollectionsTests   | testIndices               | PASS  | PASS   |
-| CollectionsTests   | testJoin                  | PASS  | PASS   |
-| CollectionsTests   | testLazyFilterMap         | PASS  | SKIP   |
-| CollectionsTests   | testMap                   | PASS  | PASS   |
-| CollectionsTests   | testReadSlice             | PASS  | PASS   |
-| CollectionsTests   | testReduce                | PASS  | PASS   |
-| CollectionsTests   | testRemoveFirst           | PASS  | PASS   |
-| CollectionsTests   | testSort                  | PASS  | PASS   |
-| CollectionsTests   | testStride                | PASS  | PASS   |
-| CollectionsTests   | testStrideThrough         | PASS  | PASS   |
-| CollectionsTests   | testWriteSlice            | PASS  | PASS   |
-| CollectionsTests   | testZipCompactMap         | PASS  | SKIP   |
-| ConcurrencyTests   | testAsyncLet              | PASS  | PASS   |
-| ConcurrencyTests   | testAsyncSequence         | PASS  | PASS   |
-| ConcurrencyTests   | testMainActor             | PASS  | PASS   |
-| ConcurrencyTests   | testSimpleValue           | PASS  | PASS   |
-| ConcurrencyTests   | testTaskCancelWithExcepti | PASS  | PASS   |
-| ConcurrencyTests   | testTaskCancelWithoutExce | PASS  | PASS   |
-| ConcurrencyTests   | testTaskIsCancelled       | PASS  | PASS   |
-| ConcurrencyTests   | testThrowsException       | PASS  | PASS   |
-| DictionaryTests    | testDictionaryLiteralInit | PASS  | PASS   |
-| DictionaryTests    | testDictionaryReferences  | PASS  | PASS   |
-| DictionaryTests    | testIterate               | PASS  | PASS   |
-| DictionaryTests    | testKeysValues            | PASS  | PASS   |
-| DictionaryTests    | testNestedSubscriptDidSet | PASS  | PASS   |
-| DictionaryTests    | testPopFirst              | PASS  | PASS   |
-| DictionaryTests    | testSubscriptDefaultValue | PASS  | PASS   |
-| DictionaryTests    | testSubscriptDidSet       | PASS  | PASS   |
-| GlobalsTests       | testFatalError            | PASS  | PASS   |
-| GlobalsTests       | testSwap                  | PASS  | PASS   |
-| KotlinInteropTests | testCustomKotlinConversio | PASS  | PASS   |
-| MathTests          | testCeil                  | PASS  | PASS   |
-| MathTests          | testEulersNumbers         | PASS  | PASS   |
-| MathTests          | testFloor                 | PASS  | PASS   |
-| MathTests          | testHypot                 | PASS  | PASS   |
-| MathTests          | testInfinity              | PASS  | PASS   |
-| MathTests          | testMath                  | PASS  | PASS   |
-| MathTests          | testNaN                   | PASS  | PASS   |
-| MathTests          | testPow                   | PASS  | PASS   |
-| MathTests          | testRound                 | PASS  | PASS   |
-| MathTests          | testSpecialNumbers        | PASS  | PASS   |
-| MathTests          | testSqrt                  | PASS  | PASS   |
-| NumberTests        | testEquatable             | PASS  | PASS   |
-| NumberTests        | testFixedWidthIntegers    | PASS  | PASS   |
-| NumberTests        | testFloatingPoint         | PASS  | PASS   |
-| NumberTests        | testHashable              | PASS  | PASS   |
-| NumberTests        | testIntegers              | PASS  | PASS   |
-| NumberTests        | testMinMax                | PASS  | PASS   |
-| NumberTests        | testNumberConversions     | PASS  | PASS   |
-| NumberTests        | testNumberInitializers    | PASS  | PASS   |
-| NumberTests        | testNumberMinMax          | PASS  | PASS   |
-| NumberTests        | testUnsignedIntegers      | PASS  | PASS   |
-| OptionSetTests     | testContains              | PASS  | PASS   |
-| OptionSetTests     | testInsert                | PASS  | PASS   |
-| OptionalTests      | testOptionalMap           | PASS  | PASS   |
-| ResultTests        | testFailure               | PASS  | PASS   |
-| ResultTests        | testSuccess               | PASS  | PASS   |
-| SetTests           | testCustomHashable        | PASS  | PASS   |
-| SetTests           | testInit                  | PASS  | PASS   |
-| SetTests           | testInsert                | PASS  | PASS   |
-| SetTests           | testIntersection          | PASS  | PASS   |
-| SetTests           | testIsDisjoint            | PASS  | PASS   |
-| SetTests           | testPopFirst              | PASS  | PASS   |
-| SetTests           | testRemove                | PASS  | PASS   |
-| SetTests           | testSubsetSuperset        | PASS  | PASS   |
-| SetTests           | testSymmetricDifference   | PASS  | PASS   |
-| SetTests           | testUnion                 | PASS  | PASS   |
-| SkipLibTests       | testFatalError            | PASS  | PASS   |
-| SkipLibTests       | testSkipLib               | PASS  | PASS   |
-| SkipLibTests       | testUnitTests             | PASS  | PASS   |
-| StringTests        | testCharacterFunctions    | PASS  | PASS   |
-| StringTests        | testCreation              | PASS  | PASS   |
-| StringTests        | testFirstDropFirst        | PASS  | PASS   |
-| StringTests        | testManipulation          | PASS  | PASS   |
-| StringTests        | testMultibyteCharacterFun | PASS  | PASS   |
-| StringTests        | testMultlineStrings       | PASS  | PASS   |
-| StringTests        | testSlice                 | PASS  | PASS   |
-| StringTests        | testSplitJoin             | PASS  | PASS   |
-| StringTests        | testStringSearching       | PASS  | PASS   |
-| StringTests        | testUnicodeStrings        | PASS  | SKIP   |
-| StructTests        | testNestedStructDidSet    | PASS  | PASS   |
-| StructTests        | testStructMutate          | PASS  | PASS   |
-| StructTests        | testStructMutateDidSet    | PASS  | PASS   |
-| StructTests        | testStructReferences      | PASS  | PASS   |
-|                    |                           | 100%  | 97%    |
+There are, however, a few restrictions:
+
+- Skip cannot synthesize `Codable` conformance for enums that are not `RawRepresentable`. You must implement the required protocol functions yourself.
+- `Array`, `Set`, and `Dictionary` are fully supported, but nesting of these types is limited. So for example Skip can encode and decode `Array<MyCodableType>` and `Dictionary<String, MyCodableType>`, but not `Array<Dictionary<String, MyCodableType>>`. Two forms of container nesting **are** currently supported: arrays-of-arrays - e.g. `Array<Array<MyCodableType>>` - and dictionaries-of-array-values - e.g. `Dictionary<String, Array<MyCodableType>>`. In practice, other nesting patters are rare.
+- When implementing your own `init(from: Decoder)` decoding, your `decode` calls must supply a concrete type literal to decode. The following will work:
+
+    ```swift
+    init(from decoder: Decoder) throws {
+        var container = try decoder.container(keyedBy: CodingKeys.self)
+        self.array = try container.decode([Int].self, forKey: .array) 
+    }
+    ```
+
+    But these examples will not work:
+
+    ```swift
+    init(from decoder: Decoder) throws {
+        var container = try decoder.container(keyedBy: CodingKeys.self)
+        let arrayType = [Int].self
+        self.array = try container.decode(arrayType, forKey: .array) 
+    }
+
+    init(from decoder: Decoder) throws {
+        var container = try decoder.container(keyedBy: CodingKeys.self)
+        // T is a generic type of this class
+        self.array = try container.decode([T].self, forKey: .array) 
+    }
+    ```
