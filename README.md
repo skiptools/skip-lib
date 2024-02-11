@@ -89,6 +89,10 @@ Support levels:
       <td><code>AnyHashable</code></td>
     </tr>
     <tr>
+      <td>✅</td>
+      <td><code>AnyObject</code></td>
+    </tr>
+    <tr>
       <td>🟢</td>
       <td>
         <details>
@@ -299,6 +303,10 @@ Support levels:
 </ul>
         </details> 
       </td>
+    </tr>
+    <tr>
+      <td>✅</td>
+      <td><code>Comparable</code></td>
     </tr>
     <tr>
       <td>✅</td>
