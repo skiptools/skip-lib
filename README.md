@@ -92,10 +92,10 @@ Support levels:
         <details>
           <summary><code>Array</code></summary>
           <ul>
-            <li><code>init()</code></li>
-            <li><code>init(repeating: Element, count: Int)</code></li>
-            <li><code>init(_ sequence: any Sequence<Element>)</code></li>
-            <li>See <code>Collection</code> for collection API support</li>
+<li><code>init()</code></li>
+<li><code>init(repeating: Element, count: Int)</code></li>
+<li><code>init(_ sequence: any Sequence&lt;Element&gt;)</code></li>
+<li>See <code>Collection</code> for collection API support</li>
           </ul>
         </details> 
       </td>
@@ -114,8 +114,8 @@ Support levels:
         <details>
           <summary><code>Bool</code></summary>
           <ul>
-            <li><code>static func random() -> Bool</code></li>
-            <li><code>static func random(using gen: inout RandomNumberGenerator) -> Bool</code></li>
+<li><code>static func random() -> Bool</code></li>
+<li><code>static func random(using gen: inout RandomNumberGenerator) -> Bool</code></li>
           </ul>
         </details> 
       </td>
@@ -150,7 +150,7 @@ Support levels:
         <details>
           <summary><code>Codable</code></summary>
           <ul>
-            <li>See [Codable](#codable)</li>
+            <li>See <a href="#codable">Codable</a></li>
           </ul>
         </details> 
       </td>
@@ -312,7 +312,7 @@ Support levels:
         <details>
           <summary><code>Decodable</code></summary>
           <ul>
-            <li>See [Codable](#codable)</li>
+            <li>See <a href="#codable">Codable</a></li>
           </ul>
         </details> 
       </td>
@@ -323,20 +323,20 @@ Support levels:
         <details>
           <summary><code>Dictionary</code></summary>
           <ul>
-            <li><code>init()</code></li>
-            <li><code>init(minimumCapacity: Int)</code></li>
-            <li><code>init(uniqueKeysWithValues keysAndValues: any Sequence<(Key, Value)>)</code></li>
-            <li><code>func filter(_ isIncluded: ((Key, Value)) throws -> Bool) rethrows -> Dictionary<Key, Value></code></li>
-            <li><code>subscript(key: Key) -> Value?</code></li>
-            <li><code>subscript(key: Key, default defaultValue: Value) -> Value</code></li>
-            <li><code>func mapValues<T>(_ transform: (Value) throws -> T) rethrows -> Dictionary<Key, T></code></li>
-            <li><code>func compactMapValues<T>(_ transform: (Value) throws -> T?) rethrows -> Dictionary<Key, T></code></li>
-            <li><code>mutating func updateValue(_ value: Value, forKey key: Key) -> Value?</code></li>
-            <li><code>mutating func removeValue(forKey key: Key) -> Value?</code></li>
-            <li><code>var keys: any Collection<Key>)</code></li>
-            <li><code>var values: any Collection<Value></code></li>
-            <li><code>mutating func removeAll(keepingCapacity keepCapacity: Bool = false) </code></li>
-            <li>See <code>Collection</code> for collection API support</li>
+<li><code>init()</code></li>
+<li><code>init(minimumCapacity: Int)</code></li>
+<li><code>init(uniqueKeysWithValues keysAndValues: any Sequence&lt;(Key, Value)&gt;)</code></li>
+<li><code>func filter(_ isIncluded: ((Key, Value)) throws -&gt; Bool) rethrows -&gt; Dictionary&lt;Key, Value&gt;</code></li>
+<li><code>subscript(key: Key) -&gt; Value?</code></li>
+<li><code>subscript(key: Key, default defaultValue: Value) -&gt; Value</code></li>
+<li><code>func mapValues&lt;T&gt;(_ transform: (Value) throws -&gt; T) rethrows -&gt; Dictionary&lt;Key, T&gt;</code></li>
+<li><code>func compactMapValues&lt;T&gt;(_ transform: (Value) throws -&gt; T?) rethrows -&gt; Dictionary&lt;Key, T&gt;</code></li>
+<li><code>mutating func updateValue(_ value: Value, forKey key: Key) -&gt; Value?</code></li>
+<li><code>mutating func removeValue(forKey key: Key) -&gt; Value?</code></li>
+<li><code>var keys: any Collection&lt;Key&gt;)</code></li>
+<li><code>var values: any Collection&lt;Value&gt;</code></li>
+<li><code>mutating func removeAll(keepingCapacity keepCapacity: Bool = false) </code></li>
+<li>See <code>Collection</code> for collection API support</li>
           </ul>
         </details> 
       </td>
@@ -347,15 +347,15 @@ Support levels:
         <details>
           <summary><code>Double</code></summary>
           <ul>
-            <li><code>static var nan: Double </code></li>
-            <li><code>static var infinity: Double </code></li>
-            <li><code>static var pi: Double </code></li>
-            <li><code>var isNan: Bool</code></li>
-            <li><code>var isFinite: Bool </code></li>
-            <li><code>var isInfinite: Bool </code></li>
-            <li><code>static func random(in range: Range<Double>) -> Double</code></li>
-            <li><code>func rounded() -> Double </code></li>
-            <li><code>func rounded(_ rule: FloatingPointRoundingRule) -> Double</code></li>
+<li><code>static var nan: Double </code></li>
+<li><code>static var infinity: Double </code></li>
+<li><code>static var pi: Double </code></li>
+<li><code>var isNan: Bool</code></li>
+<li><code>var isFinite: Bool </code></li>
+<li><code>var isInfinite: Bool </code></li>
+<li><code>static func random(in range: Range&lt;Double&gt;) -> Double</code></li>
+<li><code>func rounded() -> Double </code></li>
+<li><code>func rounded(_ rule: FloatingPointRoundingRule) -> Double</code></li>
           </ul>
         </details> 
       </td>
@@ -389,15 +389,15 @@ Support levels:
         <details>
           <summary><code>Float</code></summary>
           <ul>
-            <li><code>static var nan: Float</code></li>
-            <li><code>static var infinity: Float</code></li>
-            <li><code>static var pi: Float</code></li>
-            <li><code>var isNan: Bool</code></li>
-            <li><code>var isFinite: Bool </code></li>
-            <li><code>var isInfinite: Bool </code></li>
-            <li><code>static func random(in range: Range<Float>) -> Float</code></li>
-            <li><code>func rounded() -> Float</code></li>
-            <li><code>func rounded(_ rule: FloatingPointRoundingRule) -> Float</code></li>
+<li><code>static var nan: Float</code></li>
+<li><code>static var infinity: Float</code></li>
+<li><code>static var pi: Float</code></li>
+<li><code>var isNan: Bool</code></li>
+<li><code>var isFinite: Bool </code></li>
+<li><code>var isInfinite: Bool </code></li>
+<li><code>static func random(in range: Range<Float>) -> Float</code></li>
+<li><code>func rounded() -> Float</code></li>
+<li><code>func rounded(_ rule: FloatingPointRoundingRule) -> Float</code></li>
           </ul>
         </details> 
       </td>
@@ -420,10 +420,10 @@ Support levels:
         <details>
           <summary><code>Int8</code></summary>
           <ul>
-            <li><code>static var min: Int8</code></li>
-            <li><code>static var max: Int8</code></li>
-            <li><code>static func random(in range: Range<Int8>) -> Int8</code></li>
-            <li><code>static func random(in range: Range<Int8>, using gen: inout RandomNumberGenerator) -> Int8</code></li>
+<li><code>static var min: Int8</code></li>
+<li><code>static var max: Int8</code></li>
+<li><code>static func random(in range: Range&lt;Int8&gt;) -> Int8</code></li>
+<li><code>static func random(in range: Range&lt;Int8&gt;, using gen: inout RandomNumberGenerator) -> Int8</code></li>
           </ul>
         </details> 
       </td>
@@ -434,10 +434,10 @@ Support levels:
         <details>
           <summary><code>Int16</code></summary>
           <ul>
-            <li><code>static var min: Int16 </code></li>
-            <li><code>static var max: Int16 </code></li>
-            <li><code>static func random(in range: Range<Int16>) -> Int16 </code></li>
-            <li><code>static func random(in range: Range<Int16>, using gen: inout RandomNumberGenerator) -> Int16</code></li>
+<li><code>static var min: Int16 </code></li>
+<li><code>static var max: Int16 </code></li>
+<li><code>static func random(in range: Range&lt;Int16&gt;) -> Int16</code></li>
+<li><code>static func random(in range: Range&lt;Int16&gt;, using gen: inout RandomNumberGenerator) -> Int16</code></li>
           </ul>
         </details> 
       </td>
@@ -448,10 +448,10 @@ Support levels:
         <details>
           <summary><code>Int32</code></summary>
           <ul>
-            <li><code>static var min: Int32 </code></li>
-            <li><code>static var max: Int32 </code></li>
-            <li><code>static func random(in range: Range<Int32>) -> Int32 </code></li>
-            <li><code>static func random(in range: Range<Int32>, using gen: inout RandomNumberGenerator) -> Int32</code></li>
+<li><code>static var min: Int32 </code></li>
+<li><code>static var max: Int32 </code></li>
+<li><code>static func random(in range: Range&lt;Int32&gt;) -> Int32</code></li>
+<li><code>static func random(in range: Range&lt;Int32&gt;, using gen: inout RandomNumberGenerator) -> Int32</code></li>
           </ul>
         </details> 
       </td>
@@ -463,10 +463,10 @@ Support levels:
           <summary><code>Int</code></summary>
           <ul>
             <li>Kotlin <code>Ints</code> are 32 bit</li>
-            <li><code>static var min: Int </code></li>
-            <li><code>static var max: Int </code></li>
-            <li><code>static func random(in range: Range<Int>) -> Int </code></li>
-            <li><code>static func random(in range: Range<Int>, using gen: inout RandomNumberGenerator) -> Int </code></li>
+<li><code>static var min: Int </code></li>
+<li><code>static var max: Int </code></li>
+<li><code>static func random(in range: Range&lt;Int&gt;) -> Int</code></li>
+<li><code>static func random(in range: Range&lt;Int&gt;, using gen: inout RandomNumberGenerator) -> Int</code></li>
           </ul>
         </details> 
       </td>
@@ -477,10 +477,10 @@ Support levels:
         <details>
           <summary><code>Int64</code></summary>
           <ul>
-            <li><code>static var min: Int64 </code></li>
-            <li><code>static var max: Int64 </code></li>
-            <li><code>static func random(in range: Range<Int64>) -> Int64 </code></li>
-            <li><code>static func random(in range: Range<Int64>, using gen: inout RandomNumberGenerator) -> Int64 </code></li>
+<li><code>static var min: Int64 </code></li>
+<li><code>static var max: Int64 </code></li>
+<li><code>static func random(in range: Range&lt;Int64&gt;) -> Int64</code></li>
+<li><code>static func random(in range: Range&lt;Int64&gt;, using gen: inout RandomNumberGenerator) -> Int64</code></li>
           </ul>
         </details> 
       </td>
@@ -653,11 +653,11 @@ Support levels:
           <summary><code>Range</code></summary>
           <ul>
             <li>Only <code>Range&lt;Int&gt;</code> is generally supported</li>
-            <li><code>var lowerBound: Bound</code></li>
-            <li><code>var upperBound: Bound</code></li>
-            <li><code>func contains(_ element: Bound) -> Bool</code></li>
-            <li><code>var isEmpty: Bool</code></li>
-            <li><code>func map<RE>(_ transform: (Bound) throws -> RE) rethrows -> [RE]</code></li>
+<li><code>var lowerBound: Bound</code></li>
+<li><code>var upperBound: Bound</code></li>
+<li><code>func contains(_ element: Bound) -> Bool</code></li>
+<li><code>var isEmpty: Bool</code></li>
+<li><code>func map&lt;RE&gt;(_ transform: (Bound) throws -> RE) rethrows -> [RE]</code></li>
           </ul>
         </details> 
       </td>
@@ -723,8 +723,8 @@ Support levels:
        <details>
           <summary><code>Set</code></summary>
           <ul>
-            <li><code>init()</code></li>
-            <li><code>init(_ sequence: any Sequence<Element>)</code></li>
+<li><code>init()</code></li>
+<li><code>init(_ sequence: any Sequence<Element>)</code></li>
             <li>See <code>Collection</code></li>
             <li>See <code>SetAlgebra</code></li>
           </ul>
@@ -766,19 +766,19 @@ Support levels:
           <summary><code>String</code></summary>
           <ul>
             <li>Kotlin strings are **not** mutable</li>
-            <li><code>init(data: Data, encoding: StringEncoding)</code></li>
-            <li><code>init(bytes: [UInt8], encoding: StringEncoding)</code></li>
-            <li><code>init(contentsOf: URL)</code></li>
-            <li><code>var capitalized: String</code></li>
-            <li><code>var deletingLastPathComponent: String</code></li>
-            <li><code>func replacingOccurrences(of search: String, with replacement: String) -> String</code></li>
-            <li><code>func components(separatedBy separator: String) -> [String]</code></li>
-            <li><code>func trimmingCharacters(in set: CharacterSet) -> String</code></li>
-            <li><code>var utf8Data: Data</code></li>
-            <li><code>func data(using: StringEncoding, allowLossyConversion: Bool = true) -> Data?</code></li>
-            <li><code>var utf8: [UInt8]</code></li>
-            <li><code>var utf16: [UInt8]</code></li>
-            <li><code>var unicodeScalars: [UInt8]</code></li>
+<li><code>init(data: Data, encoding: StringEncoding)</code></li>
+<li><code>init(bytes: [UInt8], encoding: StringEncoding)</code></li>
+<li><code>init(contentsOf: URL)</code></li>
+<li><code>var capitalized: String</code></li>
+<li><code>var deletingLastPathComponent: String</code></li>
+<li><code>func replacingOccurrences(of search: String, with replacement: String) -> String</code></li>
+<li><code>func components(separatedBy separator: String) -> [String]</code></li>
+<li><code>func trimmingCharacters(in set: CharacterSet) -> String</code></li>
+<li><code>var utf8Data: Data</code></li>
+<li><code>func data(using: StringEncoding, allowLossyConversion: Bool = true) -> Data?</code></li>
+<li><code>var utf8: [UInt8]</code></li>
+<li><code>var utf16: [UInt8]</code></li>
+<li><code>var unicodeScalars: [UInt8]</code></li>
             <li>See <code>Collection</code></li>
             <li>See <code>SkipFoundation</code> for additional string API from <code>Foundation</code></li>
           </ul>
@@ -814,16 +814,16 @@ Support levels:
         <details>
           <summary><code>Task</code></summary>
           <ul>
-            <li><code>init(priority: TaskPriority? = nil, operation: @escaping () async throws -> Success)</li></code>
-            <li><code>static func detached(priority: TaskPriority? = nil, operation: @escaping () async -> Success) -> Task<Success, Failure></li></code>
-            <li><code>var value: Success</code></li>
-            <li><code>func cancel()</code></li>
-            <li><code>static func yield() async</code></li>
-            <li><code>var isCancelled: Bool</code></li>
-            <li><code>static var isCancelled: Bool</code></li>
-            <li><code>static func checkCancellation() throws</code></li>
-            <li><code>static func sleep(nanoseconds duration: UInt64) async throws</code></li>
-            <li><code>static var min: UInt8 </code></li>
+<li><code>init(priority: TaskPriority? = nil, operation: @escaping () async throws -> Success)</li></code>
+<li><code>static func detached(priority: TaskPriority? = nil, operation: @escaping () async -> Success) -> Task<Success, Failure></li></code>
+<li><code>var value: Success</code></li>
+<li><code>func cancel()</code></li>
+<li><code>static func yield() async</code></li>
+<li><code>var isCancelled: Bool</code></li>
+<li><code>static var isCancelled: Bool</code></li>
+<li><code>static func checkCancellation() throws</code></li>
+<li><code>static func sleep(nanoseconds duration: UInt64) async throws</code></li>
+<li><code>static var min: UInt8 </code></li>
           </ul>
         </details> 
       </td>
@@ -838,10 +838,10 @@ Support levels:
         <details>
           <summary><code>UInt8</code></summary>
           <ul>
-            <li><code>static var min: UInt8 </code></li>
-            <li><code>static var max: UInt8 </code></li>
-            <li><code>static func random(in range: Range<UInt8>) -> UInt8 </code></li>
-            <li><code>static func random(in range: Range<UInt8>, using gen: inout RandomNumberGenerator) -> UInt8 </code></li>
+<li><code>static var min: UInt8 </code></li>
+<li><code>static var max: UInt8 </code></li>
+<li><code>static func random(in range: Range&lt;UInt8&gt;) -> UInt8</code></li>
+<li><code>static func random(in range: Range&lt;UInt8&gt;, using gen: inout RandomNumberGenerator) -> UInt8</code></li>
           </ul>
         </details> 
       </td>
@@ -852,10 +852,10 @@ Support levels:
         <details>
           <summary><code>UInt16</code></summary>
           <ul>
-            <li><code>static var min: UInt16 </code></li>
-            <li><code>static var max: UInt16 </code></li>
-            <li><code>static func random(in range: Range<UInt16>) -> UInt16 </code></li>
-            <li><code>static func random(in range: Range<UInt16>, using gen: inout RandomNumberGenerator) -> UInt16 </code></li>
+<li><code>static var min: UInt16 </code></li>
+<li><code>static var max: UInt16 </code></li>
+<li><code>static func random(in range: Range&lt;UInt16&gt;) -> UInt16</code></li>
+<li><code>static func random(in range: Range&lt;UInt16&gt;, using gen: inout RandomNumberGenerator) -> UInt16</code></li>
           </ul>
         </details> 
       </td>
@@ -866,10 +866,10 @@ Support levels:
         <details>
           <summary><code>UInt32</code></summary>
           <ul>
-            <li><code>static var min: UInt32 </code></li>
-            <li><code>static var max: UInt32 </code></li>
-            <li><code>static func random(in range: Range<UInt32>) -> UInt32 </code></li>
-            <li><code>static func random(in range: Range<UInt32>, using gen: inout RandomNumberGenerator) -> UInt32 </code></li>
+<li><code>static var min: UInt32 </code></li>
+<li><code>static var max: UInt32 </code></li>
+<li><code>static func random(in range: Range&lt;UInt32&gt;) -> UInt32</code></li>
+<li><code>static func random(in range: Range&lt;UInt32&gt;, using gen: inout RandomNumberGenerator) -> UInt32</code></li>
           </ul>
         </details> 
       </td>
@@ -881,10 +881,10 @@ Support levels:
           <summary><code>UInt</code></summary>
           <ul>
             <li>Kotlin <code>UInts</code> are 32 bit</li>
-            <li><code>static var min: UInt </code></li>
-            <li><code>static var max: UInt </code></li>
-            <li><code>static func random(in range: Range<UInt>) -> UInt </code></li>
-            <li><code>static func random(in range: Range<UInt>, using gen: inout RandomNumberGenerator) -> UInt </code></li>
+<li><code>static var min: UInt </code></li>
+<li><code>static var max: UInt </code></li>
+<li><code>static func random(in range: Range&lt;UInt&gt;) -> UInt</code></li>
+<li><code>static func random(in range: Range&lt;UInt&gt;, using gen: inout RandomNumberGenerator) -> UInt</code></li>
           </ul>
         </details> 
       </td>
@@ -895,10 +895,10 @@ Support levels:
         <details>
           <summary><code>UInt64</code></summary>
           <ul>
-            <li><code>static var min: UInt64 </code></li>
-            <li><code>static var max: UInt64 </code></li>
-            <li><code>static func random(in range: Range<UInt64>) -> UInt64 </code></li>
-            <li><code>static func random(in range: Range<UInt64>, using gen: inout RandomNumberGenerator) -> UInt64 </code></li>
+<li><code>static var min: UInt64 </code></li>
+<li><code>static var max: UInt64 </code></li>
+<li><code>static func random(in range: Range&lt;UInt64&gt;) -> UInt64</code></li>
+<li><code>static func random(in range: Range&lt;UInt64&gt;, using gen: inout RandomNumberGenerator) -> UInt64</code></li>
           </ul>
         </details> 
       </td>
