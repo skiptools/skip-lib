@@ -405,7 +405,7 @@ Support levels:
 <li><code>var isNan: Bool</code></li>
 <li><code>var isFinite: Bool </code></li>
 <li><code>var isInfinite: Bool </code></li>
-<li><code>static func random(in range: Range<Float>) -> Float</code></li>
+<li><code>static func random(in range: Range&lt;Float>) -> Float</code></li>
 <li><code>func rounded() -> Float</code></li>
 <li><code>func rounded(_ rule: FloatingPointRoundingRule) -> Float</code></li>
           </ul>
@@ -505,7 +505,7 @@ Support levels:
         <details>
           <summary><code>MainActor</code></summary>
           <ul>
-            <li><code>static func run<T>(body: () throws -> T) async -> T</code></li>
+            <li><code>static func run&lt;T>(body: () throws -> T) async -> T</code></li>
           </ul>
         </details> 
       </td>
@@ -734,7 +734,7 @@ Support levels:
           <summary><code>Set</code></summary>
           <ul>
 <li><code>init()</code></li>
-<li><code>init(_ sequence: any Sequence<Element>)</code></li>
+<li><code>init(_ sequence: any Sequence&lt;Element>)</code></li>
             <li>See <code>Collection</code></li>
             <li>See <code>SetAlgebra</code></li>
           </ul>
@@ -824,8 +824,8 @@ Support levels:
         <details>
           <summary><code>Task</code></summary>
           <ul>
-<li><code>init(priority: TaskPriority? = nil, operation: @escaping () async throws -> Success)</li></code>
-<li><code>static func detached(priority: TaskPriority? = nil, operation: @escaping () async -> Success) -> Task<Success, Failure></li></code>
+<li><code>init(priority: TaskPriority? = nil, operation: @escaping () async throws -> Success)</code></li>
+<li><code>static func detached(priority: TaskPriority? = nil, operation: @escaping () async -> Success) -> Task&lt;Success, Failure></code></li>
 <li><code>var value: Success</code></li>
 <li><code>func cancel()</code></li>
 <li><code>static func yield() async</code></li>
@@ -913,9 +913,8 @@ Support levels:
         </details> 
       </td>
     </tr>
-  </body>
+  </tbody>
 </table>
-
 ## Topics
 
 ### Collections
