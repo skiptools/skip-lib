@@ -51,49 +51,6 @@ Most Skip libraries *call* Kotlin API, but are *written* in Swift, relying on th
 
 This pattern is used for most Swift types throughout SkipLib. Meanwhile, SwiftLib implementations of constructs built directly into the Swift language - e.g. tuples or `inout` parameters - only have a Kotlin file, with no corresponding Swift symbol file.
 
-## Topics
-
-### Collections
-
-Collections are perhaps the most complex part of the Swift standard library, and of SkipLib. Swift's comprehensive collection protocols allow `Array`, `Set`, `Dictionary`, `String`, and other types to all share a common set of API, including iteration, `map`, `reduce`, and much more.
-
-Corresponding Kotlin types - `List`, `Set`, `Map`, `String`, etc - do not share a similarly rich API set. As a result, SkipLib must duplicate collection protocol implementations in both `Collections.kt` and `String.kt`, and must duplicate `SetAlgebra` implementations in both `Set.kt` and `OptionSet.kt`.
-
-See the explanatory comments in `Collections.kt` for more information on the design of SkipLib's internal collections support.
-
-### Codable
-
-Skip supports your custom `CodingKeys` as well as your custom `encode(to:)` and `init(from:)` functions for encoding and decoding. Skip is also able to synthesize default `Codable` conformance for the Android versions of your Swift types. The Android versions will encode and decode exactly like their Swift source types.
-
-There are, however, a few restrictions:
-
-- Skip cannot synthesize `Codable` conformance for enums that are not `RawRepresentable`. You must implement the required protocol functions yourself.
-- `Array`, `Set`, and `Dictionary` are fully supported, but nesting of these types is limited. So for example Skip can encode and decode `Array<MyCodableType>` and `Dictionary<String, MyCodableType>`, but not `Array<Dictionary<String, MyCodableType>>`. Two forms of container nesting **are** currently supported: arrays-of-arrays - e.g. `Array<Array<MyCodableType>>` - and dictionaries-of-array-values - e.g. `Dictionary<String, Array<MyCodableType>>`. In practice, other nesting patters are rare.
-- When implementing your own `init(from: Decoder)` decoding, your `decode` calls must supply a concrete type literal to decode. The following will work:
-
-    ```swift
-    init(from decoder: Decoder) throws {
-        var container = try decoder.container(keyedBy: CodingKeys.self)
-        self.array = try container.decode([Int].self, forKey: .array) 
-    }
-    ```
-
-    But these examples will not work:
-
-    ```swift
-    init(from decoder: Decoder) throws {
-        var container = try decoder.container(keyedBy: CodingKeys.self)
-        let arrayType = [Int].self
-        self.array = try container.decode(arrayType, forKey: .array) 
-    }
-
-    init(from decoder: Decoder) throws {
-        var container = try decoder.container(keyedBy: CodingKeys.self)
-        // T is a generic type of this class
-        self.array = try container.decode([T].self, forKey: .array) 
-    }
-    ```
-
 ## Swift Standard Library Support
 
 The following table summarizes SkipLib's Swift Standard Library API support on Android. Anything not listed here is likely not supported. Note that in your iOS-only code - i.e. code within `#if !SKIP` blocks - you can use any API you want.
@@ -958,3 +915,46 @@ Support levels:
     </tr>
   </body>
 </table>
+
+## Topics
+
+### Collections
+
+Collections are perhaps the most complex part of the Swift standard library, and of SkipLib. Swift's comprehensive collection protocols allow `Array`, `Set`, `Dictionary`, `String`, and other types to all share a common set of API, including iteration, `map`, `reduce`, and much more.
+
+Corresponding Kotlin types - `List`, `Set`, `Map`, `String`, etc - do not share a similarly rich API set. As a result, SkipLib must duplicate collection protocol implementations in both `Collections.kt` and `String.kt`, and must duplicate `SetAlgebra` implementations in both `Set.kt` and `OptionSet.kt`.
+
+See the explanatory comments in `Collections.kt` for more information on the design of SkipLib's internal collections support.
+
+### Codable
+
+Skip supports your custom `CodingKeys` as well as your custom `encode(to:)` and `init(from:)` functions for encoding and decoding. Skip is also able to synthesize default `Codable` conformance for the Android versions of your Swift types. The Android versions will encode and decode exactly like their Swift source types.
+
+There are, however, a few restrictions:
+
+- Skip cannot synthesize `Codable` conformance for enums that are not `RawRepresentable`. You must implement the required protocol functions yourself.
+- `Array`, `Set`, and `Dictionary` are fully supported, but nesting of these types is limited. So for example Skip can encode and decode `Array<MyCodableType>` and `Dictionary<String, MyCodableType>`, but not `Array<Dictionary<String, MyCodableType>>`. Two forms of container nesting **are** currently supported: arrays-of-arrays - e.g. `Array<Array<MyCodableType>>` - and dictionaries-of-array-values - e.g. `Dictionary<String, Array<MyCodableType>>`. In practice, other nesting patters are rare.
+- When implementing your own `init(from: Decoder)` decoding, your `decode` calls must supply a concrete type literal to decode. The following will work:
+
+    ```swift
+    init(from decoder: Decoder) throws {
+        var container = try decoder.container(keyedBy: CodingKeys.self)
+        self.array = try container.decode([Int].self, forKey: .array) 
+    }
+    ```
+
+    But these examples will not work:
+
+    ```swift
+    init(from decoder: Decoder) throws {
+        var container = try decoder.container(keyedBy: CodingKeys.self)
+        let arrayType = [Int].self
+        self.array = try container.decode(arrayType, forKey: .array) 
+    }
+
+    init(from decoder: Decoder) throws {
+        var container = try decoder.container(keyedBy: CodingKeys.self)
+        // T is a generic type of this class
+        self.array = try container.decode([T].self, forKey: .array) 
+    }
+    ```
