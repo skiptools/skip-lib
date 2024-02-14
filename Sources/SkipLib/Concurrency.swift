@@ -195,104 +195,86 @@ public func withUnsafeThrowingContinuation<T>(_ fn: (UnsafeContinuation<T, Error
     fatalError()
 }
 
-public protocol AsyncSequence<Element> {
+public protocol AsyncSequence {
     associatedtype Element
     public func makeAsyncIterator() -> any AsyncIteratorProtocol<Element>
 }
 
 extension AsyncSequence {
-    @available(*, unavailable)
     public func map<RE>(_ transform: (Element) async throws -> RE) rethrows -> any AsyncSequence<RE> {
         fatalError()
     }
 
-    @available(*, unavailable)
     public func filter(_ isIncluded: (Element) async throws -> Bool) rethrows -> any AsyncSequence<Element> {
         fatalError()
     }
 
-    @available(*, unavailable)
     public func first(where predicate: (Element) async throws -> Bool) async rethrows -> Element? {
         fatalError()
     }
 
-    @available(*, unavailable)
     public func dropFirst(_ k: Int = 1) -> any AsyncSequence<Element> {
         fatalError()
     }
 
-    @available(*, unavailable)
     public func drop(while predicate: (Element) async throws -> Bool) rethrows -> any AsyncSequence<Element> {
         fatalError()
     }
 
-    @available(*, unavailable)
     public func prefix(_ maxLength: Int) -> any AsyncSequence<Element> {
         fatalError()
     }
 
-    @available(*, unavailable)
     public func prefix(while predicate: (Element) async throws -> Bool) rethrows -> any AsyncSequence<Element> {
         fatalError()
     }
 
-    @available(*, unavailable)
     public func min(by areInIncreasingOrder: (Element, Element) async throws -> Bool) async rethrows -> Element? {
         fatalError()
     }
 
-    @available(*, unavailable)
     public func max(by areInIncreasingOrder: (Element, Element) async throws -> Bool) async rethrows -> Element? {
         fatalError()
     }
 
-    @available(*, unavailable)
     public func contains(where predicate: (Element) async throws -> Bool) async rethrows -> Bool {
         fatalError()
     }
 
-    @available(*, unavailable)
     public func reduce<R>(_ initialResult: R, _ nextPartialResult: (_ partialResult: R, Element) async throws -> R) async rethrows -> R {
         fatalError()
     }
 
-    @available(*, unavailable)
     public func reduce<R>(into initialResult: R, _ updateAccumulatingResult: (_ partialResult: inout R, Element) async throws -> Void) async rethrows -> R {
         fatalError()
     }
 
-    @available(*, unavailable)
     public func allSatisfy(_ predicate: (Element) async throws -> Bool) async rethrows -> Bool {
         fatalError()
     }
 
-    @available(*, unavailable)
     public func flatMap<RE>(_ transform: (Element) async throws -> any AsyncSequence<RE>) rethrows -> any AsyncSequence<RE> {
         fatalError()
     }
 
-    @available(*, unavailable)
     public func compactMap<RE>(_ transform: (Element) async throws -> RE?) rethrows -> any AsyncSequence<RE> {
         fatalError()
     }
 
-    @available(*, unavailable)
     public func contains(_ element: Element) async -> Bool {
         fatalError()
     }
 
-    @available(*, unavailable)
     public func min() async -> Element? {
         fatalError()
     }
 
-    @available(*, unavailable)
     public func max() async -> Element? {
         fatalError()
     }
 }
 
-public protocol AsyncIteratorProtocol<Element> {
+public protocol AsyncIteratorProtocol {
     associatedtype Element
     mutating func next() async -> Element?
 }

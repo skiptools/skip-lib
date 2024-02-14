@@ -207,6 +207,314 @@ interface AsyncSequence<Element> {
 
     /// We can't implement Iterable and return a true `Iterator`, because we have to use suspending functions.
     operator fun iterator() = AsyncSequenceIterator(makeAsyncIterator())
+
+    fun <RE> map(transform: suspend (Element) -> RE): AsyncSequence<RE> {
+        val itr = makeAsyncIterator()
+        return object: AsyncSequence<RE> {
+            override fun makeAsyncIterator(): AsyncIteratorProtocol<RE> {
+                return object: AsyncIteratorProtocol<RE> {
+                    override suspend fun next(): RE? {
+                        val next = itr.next()
+                        return if (next == null) null else transform(next)
+                    }
+                }
+            }
+        }
+    }
+
+    fun filter(isIncluded: suspend (Element) -> Boolean): AsyncSequence<Element> {
+        val itr = makeAsyncIterator()
+        return object: AsyncSequence<Element> {
+            override fun makeAsyncIterator(): AsyncIteratorProtocol<Element> {
+                return object: AsyncIteratorProtocol<Element> {
+                    override suspend fun next(): Element? {
+                        while (true) {
+                            val next = itr.next()
+                            if (next == null) {
+                                return null
+                            } else if (isIncluded(next)) {
+                                return next
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    suspend fun first(where: suspend (Element) -> Boolean): Element? {
+        val itr = makeAsyncIterator()
+        while (true) {
+            val next = itr.next()
+            if (next == null) {
+                return null
+            } else if (where(next)) {
+                return next
+            }
+        }
+    }
+
+    fun dropFirst(k: Int = 1): AsyncSequence<Element> {
+        val itr = makeAsyncIterator()
+        return object: AsyncSequence<Element> {
+            override fun makeAsyncIterator(): AsyncIteratorProtocol<Element> {
+                return object: AsyncIteratorProtocol<Element> {
+                    private var hasDropped = false
+                    override suspend fun next(): Element? {
+                        if (!hasDropped) {
+                            hasDropped = true
+                            for (i in 0..<k) {
+                                if (itr.next() == null) {
+                                    return null
+                                }
+                            }
+                        }
+                        return itr.next()
+                    }
+                }
+            }
+        }
+    }
+
+    fun drop(while_: suspend (Element) -> Boolean): AsyncSequence<Element> {
+        val itr = makeAsyncIterator()
+        return object: AsyncSequence<Element> {
+            override fun makeAsyncIterator(): AsyncIteratorProtocol<Element> {
+                return object: AsyncIteratorProtocol<Element> {
+                    private var hasDropped = false
+                    override suspend fun next(): Element? {
+                        if (!hasDropped) {
+                            hasDropped = true
+                            while (true) {
+                                val next = itr.next()
+                                if (next == null) {
+                                    return null
+                                } else if (!while_(next)) {
+                                    return next
+                                }
+                            }
+                        } else {
+                            return itr.next()
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    fun prefix(maxLength: Int): AsyncSequence<Element> {
+        val itr = makeAsyncIterator()
+        return object: AsyncSequence<Element> {
+            override fun makeAsyncIterator(): AsyncIteratorProtocol<Element> {
+                return object: AsyncIteratorProtocol<Element> {
+                    private var remaining = maxLength
+                    override suspend fun next(): Element? {
+                        if (remaining == 0) {
+                            return null
+                        }
+                        val next = itr.next()
+                        if (next == null) {
+                            return null
+                        }
+                        remaining--
+                        return next
+                    }
+                }
+            }
+        }
+    }
+
+    fun prefix(while_: suspend (Element) -> Boolean): AsyncSequence<Element> {
+        val itr = makeAsyncIterator()
+        return object: AsyncSequence<Element> {
+            override fun makeAsyncIterator(): AsyncIteratorProtocol<Element> {
+                return object: AsyncIteratorProtocol<Element> {
+                    override suspend fun next(): Element? {
+                        val next = itr.next()
+                        if (next == null || !while_(next)) {
+                            return null
+                        }
+                        return next
+                    }
+                }
+            }
+        }
+    }
+
+    suspend fun min(by: suspend (Element, Element) -> Boolean): Element? {
+        val itr = makeAsyncIterator()
+        var min: Element? = null
+        while (true) {
+            val next = itr.next()
+            if (next == null) {
+                break
+            } else if (min == null || by(next, min)) {
+                min = next
+            }
+        }
+        return min
+    }
+
+    suspend fun max(by: suspend (Element, Element) -> Boolean): Element? {
+        val itr = makeAsyncIterator()
+        var max: Element? = null
+        while (true) {
+            val next = itr.next()
+            if (next == null) {
+                break
+            } else if (max == null || by(max, next)) {
+                max = next
+            }
+        }
+        return max
+    }
+
+    suspend fun contains(where_: suspend (Element) -> Boolean): Boolean {
+        val itr = makeAsyncIterator()
+        while (true) {
+            val next = itr.next()
+            if (next == null) {
+                return false
+            } else if (where_(next)) {
+                return true
+            }
+        }
+    }
+
+    // WARNING: Although `initialResult` is not a labeled parameter in Swift, the transpiler inserts it
+    // into our Kotlin call sites to differentiate between calls to the two `reduce()` functions. Do not change
+    suspend fun <R> reduce(initialResult: R, nextPartialResult: suspend (R, Element) -> R): R {
+        val itr = makeAsyncIterator()
+        var result = initialResult
+        while (true) {
+            val next = itr.next()
+            if (next == null) {
+                break
+            } else {
+                result = nextPartialResult(result, next)
+            }
+        }
+        return result
+    }
+
+    suspend fun <R> reduce(unusedp: Nothing? = null, into: R, updateAccumulatingResult: suspend (InOut<R>, Element) -> Unit): R {
+        val itr = makeAsyncIterator()
+        var result = into
+        while (true) {
+            val next = itr.next()
+            if (next == null) {
+                break
+            } else {
+                updateAccumulatingResult(InOut({ result }, { result = it }), next)
+            }
+        }
+        return result
+    }
+
+    suspend fun allSatisfy(predicate: suspend (Element) -> Boolean): Boolean {
+        val itr = makeAsyncIterator()
+        while (true) {
+            val next = itr.next()
+            if (next == null) {
+                return true
+            } else if (!predicate(next)) {
+                return false
+            }
+        }
+    }
+
+    fun <RE> flatMap(transform: suspend (Element) -> AsyncSequence<RE>): AsyncSequence<RE> {
+        val itr = makeAsyncIterator()
+        return object: AsyncSequence<RE> {
+            override fun makeAsyncIterator(): AsyncIteratorProtocol<RE> {
+                return object: AsyncIteratorProtocol<RE> {
+                    private var currentItr: AsyncIteratorProtocol<RE>? = null
+                    override suspend fun next(): RE? {
+                        while (true) {
+                            if (currentItr == null) {
+                                val next = itr.next()
+                                if (next == null) {
+                                    return null
+                                } else {
+                                    currentItr = transform(next).makeAsyncIterator()
+                                }
+                            } else {
+                                val next = currentItr!!.next()
+                                if (next == null) {
+                                    currentItr = null
+                                } else {
+                                    return next
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    fun <RE> compactMap(transform: suspend (Element) -> RE?): AsyncSequence<RE> {
+        val itr = makeAsyncIterator()
+        return object: AsyncSequence<RE> {
+            override fun makeAsyncIterator(): AsyncIteratorProtocol<RE> {
+                return object: AsyncIteratorProtocol<RE> {
+                    override suspend fun next(): RE? {
+                        while (true) {
+                            val next = itr.next()
+                            if (next == null) {
+                                return null
+                            } else {
+                                val re = transform(next)
+                                if (re != null) {
+                                    return re
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    suspend fun contains(element: Element): Boolean {
+        val itr = makeAsyncIterator()
+        while (true) {
+            val next = itr.next()
+            if (next == null) {
+                return false
+            } else if (next == element) {
+                return true
+            }
+        }
+    }
+
+    suspend fun min(): Element? {
+        val itr = makeAsyncIterator()
+        var min: Element? = null
+        while (true) {
+            val next = itr.next()
+            if (next == null) {
+                break
+            } else if (min == null || (next as Comparable<Element>) < min) {
+                min = next
+            }
+        }
+        return min
+    }
+
+    suspend fun max(): Element? {
+        val itr = makeAsyncIterator()
+        var max: Element? = null
+        while (true) {
+            val next = itr.next()
+            if (next == null) {
+                break
+            } else if (max == null || (next as Comparable<Element>) > max) {
+                max = next
+            }
+        }
+        return max
+    }
 }
 
 class AsyncSequenceIterator<Element>(private val iter: AsyncIteratorProtocol<Element>) {

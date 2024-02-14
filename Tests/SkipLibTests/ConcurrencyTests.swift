@@ -112,11 +112,104 @@ final class ConcurrencyTests: XCTestCase {
         var collected: [Int] = []
         for await i in seq {
             collected.append(i)
-            if collected.count > 10 {
-                break
-            }
         }
         XCTAssertEqual(collected, [0, 100, 200])
+
+        collected.removeAll()
+        let mapped = seq.map { $0 * -1 }
+        for await i in mapped {
+            collected.append(i)
+        }
+        XCTAssertEqual(collected, [0, -100, -200])
+
+        collected.removeAll()
+        let compactMapped = seq.compactMap { $0 == 100 ? nil : $0 }
+        for await i in compactMapped {
+            collected.append(i)
+        }
+        XCTAssertEqual(collected, [0, 200])
+
+        collected.removeAll()
+        let flatMapped = seq.flatMap { _ in AsyncIntSequence() }
+        for await i in flatMapped {
+            collected.append(i)
+        }
+        XCTAssertEqual(collected, [0, 100, 200, 0, 100, 200, 0, 100, 200])
+
+        collected.removeAll()
+        let filtered = seq.filter { $0 == 100 }
+        for await i in filtered {
+            collected.append(i)
+        }
+        XCTAssertEqual(collected, [100])
+
+        let first = await seq.first { $0 == 100 }
+        XCTAssertEqual(first, 100)
+
+        collected.removeAll()
+        let dropped = seq.dropFirst()
+        for await i in dropped {
+            collected.append(i)
+        }
+        XCTAssertEqual(collected, [100, 200])
+
+        collected.removeAll()
+        let droppedAll = seq.dropFirst(10)
+        for await i in droppedAll {
+            collected.append(i)
+        }
+        XCTAssertEqual(collected, Array<Int>())
+
+        collected.removeAll()
+        let dropped2 = seq.drop { $0 != 100 }
+        for await i in dropped2 {
+            collected.append(i)
+        }
+        XCTAssertEqual(collected, [100, 200])
+
+        collected.removeAll()
+        let prefix = seq.prefix(2)
+        for await i in prefix {
+            collected.append(i)
+        }
+        XCTAssertEqual(collected, [0, 100])
+
+        collected.removeAll()
+        let prefixAll = seq.prefix(10)
+        for await i in prefixAll {
+            collected.append(i)
+        }
+        XCTAssertEqual(collected, [0, 100, 200])
+
+        let min = await seq.min()
+        XCTAssertEqual(min, 0)
+        let min2 = await seq.min(by: >)
+        XCTAssertEqual(min2, 200)
+
+        let max = await seq.max()
+        XCTAssertEqual(max, 200)
+        let max2 = await seq.max(by: >)
+        XCTAssertEqual(max2, 0)
+
+        let contains = await seq.contains(100)
+        XCTAssertTrue(contains)
+        let contains2 = await seq.contains(300)
+        XCTAssertFalse(contains2)
+        let contains3 = await seq.contains { $0 == 100 }
+        XCTAssertTrue(contains3)
+        let contains4 = await seq.contains { $0 == 300 }
+        XCTAssertFalse(contains4)
+
+        let allSatisfy = await seq.allSatisfy { $0 >= 0 }
+        XCTAssertTrue(allSatisfy)
+        let allSatisfy2 = await seq.allSatisfy { $0 < 200 }
+        XCTAssertFalse(allSatisfy2)
+
+        let reduce = await seq.reduce(0, +)
+        XCTAssertEqual(reduce, 300)
+        var result = 0
+        let reduce2 = await seq.reduce(into: result) { $0 += $1 }
+        XCTAssertEqual(reduce2, 300)
     }
 
     func testMainActor() async throws {

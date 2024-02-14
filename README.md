@@ -115,6 +115,10 @@ Support levels:
       <td><code>assertionFailure</code></td>
     </tr>
     <tr>
+      <td>✅</td>
+      <td><code>AsyncSequence</code></td>
+    </tr>
+    <tr>
       <td>🟢</td>
       <td>
         <details>
