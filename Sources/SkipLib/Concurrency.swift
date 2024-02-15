@@ -8,6 +8,9 @@
 
 #if SKIP
 
+// Note that we don't attach 'nodispatch' attributes to Task API because the transpiler automatically
+// adjusts the dispatch behavior of closures passed to Tasks
+
 public struct Task<Success, Failure> where Failure: Error {
     public var value: Success {
         get async throws { fatalError() }
@@ -94,12 +97,156 @@ public struct TaskPriority : RawRepresentable {
     }
 }
 
-@available(*, unavailable)
-public struct TaskGroup<ChildTaskResult> {
+public struct TaskGroup<ChildTaskResult>: AsyncSequence<ChildTaskResult> {
+    // SKIP ATTRIBUTES: nodispatch
+    public mutating func addTask(priority: TaskPriority? = nil, operation: () async -> ChildTaskResult) {
+    }
+
+    // SKIP ATTRIBUTES: nodispatch
+    public mutating func addTaskUnlessCancelled(priority: TaskPriority? = nil, operation: () async -> ChildTaskResult) -> Bool {
+        return false
+    }
+
+    public mutating func next() async -> ChildTaskResult? {
+        return nil
+    }
+
+    public mutating func waitForAll() async {
+    }
+
+    public var isEmpty: Bool {
+        return false
+    }
+
+    public func cancelAll() {
+    }
+
+    public var isCancelled: Bool {
+        return false
+    }
+
+    public func makeAsyncIterator() -> Iterator<ChildTaskResult> {
+        fatalError()
+    }
+
+    public struct Iterator<ChildTaskResult>: AsyncIteratorProtocol<ChildTaskResult> {
+        public mutating func next() async -> ChildTaskResult? {
+            return nil
+        }
+
+        public mutating func cancel() {
+        }
+    }
 }
 
-@available(*, unavailable)
-public struct ThrowingTaskGroup<ChildTaskResult, Failure> where Failure : Error {
+public struct DiscardingTaskGroup {
+    // SKIP ATTRIBUTES: nodispatch
+    public mutating func addTask(priority: TaskPriority? = nil, operation: () async -> Void) {
+    }
+
+    // SKIP ATTRIBUTES: nodispatch
+    public mutating func addTaskUnlessCancelled(priority: TaskPriority? = nil, operation: () async -> Void) -> Bool {
+        return false
+    }
+
+    public var isEmpty: Bool {
+        return false
+    }
+
+    public func cancelAll() {
+    }
+
+    public var isCancelled: Bool {
+        return false
+    }
+}
+
+public struct ThrowingTaskGroup<ChildTaskResult, Failure>: AsyncSequence<ChildTaskResult> where Failure : Error {
+    // SKIP ATTRIBUTES: nodispatch
+    public mutating func addTask(priority: TaskPriority? = nil, operation: () async throws -> ChildTaskResult) {
+    }
+
+    // SKIP ATTRIBUTES: nodispatch
+    public mutating func addTaskUnlessCancelled(priority: TaskPriority? = nil, operation: () async throws -> ChildTaskResult) -> Bool {
+        return false
+    }
+
+    public mutating func next() async throws -> ChildTaskResult? {
+        return nil
+    }
+
+    public mutating func nextResult() async -> Result<ChildTaskResult, Failure>? {
+        return nil
+    }
+
+    public mutating func waitForAll() async throws {
+    }
+
+    public var isEmpty: Bool {
+        return false
+    }
+
+    public func cancelAll() {
+    }
+
+    public var isCancelled: Bool {
+        return false
+    }
+
+    public func makeAsyncIterator() -> Iterator<ChildTaskResult> {
+        fatalError()
+    }
+
+    public struct Iterator<ChildTaskResult>: AsyncIteratorProtocol<ChildTaskResult> {
+        public mutating func next() async throws -> ChildTaskResult? {
+            return nil
+        }
+
+        public mutating func cancel() {
+        }
+    }
+}
+
+public struct ThrowingDiscardingTaskGroup<Failure> where Failure : Error {
+    // SKIP ATTRIBUTES: nodispatch
+    public mutating func addTask(priority: TaskPriority? = nil, operation: () async throws -> Void) {
+    }
+
+    // SKIP ATTRIBUTES: nodispatch
+    public mutating func addTaskUnlessCancelled(priority: TaskPriority? = nil, operation: () async throws -> Void) -> Bool {
+        return false
+    }
+
+    public var isEmpty: Bool {
+        return false
+    }
+
+    public func cancelAll() {
+    }
+
+    public var isCancelled: Bool {
+        return false
+    }
+}
+
+// SKIP ATTRIBUTES: nodispatch
+public func withTaskGroup<ChildTaskResult, GroupResult>(of childTaskResultType: ChildTaskResult.Type, returning returnType: GroupResult.Type? = nil, body: (TaskGroup<ChildTaskResult>) async -> GroupResult) async -> GroupResult {
+    fatalError()
+}
+
+// SKIP ATTRIBUTES: nodispatch
+public func withDiscardingTaskGroup<GroupResult>(returning returnType: GroupResult.Type? = nil, body: (DiscardingTaskGroup) async -> GroupResult) async -> GroupResult {
+    fatalError()
+}
+
+// SKIP ATTRIBUTES: nodispatch
+public func withThrowingTaskGroup<ChildTaskResult, GroupResult>(of childTaskResultType: ChildTaskResult.Type, returning returnType: GroupResult.Type? = nil, body: (ThrowingTaskGroup<ChildTaskResult, Error>) async throws -> GroupResult) async rethrows -> GroupResult {
+    fatalError()
+}
+
+// SKIP ATTRIBUTES: nodispatch
+public func withThrowingDiscardingTaskGroup<GroupResult>(returning returnType: GroupResult.Type? = nil, body: (ThrowingDiscardingTaskGroup<Error>) async throws -> GroupResult) async throws -> GroupResult {
+    fatalError()
 }
 
 public struct CancellationError: Error {
@@ -134,6 +281,7 @@ public class MainActor {
     nonisolated final public func enqueue(_ job: UnownedJob) {
     }
 
+    // SKIP ATTRIBUTES: nodispatch
     public static func run<T>(body: () throws -> T) async -> T {
         fatalError()
     }
@@ -167,16 +315,6 @@ public func withCheckedContinuation<T>(function: String = "", _ body: (CheckedCo
 
 @available(*, unavailable)
 public func withTaskCancellationHandler<T>(operation: () async throws -> T, onCancel handler: () -> Void) async rethrows -> T {
-    fatalError()
-}
-
-@available(*, unavailable)
-public func withTaskGroup<ChildTaskResult, GroupResult>(of childTaskResultType: ChildTaskResult.Type, returning returnType: GroupResult.Type = GroupResult.self, body: (inout TaskGroup<ChildTaskResult>) async -> GroupResult) async -> GroupResult {
-    fatalError()
-}
-
-@available(*, unavailable)
-@inlinable public func withThrowingTaskGroup<ChildTaskResult, GroupResult>(of childTaskResultType: ChildTaskResult.Type, returning returnType: GroupResult.Type = GroupResult.self, body: (inout ThrowingTaskGroup<ChildTaskResult, Error>) async throws -> GroupResult) async rethrows -> GroupResult {
     fatalError()
 }
 

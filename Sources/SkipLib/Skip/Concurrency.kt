@@ -7,25 +7,27 @@ package skip.lib
 
 import kotlin.coroutines.*
 import kotlinx.coroutines.*
+import kotlinx.coroutines.selects.select
+import kotlin.reflect.KClass
 
 /// Kotlin representation of `Swift.Task`.
 class Task<T> {
-    private var deferred: Deferred<T>
+    internal var deferred: Deferred<T>
     private var state = TaskState()
 
-    constructor(priority: TaskPriority? = null, operation: suspend () -> T): this(false, priority, operation) {
+    constructor(priority: TaskPriority? = null, operation: suspend () -> T): this(isMainActor = false, priority = priority, operation = operation) {
     }
 
-    constructor(isMainActor: Boolean, priority: TaskPriority? = null, operation: suspend () -> T) {
+    constructor(isMainActor: Boolean, scope: CoroutineScope = GlobalScope, priority: TaskPriority? = null, operation: suspend () -> T) {
         // Priorities and Dispatchers are not equivalent. Dispatchers.Default is supposedly designed for CPU-intensive
         // operations, while Dispatchers.IO is designed for IO operations. We expect CPU operations to be shorter than
         // IO ones, so perhaps Dispatchers.Default will be better for our high priority tasks that probably don't involve
         // a lot of waiting, while Dispatchers.IO will be better for background tasks that don't mind being preempted
         state.priority = priority ?: Companion.currentState.get()?.priority
-        val dispatcher = if (isMainActor) Dispatchers.Main else if (priority == TaskPriority.high) Dispatchers.Default else Dispatchers.IO
+        val dispatcher = if (isMainActor) Dispatchers.Main else priority.dispatcher
         // Store a TaskState in our context-aware storage so that we can access it statically in e.g. Task.isCancelled
         @OptIn(DelicateCoroutinesApi::class)
-        deferred = GlobalScope.async(dispatcher + Companion.currentState.asContextElement(state)) {
+        deferred = scope.async(dispatcher + Companion.currentState.asContextElement(state)) {
             state.job = currentCoroutineContext().job
             operation()
         }
@@ -48,7 +50,7 @@ class Task<T> {
     companion object {
         private val currentState = ThreadLocal<TaskState?>()
 
-        fun <T> detached(priority: TaskPriority? = null, operation: suspend () -> T): Task<T> = Task(isMainActor = false, priority, operation)
+        fun <T> detached(priority: TaskPriority? = null, operation: suspend () -> T): Task<T> = Task(isMainActor = false, priority = priority, operation = operation)
 
         val isCancelled: Boolean
             get() {
@@ -121,6 +123,171 @@ class TaskPriority(override val rawValue: Int): RawRepresentable<Int> {
         val utility = low
         val background = TaskPriority(9)
     }
+}
+
+private val TaskPriority?.dispatcher: CoroutineDispatcher
+    get() = if (this == TaskPriority.high) Dispatchers.Default else Dispatchers.IO
+
+open class TaskGroup<ChildTaskResult>(private val throwErrors: Boolean = false): AsyncSequence<ChildTaskResult> {
+    private val job = Job()
+    private val coroutineScope = CoroutineScope(job)
+    private val tasks = mutableListOf<Task<Result<ChildTaskResult, Error>>>()
+
+    fun addTask(priority: TaskPriority? = null, operation: suspend () -> ChildTaskResult) {
+        val task: Task<Result<ChildTaskResult, Error>> = Task(isMainActor = false, scope = coroutineScope, priority) {
+            try {
+                val success = operation()
+                Result.success(success)
+            } catch (e: CancellationError) {
+                throw e
+            } catch (e: Exception) {
+                val error = (e as? Error) ?: ErrorException(e)
+                Result.failure(error)
+            }
+        }
+        tasks.add(task)
+    }
+
+    fun addTaskUnlessCancelled(priority: TaskPriority? = null, operation: suspend () -> ChildTaskResult): Boolean {
+        if (isCancelled) {
+            return false
+        }
+        addTask(priority, operation)
+        return true
+    }
+
+    suspend fun next(): ChildTaskResult? {
+        val result = nextResult()
+        if (result == null) {
+            return null
+        }
+        try {
+            return result.get()
+        } catch (e: Exception) {
+            if (throwErrors) {
+                throw e
+            } else {
+                return null
+            }
+        }
+    }
+
+    suspend fun nextResult(): Result<ChildTaskResult, Error>? {
+        if (isCancelled) {
+            return Result.failure(CancellationError())
+        }
+        if (tasks.isEmpty()) {
+            return null
+        }
+        try {
+            return select<Result<ChildTaskResult, Error>> {
+                tasks.withIndex().forEach { (index, task) ->
+                    task.deferred.onAwait {
+                        tasks.removeAt(index)
+                        it
+                    }
+                }
+            }
+        } catch (_: CancellationException) {
+            tasks.clear()
+            return null
+        }
+    }
+
+    suspend fun waitForAll() {
+        val deferreds = tasks.map { it.deferred }
+        if (!deferreds.isEmpty()) {
+            deferreds.awaitAll()
+        }
+    }
+
+    val isEmpty: Boolean
+        get() = tasks.isEmpty()
+
+    fun cancelAll() {
+        tasks.clear()
+        coroutineScope.cancel()
+    }
+
+    val isCancelled: Boolean
+        get() = job.isCancelled
+
+    override fun makeAsyncIterator(): Iterator<ChildTaskResult> {
+        return Iterator(this)
+    }
+
+    class Iterator<ChildTaskResult>(private val taskGroup: TaskGroup<ChildTaskResult>): AsyncIteratorProtocol<ChildTaskResult> {
+        override suspend fun next(): ChildTaskResult? {
+            return taskGroup.next()
+        }
+
+        fun cancel() {
+            taskGroup.cancelAll()
+        }
+    }
+}
+
+/// In Kotlin, `ThrowingTaskGroup` is just a `TaskGroup` that throws encountered errors.
+class ThrowingTaskGroup<ChildTaskResult>: TaskGroup<ChildTaskResult>(throwErrors = true) {
+}
+
+/// In Kotlin, `DiscardingTaskGroup` is just a subset of a `TaskGroup` with `Unit` result type.
+class DiscardingTaskGroup: TaskGroup<Unit>() {
+}
+
+/// In Kotlin, `ThrowingDiscardingTaskGroup` is just a subset of a `TaskGroup` with `Unit` result
+// type that throws errors.
+class ThrowingDiscardingTaskGroup: TaskGroup<Unit>(throwErrors = true) {
+}
+
+suspend fun <ChildTaskResult, GroupResult> withTaskGroup(of: KClass<ChildTaskResult>, returning: KClass<GroupResult>? = null, body: suspend (TaskGroup<ChildTaskResult>) -> GroupResult): GroupResult where ChildTaskResult : Any, GroupResult: Any {
+    val taskGroup = TaskGroup<ChildTaskResult>()
+    val result: GroupResult
+    try {
+        result = body(taskGroup)
+    } finally {
+        taskGroup.waitForAll()
+    }
+    return result
+}
+
+suspend fun <GroupResult> withDiscardingTaskGroup(returning: KClass<GroupResult>? = null, body: suspend (DiscardingTaskGroup) -> GroupResult): GroupResult where GroupResult: Any {
+    val discardingTaskGroup = DiscardingTaskGroup()
+    val result: GroupResult
+    try {
+        result = body(discardingTaskGroup)
+    } finally {
+        discardingTaskGroup.waitForAll()
+    }
+    return result
+}
+
+suspend fun <ChildTaskResult, GroupResult> withThrowingTaskGroup(of: KClass<ChildTaskResult>, returning: KClass<GroupResult>? = null, body: suspend (ThrowingTaskGroup<ChildTaskResult>) -> GroupResult): GroupResult where ChildTaskResult : Any, GroupResult: Any {
+    val taskGroup = ThrowingTaskGroup<ChildTaskResult>()
+    val result: GroupResult
+    try {
+        result = body(taskGroup)
+    } catch (e: Exception) {
+        taskGroup.cancelAll()
+        throw e
+    } finally {
+        taskGroup.waitForAll()
+    }
+    return result
+}
+
+suspend fun <GroupResult> withThrowingDiscardingTaskGroup(returning: KClass<GroupResult>? = null, body: suspend (ThrowingDiscardingTaskGroup) -> GroupResult): GroupResult where GroupResult: Any {
+    val discardingTaskGroup = ThrowingDiscardingTaskGroup()
+    val result: GroupResult
+    try {
+        result = body(discardingTaskGroup)
+    } catch (e: Exception) {
+        discardingTaskGroup.cancelAll()
+        throw e
+    } finally {
+        discardingTaskGroup.waitForAll()
+    }
+    return result
 }
 
 /// Kotlin representation of `Swift.AnyActor`.

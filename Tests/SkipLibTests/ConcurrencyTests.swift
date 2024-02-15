@@ -96,6 +96,107 @@ final class ConcurrencyTests: XCTestCase {
         XCTAssertFalse(task2Cancelled)
     }
 
+    func testTaskGroup() async throws {
+        let results = try await withThrowingTaskGroup(of: Int.self) { group in
+            group.addTask {
+                return try await self.delayedInt(millis: 200)
+            }
+            group.addTask {
+                return try await self.delayedInt(millis: 100)
+            }
+            group.addTask {
+                return try await self.delayedInt(millis: 400)
+            }
+            var results: [Int] = []
+            for try await result in group {
+                results.append(result)
+            }
+            return results
+        }
+        XCTAssertEqual(results, [100, 200, 400])
+    }
+
+    func testThrowingTaskUncaught() async throws {
+        do {
+            let _ = try await withThrowingTaskGroup(of: Int.self) { group in
+                group.addTask {
+                    let _ = try await self.delayedInt(millis: 200)
+                    throw ConcurrencyTestsError()
+                }
+                group.addTask {
+                    return try await self.delayedInt(millis: 100)
+                }
+                group.addTask {
+                    return try await self.delayedInt(millis: 400)
+                }
+                var results: [Int] = []
+                for try await result in group {
+                    results.append(result)
+                }
+                XCTFail()
+                return results
+            }
+        } catch {
+            XCTAssertTrue(error is ConcurrencyTestsError)
+        }
+    }
+
+    func testThrowingTaskGroupCaught() async throws {
+        var caught: Error? = nil
+        var lastResult: Int? = nil
+        let results = try await withThrowingTaskGroup(of: Int.self) { group in
+            group.addTask {
+                let _ = try await self.delayedInt(millis: 200)
+                throw ConcurrencyTestsError()
+            }
+            group.addTask {
+                return try await self.delayedInt(millis: 100)
+            }
+            group.addTask {
+                return try await self.delayedInt(millis: 400)
+            }
+            var results: [Int] = []
+            do {
+                for try await result in group {
+                    results.append(result)
+                }
+            } catch {
+                caught = error
+            }
+            lastResult = try await group.next()
+            return results
+        }
+        XCTAssertTrue(caught is ConcurrencyTestsError)
+        XCTAssertEqual(results, [100])
+        XCTAssertEqual(lastResult, 400)
+    }
+
+    func testTaskGroupCancel() async throws {
+        let result = try await withThrowingTaskGroup(of: Int.self) { group in
+            group.addTask {
+                let _ = try await self.delayedInt(millis: 200)
+                throw ConcurrencyTestsError()
+            }
+            group.addTask {
+                return try await self.delayedInt(millis: 100)
+            }
+            group.addTask {
+                return try await self.delayedInt(millis: 400)
+            }
+            let result = try await group.next()
+            XCTAssertEqual(100, result)
+            group.cancelAll()
+            XCTAssertTrue(group.isCancelled)
+            do {
+                let _ = try await group.next()
+                XCTFail()
+            } catch is CancellationError {
+            }
+            return result ?? 0
+        }
+        XCTAssertEqual(result, 100)
+    }
+
     func testAsyncLet() async throws {
         let start = currentTimeMillis()
         async let i1 = delayedInt(millis: 500)

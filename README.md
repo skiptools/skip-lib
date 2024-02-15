@@ -356,6 +356,10 @@ Support levels:
       </td>
     </tr>
     <tr>
+      <td>✅</td>
+      <td><code>DiscardingTaskGroup</code></td>
+    </tr>
+    <tr>
       <td>🟢</td>
       <td>
         <details>
@@ -844,6 +848,18 @@ Support levels:
     </tr>
     <tr>
       <td>✅</td>
+      <td><code>TaskGroup</code></td>
+    </tr>
+    <tr>
+      <td>✅</td>
+      <td><code>ThrowingDiscardingTaskGroup</code></td>
+    </tr>
+    <tr>
+      <td>✅</td>
+      <td><code>ThrowingTaskGroup</code></td>
+    </tr>
+    <tr>
+      <td>✅</td>
       <td><code>type(of:)</code></td>
     </tr>
     <tr>
@@ -916,6 +932,22 @@ Support levels:
           </ul>
         </details> 
       </td>
+    </tr>
+    <tr>
+      <td>✅</td>
+      <td><code>withDiscardingTaskGroup</code></td>
+    </tr>
+    <tr>
+      <td>✅</td>
+      <td><code>withThrowingTaskGroup</code></td>
+    </tr>
+    <tr>
+      <td>✅</td>
+      <td><code>withThrowingDiscardingTaskGroup</code></td>
+    </tr>
+    <tr>
+      <td>✅</td>
+      <td><code>withThrowingTaskGroup</code></td>
     </tr>
   </tbody>
 </table>
