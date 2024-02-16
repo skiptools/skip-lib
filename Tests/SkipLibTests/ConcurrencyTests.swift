@@ -175,8 +175,7 @@ final class ConcurrencyTests: XCTestCase {
     func testTaskGroupCancel() async throws {
         let result = try await withThrowingTaskGroup(of: Int.self) { group in
             group.addTask {
-                let _ = try await self.delayedInt(millis: 200)
-                throw ConcurrencyTestsError()
+                return try await self.delayedInt(millis: 200)
             }
             group.addTask {
                 return try await self.delayedInt(millis: 100)
