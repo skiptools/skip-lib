@@ -314,6 +314,92 @@ final class ConcurrencyTests: XCTestCase {
         XCTAssertEqual(reduce2, 300)
     }
 
+    func testAsyncStream() async throws {
+        let (stream, continuation) = AsyncStream.makeStream(of: Int.self)
+        continuation.yield(100)
+        continuation.yield(200)
+        continuation.finish()
+        try await assertEqual(stream: stream, content: [100, 200])
+
+        let (stream2, continuation2) = AsyncStream.makeStream(of: Int.self)
+        Task {
+            await continuation2.yield(asyncInt())
+            await continuation2.yield(asyncInt2())
+            continuation2.finish()
+        }
+        try await assertEqual(stream: stream2, content: [100, 200])
+
+        var i = 0
+        let stream3 = AsyncStream<Int>(unfolding: {
+            i += 1
+            if i == 1 {
+                return await self.asyncInt()
+            } else if i == 2 {
+                return await self.asyncInt2()
+            } else {
+                return nil
+            }
+        })
+        try await assertEqual(stream: stream3, content: [100, 200])
+
+        #if SKIP
+        let stream4 = AsyncStream(Int.self) { continuation in
+            continuation.yield(100)
+            continuation.yield(200)
+            continuation.finish()
+        }
+        var flow = stream4.kotlin()
+        var c = 0
+        flow.collect { value in
+            if c == 0 {
+                XCTAssertEqual(value, 100)
+            } else if c == 1 {
+                XCTAssertEqual(value, 200)
+            }
+            c += 1
+        }
+        XCTAssertEqual(c, 2)
+
+        i = 0
+        let stream5 = AsyncStream<Int>(unfolding: {
+            i += 1
+            if i == 1 {
+                return await self.asyncInt()
+            } else if i == 2 {
+                return await self.asyncInt2()
+            } else {
+                return nil
+            }
+        })
+        flow = stream5.kotlin()
+        c = 0
+        flow.collect { value in
+            if c == 0 {
+                XCTAssertEqual(value, 100)
+            } else if c == 1 {
+                XCTAssertEqual(value, 200)
+            }
+            c += 1
+        }
+        XCTAssertEqual(c, 2)
+
+        flow = kotlinx.coroutines.flow.flowOf(10, 20, 30)
+        let stream6 = AsyncStream<Int>(flow: flow)
+        try await assertEqual(stream: stream6, content: [10, 20, 30])
+        #endif
+    }
+
+    private func assertEqual(stream: AsyncStream<Int>, content: [Int]) async throws {
+        var i = 0
+        for await value in stream {
+            if i < content.count {
+                XCTAssertEqual(value, content[i])
+            }
+            i += 1
+        }
+        XCTAssertEqual(i, content.count)
+    }
+
     func testMainActor() async throws {
         mainActorCount = 0
         let task1 = Task.detached {

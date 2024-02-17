@@ -119,6 +119,17 @@ Support levels:
       <td><code>AsyncSequence</code></td>
     </tr>
     <tr>
+      <td>✅</td>
+      <td>
+        <details>
+          <summary><code>AsyncStream</code></summary>
+          <ul>
+<li>When invoking the <code>init(unfolding:)</code> constructor, use a labeled argument rather than a trailing closure</li>
+          </ul>
+        </details> 
+      </td>
+    </tr>
+    <tr>
       <td>🟢</td>
       <td>
         <details>
