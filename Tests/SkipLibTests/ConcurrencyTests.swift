@@ -78,7 +78,7 @@ final class ConcurrencyTests: XCTestCase {
         Self.taskIsCancelled = false
         let task = Task {
             defer { Self.taskIsCancelled = Task.isCancelled }
-            try await Task.sleep(nanoseconds: 10_000_000)
+            try await Task.sleep(nanoseconds: 100_000_000)
         }
         let _ = await asyncInt() + asyncInt2()
         task.cancel()
@@ -138,7 +138,7 @@ final class ConcurrencyTests: XCTestCase {
                 return results
             }
         } catch {
-            XCTAssertTrue(error is ConcurrencyTestsError)
+            XCTAssertTrue(error is ConcurrencyTestsError, "Caught wrong error type: \(error)")
         }
     }
 
@@ -396,6 +396,107 @@ final class ConcurrencyTests: XCTestCase {
                 XCTAssertEqual(value, content[i])
             }
             i += 1
+        }
+        XCTAssertEqual(i, content.count)
+    }
+
+    func testAsyncThrowingStream() async throws {
+        let (stream, continuation) = AsyncThrowingStream.makeStream(of: Int.self)
+        continuation.yield(100)
+        continuation.yield(200)
+        continuation.finish()
+        try await assertEqual(stream: stream, content: [100, 200], shouldThrow: false)
+
+        let (stream2, continuation2) = AsyncThrowingStream.makeStream(of: Int.self)
+        Task {
+            await continuation2.yield(asyncInt())
+            await continuation2.yield(asyncInt2())
+            continuation2.finish(throwing: ConcurrencyTestsError())
+        }
+        try await assertEqual(stream: stream2, content: [100, 200], shouldThrow: true)
+
+        var i = 0
+        let stream3 = AsyncThrowingStream<Int, Error>(unfolding: {
+            i += 1
+            if i == 1 {
+                return await self.asyncInt()
+            } else if i == 2 {
+                return await self.asyncInt2()
+            } else {
+                throw ConcurrencyTestsError()
+            }
+        })
+        try await assertEqual(stream: stream3, content: [100, 200], shouldThrow: true)
+
+        #if SKIP
+        let stream4 = AsyncThrowingStream(Int.self) { continuation in
+            continuation.yield(100)
+            continuation.yield(200)
+            continuation.finish(throwing: ConcurrencyTestsError())
+        }
+        var flow = stream4.kotlin()
+        var c = 0
+        do {
+            flow.collect { value in
+                if c == 0 {
+                    XCTAssertEqual(value, 100)
+                } else if c == 1 {
+                    XCTAssertEqual(value, 200)
+                }
+                c += 1
+            }
+            XCTFail("Should have thrown")
+        } catch {
+        }
+        XCTAssertEqual(c, 2)
+
+        i = 0
+        let stream5 = AsyncStream<Int>(unfolding: {
+            i += 1
+            if i == 1 {
+                return await self.asyncInt()
+            } else if i == 2 {
+                return await self.asyncInt2()
+            } else {
+                throw ConcurrencyTestsError()
+            }
+        })
+        flow = stream5.kotlin()
+        c = 0
+        do {
+            flow.collect { value in
+                if c == 0 {
+                    XCTAssertEqual(value, 100)
+                } else if c == 1 {
+                    XCTAssertEqual(value, 200)
+                }
+                c += 1
+            }
+            XCTFail("Should have thrown")
+        } catch {
+        }
+        XCTAssertEqual(c, 2)
+
+        flow = kotlinx.coroutines.flow.flowOf(10, 20, 30)
+        let stream6 = AsyncThrowingStream<Int, Error>(flow: flow)
+        try await assertEqual(stream: stream6, content: [10, 20, 30], shouldThrow: false)
+        #endif
+    }
+
+    private func assertEqual(stream: AsyncThrowingStream<Int, Error>, content: [Int], shouldThrow: Bool) async throws {
+        var i = 0
+        do {
+            for try await value in stream {
+                if i < content.count {
+                    XCTAssertEqual(value, content[i])
+                }
+                i += 1
+            }
+            if shouldThrow {
+                XCTFail("Should have thrown")
+            }
+        } catch {
+            XCTAssertTrue(shouldThrow)
         }
         XCTAssertEqual(i, content.count)
     }

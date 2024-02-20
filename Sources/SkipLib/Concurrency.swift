@@ -313,7 +313,6 @@ public func withCheckedContinuation<T>(function: String = "", _ body: (CheckedCo
     fatalError()
 }
 
-@available(*, unavailable)
 public func withTaskCancellationHandler<T>(operation: () async throws -> T, onCancel handler: () -> Void) async rethrows -> T {
     fatalError()
 }

@@ -949,6 +949,11 @@ Support levels:
       <td><code>withDiscardingTaskGroup</code></td>
     </tr>
     <tr>
+    <tr>
+      <td>✅</td>
+      <td><code>withTaskCancellationHandler</code></td>
+    </tr>
+    <tr>
       <td>✅</td>
       <td><code>withThrowingTaskGroup</code></td>
     </tr>

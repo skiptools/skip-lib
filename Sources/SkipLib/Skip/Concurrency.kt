@@ -13,39 +13,52 @@ import kotlin.reflect.KClass
 /// Kotlin representation of `Swift.Task`.
 class Task<T> {
     internal var deferred: Deferred<T>
-    private var state = TaskState()
+    private val state = TaskState()
 
     constructor(priority: TaskPriority? = null, operation: suspend () -> T): this(isMainActor = false, priority = priority, operation = operation) {
     }
 
-    constructor(isMainActor: Boolean, scope: CoroutineScope = GlobalScope, priority: TaskPriority? = null, operation: suspend () -> T) {
-        // Priorities and Dispatchers are not equivalent. Dispatchers.Default is supposedly designed for CPU-intensive
-        // operations, while Dispatchers.IO is designed for IO operations. We expect CPU operations to be shorter than
-        // IO ones, so perhaps Dispatchers.Default will be better for our high priority tasks that probably don't involve
-        // a lot of waiting, while Dispatchers.IO will be better for background tasks that don't mind being preempted
+    @OptIn(DelicateCoroutinesApi::class)
+    constructor(isMainActor: Boolean, scope: CoroutineScope? = null, priority: TaskPriority? = null, operation: suspend () -> T) {
         state.priority = priority ?: Companion.currentState.get()?.priority
         val dispatcher = if (isMainActor) Dispatchers.Main else priority.dispatcher
         // Store a TaskState in our context-aware storage so that we can access it statically in e.g. Task.isCancelled
-        @OptIn(DelicateCoroutinesApi::class)
-        deferred = scope.async(dispatcher + Companion.currentState.asContextElement(state)) {
-            state.job = currentCoroutineContext().job
+        deferred = (scope ?: GlobalScope).async(dispatcher + Companion.currentState.asContextElement(state)) {
             operation()
         }
     }
 
     suspend fun value(): T {
-        return deferred.await()
+        try {
+            return deferred.await()
+        } catch (e: CancellationException) {
+            cancel() // In case exception did not come from explicit cancel
+            throw CancellationError(e)
+        }
     }
 
     fun cancel() {
-        state.isCancelled = true
-        if (state.isInNativeCancellation > 0) {
-            deferred.cancel()
+        val onCancellation: kotlin.Array<() -> Unit>
+        synchronized (state) {
+            if (state.isCancelled) {
+                return
+            }
+            // In Swift, Task cancellation is cooperative. We simply mark the Task as cancelled and invoke
+            // the cancellation handlers rather than cancel the underlying Job
+            state.isCancelled = true
+            onCancellation = state.onCancellation.toTypedArray()
+            state.onCancellation.clear()
+        }
+        try {
+            for (cancellation in onCancellation) {
+                cancellation()
+            }
+        } catch (_: Exception) {
         }
     }
 
     val isCancelled: Boolean
-        get() = deferred.isCancelled || state.isCancelled
+        get() = synchronized (state) { state.isCancelled }
 
     companion object {
         private val currentState = ThreadLocal<TaskState?>()
@@ -55,7 +68,13 @@ class Task<T> {
         val isCancelled: Boolean
             get() {
                 val state = currentState.get()
-                return state != null && (state.isCancelled || state.job?.isCancelled == true)
+                if (state == null) {
+                    return false
+                } else {
+                    synchronized (state) {
+                        return state.isCancelled
+                    }
+                }
             }
 
         fun checkCancellation() {
@@ -66,43 +85,72 @@ class Task<T> {
 
         suspend fun sleep(nanoseconds: Long) = sleep(ULong(nanoseconds))
         suspend fun sleep(nanoseconds: ULong) {
-            withNativeJobCancellation {
-                delay(timeMillis = Long(nanoseconds / 1_000_000UL))
+            val job = Job()
+            withContext(job) {
+                withTaskCancellationHandler(operation = {
+                    delay(timeMillis = Long(nanoseconds / 1_000_000UL))
+                }, onCancel = {
+                    job.cancel()
+                })
             }
         }
 
         suspend fun yield() = globalYield()
 
-        /// Use this Kotlin-only function to execute code that should cancel the underlying `Job`
-        /// when `Task.cancel()` is called.
-        ///
-        /// Cancelling the native `Job` will cause `Task.value` to throw a `CancellationError`, so it
-        /// should only be done when the Swift-equivalent API throws a  `CancellationError` on cancel.
-        suspend fun <T> withNativeJobCancellation(operation: suspend () -> T): T {
+        /// Internal implementation of global `withTaskCancellationHandler` function.
+        internal suspend fun <T> withTaskCancellationHandler(operation: suspend () -> T, onCancel: () -> Unit): T {
             val state = currentState.get()
-            state?.let { it.isInNativeCancellation += 1 }
-            try {
+            if (state == null) {
+                // Handle a situation where we're not in a Task for better integration with regular
+                // Kotlin async code
+                val job = currentCoroutineContext()[Job]
+                if (job?.isCancelled == true) {
+                    onCancel()
+                } else {
+                    job?.invokeOnCompletion { cause ->
+                        if (cause is CancellationException) {
+                            onCancel()
+                        }
+                    }
+                }
                 return operation()
-            } catch (e: CancellationException) {
-                throw CancellationError(e)
-            } finally {
-                state?.let { it.isInNativeCancellation -= 1 }
+            } else {
+                var isCancelled = false
+                synchronized (state) {
+                    isCancelled = state.isCancelled
+                    if (!isCancelled) {
+                        state.onCancellation.add(onCancel)
+                    }
+                }
+                if (isCancelled) {
+                    onCancel()
+                    return operation()
+                } else {
+                    try {
+                        return operation()
+                    } finally {
+                        synchronized (state) { state.onCancellation.remove(onCancel) }
+                    }
+                }
             }
         }
     }
 }
 
-// Use a mutable state holder to be able to set the Task status to cancelled. We use a flag rather than
-// canceling the underlying `Job` itself because Kotlin cancellation is not cooperative like Swift. A
-// cancelled `Job` always causes a CancellationException when trying to get its value.
-private class TaskState {
-    var job: Job? = null
-    var priority: TaskPriority? = null
-    var isCancelled = false
-    var isInNativeCancellation = 0
+suspend fun <T> withTaskCancellationHandler(operation: suspend () -> T, onCancel: () -> Unit): T {
+    return Task.withTaskCancellationHandler(operation, onCancel)
 }
 
-// Allows us to call the global yield function from our same-named Task function
+// Use a mutable state holder to be able to set the `Task` status to cancelled. We use a flag rather than
+// canceling the underlying `Job` itself because Kotlin cancellation is not cooperative like Swift. A
+// cancelled `Job` always causes a `CancellationException` when trying to get its value.
+private class TaskState {
+    var priority: TaskPriority? = null
+    var isCancelled = false
+    val onCancellation = mutableListOf<() -> Unit>()
+}
+
+/// Allows us to call the global `yield` function from our same-named `Task` function.
 private suspend fun globalYield() {
     yield()
 }
@@ -126,24 +174,35 @@ class TaskPriority(override val rawValue: Int): RawRepresentable<Int> {
 }
 
 private val TaskPriority?.dispatcher: CoroutineDispatcher
+    // Priorities and Dispatchers are not equivalent. Dispatchers.Default is supposedly designed for CPU-intensive
+    // operations, while Dispatchers.IO is designed for IO operations. We expect CPU operations to be shorter than
+    // IO ones, so perhaps Dispatchers.Default will be better for our high priority tasks that probably don't involve
+    // a lot of waiting, while Dispatchers.IO will be better for background tasks that don't mind being preempted
     get() = if (this == TaskPriority.high) Dispatchers.Default else Dispatchers.IO
 
+/// Kotlin representation of `Swift.TaskGroup` as well as its Discarding and Throwing variants.
 open class TaskGroup<ChildTaskResult>(private val throwErrors: Boolean = false): AsyncSequence<ChildTaskResult> {
-    private val job = Job()
-    private val coroutineScope = CoroutineScope(job)
+    private val coroutineScope = CoroutineScope(Job())
     private val tasks = mutableListOf<Task<Result<ChildTaskResult, Error>>>()
+    private var _isCancelled = false
 
     fun addTask(priority: TaskPriority? = null, operation: suspend () -> ChildTaskResult) {
+        // We create an actual Task so that the running code has access to cancellation context, etc.
+        // An exception in one Task should not fail the group unless it escapes, so we collect the
+        // success and exception values in a Result for each Task
         val task: Task<Result<ChildTaskResult, Error>> = Task(isMainActor = false, scope = coroutineScope, priority) {
             try {
                 val success = operation()
                 Result.success(success)
-            } catch (e: CancellationError) {
-                throw e
+            } catch (e: CancellationException) {
+                Result.failure(CancellationError(e))
             } catch (e: Exception) {
                 val error = (e as? Error) ?: ErrorException(e)
                 Result.failure(error)
             }
+        }
+        if (isCancelled) {
+            task.cancel()
         }
         tasks.add(task)
     }
@@ -174,7 +233,7 @@ open class TaskGroup<ChildTaskResult>(private val throwErrors: Boolean = false):
 
     suspend fun nextResult(): Result<ChildTaskResult, Error>? {
         if (isCancelled) {
-            return Result.failure(CancellationError())
+            return null
         }
         if (tasks.isEmpty()) {
             return null
@@ -183,21 +242,24 @@ open class TaskGroup<ChildTaskResult>(private val throwErrors: Boolean = false):
             return select<Result<ChildTaskResult, Error>> {
                 tasks.withIndex().forEach { (index, task) ->
                     task.deferred.onAwait {
+                        // Remove Tasks as they are consumed
                         tasks.removeAt(index)
                         it
                     }
                 }
             }
-        } catch (_: CancellationException) {
-            tasks.clear()
+        } catch (_: CancellationException) { // Parent Task's Job was cancelled?
             return null
         }
     }
 
     suspend fun waitForAll() {
-        val deferreds = tasks.map { it.deferred }
-        if (!deferreds.isEmpty()) {
-            deferreds.awaitAll()
+        try {
+            val deferreds = tasks.map { it.deferred }
+            if (!deferreds.isEmpty()) {
+                deferreds.awaitAll()
+            }
+        } catch (_: CancellationException) { // Parent Task's Job was cancelled?
         }
     }
 
@@ -205,12 +267,13 @@ open class TaskGroup<ChildTaskResult>(private val throwErrors: Boolean = false):
         get() = tasks.isEmpty()
 
     fun cancelAll() {
-        tasks.clear()
-        coroutineScope.cancel()
+        _isCancelled = true
+        // Cancellation is cooperative
+        tasks.forEach { it.cancel() }
     }
 
     val isCancelled: Boolean
-        get() = job.isCancelled
+        get() = _isCancelled
 
     override fun makeAsyncIterator(): Iterator<ChildTaskResult> {
         return Iterator(this)
@@ -242,52 +305,60 @@ class ThrowingDiscardingTaskGroup: TaskGroup<Unit>(throwErrors = true) {
 
 suspend fun <ChildTaskResult, GroupResult> withTaskGroup(of: KClass<ChildTaskResult>, returning: KClass<GroupResult>? = null, body: suspend (TaskGroup<ChildTaskResult>) -> GroupResult): GroupResult where ChildTaskResult : Any, GroupResult: Any {
     val taskGroup = TaskGroup<ChildTaskResult>()
-    val result: GroupResult
-    try {
-        result = body(taskGroup)
-    } finally {
-        taskGroup.waitForAll()
-    }
-    return result
+    return withTaskCancellationHandler(operation = {
+        try {
+            body(taskGroup)
+        } finally {
+            taskGroup.waitForAll()
+        }
+    }, onCancel = {
+        taskGroup.cancelAll()
+    })
 }
 
 suspend fun <GroupResult> withDiscardingTaskGroup(returning: KClass<GroupResult>? = null, body: suspend (DiscardingTaskGroup) -> GroupResult): GroupResult where GroupResult: Any {
     val discardingTaskGroup = DiscardingTaskGroup()
-    val result: GroupResult
-    try {
-        result = body(discardingTaskGroup)
-    } finally {
-        discardingTaskGroup.waitForAll()
-    }
-    return result
+    return withTaskCancellationHandler(operation = {
+        try {
+            body(discardingTaskGroup)
+        } finally {
+            discardingTaskGroup.waitForAll()
+        }
+    }, onCancel = {
+        discardingTaskGroup.cancelAll()
+    })
 }
 
 suspend fun <ChildTaskResult, GroupResult> withThrowingTaskGroup(of: KClass<ChildTaskResult>, returning: KClass<GroupResult>? = null, body: suspend (ThrowingTaskGroup<ChildTaskResult>) -> GroupResult): GroupResult where ChildTaskResult : Any, GroupResult: Any {
     val taskGroup = ThrowingTaskGroup<ChildTaskResult>()
-    val result: GroupResult
-    try {
-        result = body(taskGroup)
-    } catch (e: Exception) {
+    return withTaskCancellationHandler(operation = {
+        try {
+            body(taskGroup)
+        } catch (e: Exception) {
+            taskGroup.cancelAll()
+            throw e
+        } finally {
+            taskGroup.waitForAll()
+        }
+    }, onCancel = {
         taskGroup.cancelAll()
-        throw e
-    } finally {
-        taskGroup.waitForAll()
-    }
-    return result
+    })
 }
 
 suspend fun <GroupResult> withThrowingDiscardingTaskGroup(returning: KClass<GroupResult>? = null, body: suspend (ThrowingDiscardingTaskGroup) -> GroupResult): GroupResult where GroupResult: Any {
     val discardingTaskGroup = ThrowingDiscardingTaskGroup()
-    val result: GroupResult
-    try {
-        result = body(discardingTaskGroup)
-    } catch (e: Exception) {
+    return withTaskCancellationHandler(operation = {
+        try {
+            body(discardingTaskGroup)
+        } catch (e: Exception) {
+            discardingTaskGroup.cancelAll()
+            throw e
+        } finally {
+            discardingTaskGroup.waitForAll()
+        }
+    }, onCancel = {
         discardingTaskGroup.cancelAll()
-        throw e
-    } finally {
-        discardingTaskGroup.waitForAll()
-    }
-    return result
+    })
 }
 
 /// Kotlin representation of `Swift.AnyActor`.
