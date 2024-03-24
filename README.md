@@ -984,6 +984,7 @@ Skip supports your custom `CodingKeys` as well as your custom `encode(to:)` and 
 There are, however, a few restrictions:
 
 - Skip cannot synthesize `Codable` conformance for enums that are not `RawRepresentable`. You must implement the required protocol functions yourself.
+- If you implement your own `encode` function or `init(from:)` decoding constructor and you use `CodingKeys`, you must declare your own `CodingKeys` enum. You cannot rely on the synthesized enum.
 - `Array`, `Set`, and `Dictionary` are fully supported, but nesting of these types is limited. So for example Skip can encode and decode `Array<MyCodableType>` and `Dictionary<String, MyCodableType>`, but not `Array<Dictionary<String, MyCodableType>>`. Two forms of container nesting **are** currently supported: arrays-of-arrays - e.g. `Array<Array<MyCodableType>>` - and dictionaries-of-array-values - e.g. `Dictionary<String, Array<MyCodableType>>`. In practice, other nesting patters are rare.
 - When implementing your own `init(from: Decoder)` decoding, your `decode` calls must supply a concrete type literal to decode. The following will work:
 
