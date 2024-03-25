@@ -452,3 +452,18 @@ fun zip(sequence1: String, sequence2: String): Array<Tuple2<Char, Char>> {
 
 fun Char(char: Char): Char = char
 fun Char(string: String): Char = string[0]
+
+// Also see SkipFoundation.CharacterSet.whitespaces/whitespacesAndNewlines
+val Char.isWhitespace: Boolean
+    get() = when (this) {
+        ' ', '\t', '\u2029', '\u3000' -> true
+        else -> false
+    }
+val Char.isNewline: Boolean
+    get() = when (this) {
+        'n', '\r', '\u000B', '\u000C', '\u0085', '\u2028', '\u2029' -> true
+        else -> false
+    }
+
+fun Char.uppercased(): String = toString().uppercased()
+fun Char.lowercased(): String = toString().lowercased()

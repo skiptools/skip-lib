@@ -131,6 +131,95 @@ public func String(format: String, arguments: [Any]) -> String {
 public struct Character {
     public init(_ character: Character) {
     }
+
+    public init(_ string: String) {
+    }
+
+    @available(*, unavailable)
+    public var asciiValue: UInt8? {
+        fatalError()
+    }
+
+    public var isWhitespace: Bool {
+        fatalError()
+    }
+
+    public var isNewline: Bool {
+        fatalError()
+    }
+
+    @available(*, unavailable)
+    public var isNumber: Bool {
+        fatalError()
+    }
+
+    @available(*, unavailable)
+    public var isWholeNumber: Bool {
+        fatalError()
+    }
+
+    @available(*, unavailable)
+    public var wholeNumberValue: Int? {
+        fatalError()
+    }
+
+    @available(*, unavailable)
+    public var isHexDigit: Bool {
+        fatalError()
+    }
+
+    @available(*, unavailable)
+    public var hexDigitValue: Int? {
+        fatalError()
+    }
+
+    @available(*, unavailable)
+    public var isLetter: Bool {
+        fatalError()
+    }
+
+    public func uppercased() -> String {
+        fatalError()
+    }
+
+    public func lowercased() -> String {
+        fatalError()
+    }
+
+    @available(*, unavailable)
+    public var isUppercase: Bool {
+        fatalError()
+    }
+
+    @available(*, unavailable)
+    public var isLowercase: Bool {
+        fatalError()
+    }
+
+    @available(*, unavailable)
+    public var isCased: Bool {
+        fatalError()
+    }
+
+    @available(*, unavailable)
+    public var isSymbol: Bool {
+        fatalError()
+    }
+
+    @available(*, unavailable)
+    public var isMathSymbol: Bool {
+        fatalError()
+    }
+
+    @available(*, unavailable)
+    public var isCurrencySymbol: Bool {
+        fatalError()
+    }
+
+    @available(*, unavailable)
+    public var isPunctuation: Bool {
+        fatalError()
+    }
 }
 
 public typealias CChar = Character
