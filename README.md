@@ -169,6 +169,22 @@ Support levels:
       <td>🟢</td>
       <td>
         <details>
+          <summary><code>Character</code></summary>
+          <ul>
+<li><code>init(_: Character)</code></li>
+<li><code>init(_: String)</code></li>
+<li><code>var isNewline: Bool</code></li>
+<li><code>var isWhitespace: Bool</code></li>
+<li><code>func lowercased() -> String</code></li>
+<li><code>func uppercased() -> String</code></li>
+          </ul>
+        </details> 
+      </td>
+    </tr>
+    <tr>
+      <td>🟢</td>
+      <td>
+        <details>
           <summary><code>Codable</code></summary>
           <ul>
             <li>See <a href="#codable">Codable</a></li>
