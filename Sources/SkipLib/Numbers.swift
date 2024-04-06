@@ -125,4 +125,10 @@ public let M_LN2: Double = 0.0
 public let M_LN10: Double = 0.0
 public let M_PI: Double = 0.0
 
+public let MSEC_PER_SEC = UInt64(0)
+public let NSEC_PER_SEC = UInt64(0)
+public let NSEC_PER_MSEC = UInt64(0)
+public let USEC_PER_SEC = UInt64(0)
+public let NSEC_PER_USEC = UInt64(0)
+
 #endif

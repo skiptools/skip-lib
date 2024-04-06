@@ -257,3 +257,9 @@ val M_LOG10E: Double get() = kotlin.math.ln(kotlin.math.E) / kotlin.math.ln(10.0
 val M_LN2: Double get() = kotlin.math.ln(2.0)
 val M_LN10: Double get() = kotlin.math.ln(10.0)
 val M_PI: Double get() = kotlin.math.PI
+
+val MSEC_PER_SEC = 1000UL
+val NSEC_PER_SEC = 1000000000UL
+val NSEC_PER_MSEC = 1000000UL
+val USEC_PER_SEC = 1000000UL
+val NSEC_PER_USEC = 1000UL
