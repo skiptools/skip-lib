@@ -295,7 +295,9 @@ public struct UnownedJob {
 public struct UnownedSerialExecutor {
 }
 
-@available(*, unavailable)
+public struct CheckedContinuation<T, E> where E : Error {
+}
+
 public struct UnsafeContinuation<T, E> where E : Error {
 }
 
@@ -303,12 +305,10 @@ public struct UnsafeContinuation<T, E> where E : Error {
 public struct UnsafeCurrentTask {
 }
 
-@available(*, unavailable)
 public func withCheckedContinuation<T>(function: String = "", _ body: (CheckedContinuation<T, Never>) -> Void) async -> T {
     fatalError()
 }
 
-@available(*, unavailable)
 @inlinable public func withCheckedThrowingContinuation<T>(function: String = "", _ body: (CheckedContinuation<T, Error>) -> Void) async throws -> T {
     fatalError()
 }
@@ -317,7 +317,6 @@ public func withTaskCancellationHandler<T>(operation: () async throws -> T, onCa
     fatalError()
 }
 
-@available(*, unavailable)
 public func withUnsafeContinuation<T>(_ fn: (UnsafeContinuation<T, Never>) -> Void) async -> T {
     fatalError()
 }
@@ -327,7 +326,6 @@ public func withUnsafeCurrentTask<T>(body: (UnsafeCurrentTask?) throws -> T) ret
     fatalError()
 }
 
-@available(*, unavailable)
 public func withUnsafeThrowingContinuation<T>(_ fn: (UnsafeContinuation<T, Error>) -> Void) async throws -> T {
     fatalError()
 }

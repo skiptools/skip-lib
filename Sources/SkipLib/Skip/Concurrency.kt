@@ -137,6 +137,61 @@ class Task<T> {
     }
 }
 
+suspend fun <T> withCheckedContinuation(function: String = "", body: (CheckedContinuation<T>) -> Unit): T {
+    return suspendCoroutine { continuation ->
+        body(CheckedContinuation(continuation = UnsafeContinuation(success = { value ->
+            continuation.resume(value)
+        }, failure = { error ->
+            continuation.resumeWithException(error)
+        })))
+    }
+}
+
+suspend fun <T> withCheckedThrowingContinuation(function: String = "", body: (CheckedContinuation<T>) -> Unit): T {
+    return suspendCoroutine { continuation ->
+        body(CheckedContinuation(continuation = UnsafeContinuation(success = { value ->
+            continuation.resume(value)
+        }, failure = { error ->
+            continuation.resumeWithException(error)
+        })))
+    }
+}
+
+
+class UnsafeContinuation<T> {
+    private val success: (T) -> Unit
+    private val failure: (Throwable) -> Unit
+
+    internal constructor(success: (T) -> Unit, failure: (Throwable) -> Unit) {
+        this.success = success
+        this.failure = failure
+    }
+
+    fun resume(returning: T) {
+        success(returning)
+    }
+
+    fun resume(unusedp: Nothing? = null, throwing: Throwable) {
+        failure(throwing)
+    }
+}
+
+class CheckedContinuation<T> {
+    private val continuation: UnsafeContinuation<T>
+
+    constructor(continuation: UnsafeContinuation<T>, function: String = "") {
+        this.continuation = continuation
+    }
+
+    fun resume(returning: T) {
+        this.continuation.resume(returning = returning)
+    }
+
+    fun resume(unusedp: Nothing? = null, throwing: Throwable) {
+        this.continuation.resume(throwing = throwing)
+    }
+}
+
 suspend fun <T> withTaskCancellationHandler(operation: suspend () -> T, onCancel: () -> Unit): T {
     return Task.withTaskCancellationHandler(operation, onCancel)
 }

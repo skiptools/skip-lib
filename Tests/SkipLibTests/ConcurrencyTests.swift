@@ -561,6 +561,49 @@ final class ConcurrencyTests: XCTestCase {
     func asyncInt2() async -> Int {
         return 200
     }
+
+    func testWithCheckedContinuation() async throws {
+        let i1 = await withCheckedContinuation(function: "testWithCheckedContinuation") { continuation in
+            continuation.resume(returning: 100)
+        }
+
+        XCTAssertEqual(100, i1)
+
+        let i2 = await withCheckedContinuation(function: "testWithCheckedContinuation") { continuation in
+            Task.detached {
+                continuation.resume(returning: 101)
+            }
+        }
+
+        XCTAssertEqual(101, i2)
+
+        let i3 = await withCheckedContinuation(function: "testWithCheckedContinuation") { continuation in
+            Task.detached {
+                Task {
+                    Task.detached {
+                        continuation.resume(returning: await self.asyncInt() + self.asyncInt2())
+                    }
+                }
+            }
+        }
+
+        XCTAssertEqual(300, i3)
+    }
+
+    func testWithCheckedThrowingContinuation() async throws {
+        do {
+            let x: Int = try await withCheckedThrowingContinuation(function: "testWithCheckedThrowingContinuation") { continuation in
+                Task.detached {
+                    continuation.resume(throwing: ConcurrencyTestsError())
+                }
+            }
+            XCTFail("should have thrown an error")
+        } catch _ as ConcurrencyTestsError {
+            // success
+        } catch {
+            XCTFail("wrong error thrown: \(error)")
+        }
+    }
 }
 
 struct ConcurrencyTestsError: Error {
