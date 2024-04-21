@@ -137,7 +137,7 @@ class Task<T> {
     }
 }
 
-suspend fun <T> withCheckedContinuation(function: String = "", body: (CheckedContinuation<T>) -> Unit): T {
+suspend fun <T> withCheckedContinuation(function: String = "", body: (CheckedContinuation<T, Never>) -> Unit): T {
     return suspendCoroutine { continuation ->
         body(CheckedContinuation(continuation = UnsafeContinuation(success = { value ->
             continuation.resume(value)
@@ -147,22 +147,22 @@ suspend fun <T> withCheckedContinuation(function: String = "", body: (CheckedCon
     }
 }
 
-suspend fun <T> withCheckedThrowingContinuation(function: String = "", body: (CheckedContinuation<T>) -> Unit): T {
+suspend fun <T> withCheckedThrowingContinuation(function: String = "", body: (CheckedContinuation<T, Error>) -> Unit): T {
     return suspendCoroutine { continuation ->
         body(CheckedContinuation(continuation = UnsafeContinuation(success = { value ->
             continuation.resume(value)
         }, failure = { error ->
-            continuation.resumeWithException(error)
+            continuation.resumeWithException(error as Throwable)
         })))
     }
 }
 
 
-class UnsafeContinuation<T> {
+class UnsafeContinuation<T, E> where E : Error  {
     private val success: (T) -> Unit
-    private val failure: (Throwable) -> Unit
+    private val failure: (E) -> Unit
 
-    internal constructor(success: (T) -> Unit, failure: (Throwable) -> Unit) {
+    internal constructor(success: (T) -> Unit, failure: (E) -> Unit) {
         this.success = success
         this.failure = failure
     }
@@ -171,15 +171,15 @@ class UnsafeContinuation<T> {
         success(returning)
     }
 
-    fun resume(unusedp: Nothing? = null, throwing: Throwable) {
+    fun resume(unusedp: Nothing? = null, throwing: E) {
         failure(throwing)
     }
 }
 
-class CheckedContinuation<T> {
-    private val continuation: UnsafeContinuation<T>
+class CheckedContinuation<T, E> where E : Error {
+    private val continuation: UnsafeContinuation<T, E>
 
-    constructor(continuation: UnsafeContinuation<T>, function: String = "") {
+    constructor(continuation: UnsafeContinuation<T, E>, function: String = "") {
         this.continuation = continuation
     }
 
@@ -187,8 +187,22 @@ class CheckedContinuation<T> {
         this.continuation.resume(returning = returning)
     }
 
-    fun resume(unusedp: Nothing? = null, throwing: Throwable) {
+    fun resume(unusedp: Nothing? = null, throwing: E) {
         this.continuation.resume(throwing = throwing)
+    }
+
+    fun resume(unusedp0: Nothing? = null, unusedp1: Nothing? = null, with: Result<T, E>) {
+        val result = with
+        when (result) {
+            is Result.SuccessCase -> {
+                val success = result.associated0
+                this.continuation.resume(returning = success)
+            }
+            is Result.FailureCase -> {
+                val error = result.associated0
+                this.continuation.resume(throwing = error)
+            }
+        }
     }
 }
 
