@@ -1,3 +1,10 @@
+## 0.7.9
+
+Released 2024-05-03
+
+  - Add CheckedContinuation.resume(Result) and paramaterize error type for withCheckedThrowingContinuation
+  - Add withCheckedContinuation and withCheckedThrowingContinuation
+
 ## 0.7.5
 
 Released 2024-02-18
