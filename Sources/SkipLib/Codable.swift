@@ -67,7 +67,7 @@ public protocol KeyedEncodingContainerProtocol {
 public struct KeyedEncodingContainer<Key: CodingKey> : KeyedEncodingContainerProtocol {
 }
 
-public protocol UnkeyedEncodingContainer {
+public protocol UnkeyedEncodingContainerProtocol {
     var codingPath: [CodingKey] { get }
     var count: Int { get }
     mutating func encodeNil() throws
@@ -93,7 +93,10 @@ public protocol UnkeyedEncodingContainer {
     mutating func superEncoder() -> Encoder
 }
 
-public protocol SingleValueEncodingContainer {
+public struct UnkeyedEncodingContainer : UnkeyedEncodingContainerProtocol {
+}
+
+public protocol SingleValueEncodingContainerProtocol {
     var codingPath: [CodingKey] { get }
     mutating func encodeNil() throws
     mutating func encode(_ value: Bool) throws
@@ -112,6 +115,11 @@ public protocol SingleValueEncodingContainer {
     mutating func encode(_ value: UInt64) throws
     mutating func encode<T>(_ value: T) throws where T: Any
     mutating func encodeConditional<T>(_ object: T) throws where T: Any
+    mutating func nestedContainer<NestedKey>(keyedBy keyType: NestedKey.Type) -> KeyedEncodingContainer<NestedKey> where NestedKey : CodingKey
+    mutating func nestedUnkeyedContainer() -> UnkeyedEncodingContainer
+}
+
+public struct SingleValueEncodingContainer : SingleValueEncodingContainerProtocol {
 }
 
 public protocol Decodable {
@@ -170,7 +178,7 @@ public protocol KeyedDecodingContainerProtocol {
 public struct KeyedDecodingContainer<Key: CodingKey> : KeyedDecodingContainerProtocol {
 }
 
-public protocol UnkeyedDecodingContainer {
+public protocol UnkeyedDecodingContainerProtocol {
     var codingPath: [CodingKey] { get }
     var count: Int? { get }
     var isAtEnd: Bool { get }
@@ -197,7 +205,10 @@ public protocol UnkeyedDecodingContainer {
     mutating func superDecoder() throws -> Decoder
 }
 
-public protocol SingleValueDecodingContainer {
+public struct UnkeyedDecodingContainer : UnkeyedDecodingContainerProtocol {
+}
+
+public protocol SingleValueDecodingContainerProtocol {
     var codingPath: [CodingKey] { get }
     func decodeNil() -> Bool
     func decode(_ type: Bool.Type) throws -> Bool
@@ -215,6 +226,11 @@ public protocol SingleValueDecodingContainer {
     func decode(_ type: UInt32.Type) throws -> UInt32
     func decode(_ type: UInt64.Type) throws -> UInt64
     func decode<T>(_ type: T.Type) throws -> T
+    func nestedContainer<NestedKey>(keyedBy type: NestedKey.Type) throws -> KeyedDecodingContainer<NestedKey> where NestedKey : CodingKey
+    func nestedUnkeyedContainer() throws -> UnkeyedDecodingContainer
+}
+
+public struct SingleValueDecodingContainer : SingleValueDecodingContainerProtocol {
 }
 
 #endif
