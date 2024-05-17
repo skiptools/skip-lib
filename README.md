@@ -59,8 +59,8 @@ Support levels:
 
   - ✅ – Full
   - 🟢 – High
-  - 🟡 – Medium 
-  - 🔴 – Low
+  - 🔵 - Medium
+  - 🟡 – Low
 
 <table>
   <thead><th>Support</th><th>API</th></thead>
@@ -193,7 +193,7 @@ Support levels:
       </td>
     </tr>
     <tr>
-      <td>🟡</td>
+      <td>🔵</td>
       <td>
         <details>
           <summary><code>Collection</code></summary>
@@ -692,7 +692,7 @@ Support levels:
       <td><code>RandomNumberGenerator</code></td>
     </tr>
     <tr>
-      <td>🔴</td>
+      <td>🟡</td>
       <td>
         <details>
           <summary><code>Range</code></summary>
@@ -712,7 +712,7 @@ Support levels:
       <td><code>RawRepresentable</code></td>
     </tr>
     <tr>
-      <td>🔴</td>
+      <td>🟡</td>
       <td>
        <details>
           <summary><code>Regex</code></summary>
@@ -725,7 +725,7 @@ Support levels:
       </td>
     </tr>
     <tr>
-      <td>🔴</td>
+      <td>🟡</td>
       <td>
        <details>
           <summary><code>Regex.Match</code></summary>
@@ -737,7 +737,7 @@ Support levels:
       </td>
     </tr>
     <tr>
-      <td>🔴</td>
+      <td>🟡</td>
       <td>
        <details>
           <summary><code>Regex.MatchGroup</code></summary>
@@ -752,7 +752,7 @@ Support levels:
       <td><code>Result</code></td>
     </tr>
     <tr>
-      <td>🟡</td>
+      <td>🔵</td>
       <td>
        <details>
           <summary><code>swap(_:_:)</code></summary>
@@ -854,7 +854,7 @@ Support levels:
       <td><code>SystemRandomNumberGenerator</code></td>
     </tr>
     <tr>
-      <td>🟡</td>
+      <td>🔵</td>
       <td>
         <details>
           <summary><code>Task</code></summary>
