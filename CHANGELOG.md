@@ -1,3 +1,11 @@
+## 0.7.11
+
+Released 2024-05-17
+
+  - Handle String format with preceeding %0., which causes a MissingFormatWidthException in Java (fixes https://github.com/skiptools/skip-lib/issues/2)
+  - Update API support tab colors
+  - Update README support table colors
+
 ## 0.7.9
 
 Released 2024-05-03
