@@ -428,12 +428,16 @@ private val objcPatternSpecifiers = kotlin.text.Regex("(?<!%)%(\\d+\\$)?(${objc2
 
 // Convert from Swift String.init(format:) pattern into a Kotlin-compatible format string: https://kotlinlang.org/docs/strings.html#string-formatting
 private fun objcStringFormatToJava(objCFormat: String): String {
-    val javaFormat = objcPatternSpecifiers.replace(objCFormat) { matchResult ->
+    var javaFormat = objcPatternSpecifiers.replace(objCFormat) { matchResult ->
         val matchedString = matchResult.value
         val positionalArg = matchResult.groupValues[1] // may be empty
         val objCSpecifier = matchResult.groupValues[2]
         val javaSpecifier = objc2JavaPatterns[objCSpecifier] ?: objCSpecifier
         "%${positionalArg}${javaSpecifier}"
+    }
+    if (javaFormat.startsWith("%0.")) {
+        // https://github.com/skiptools/skip-lib/issues/2 : a format like "%0.3f" is tolerated in Swift but raises a java.util.MissingFormatWidthException because the "0" is being treated as a flag
+        javaFormat = "%" + javaFormat.drop(2)
     }
     return javaFormat
 }
