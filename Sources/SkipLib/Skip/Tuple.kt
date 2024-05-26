@@ -11,11 +11,21 @@ package skip.lib
 // access members without calling `sref()` on them. So support `sref()` on the tuples themselves. Note that
 // because the tuples aren't mutable, we can ignore the `MutableStruct.onUpdate` closures
 
-data class Tuple2<E0, E1>(val _e0: E0, val _e1: E1) {
+data class Tuple2<E0, E1>(val _e0: E0, val _e1: E1): Comparable<Tuple2<E0, E1>> {
     val element0: E0
         get() = _e0.sref()
     val element1: E1
         get() = _e1.sref()
+
+    @Suppress("UNCHECKED_CAST")
+    override fun compareTo(other: Tuple2<E0, E1>): Int {
+        if (_e0 !is Comparable<*>) return 0
+        val e0cmp = (_e0 as Comparable<E0>).compareTo(other._e0)
+        if (e0cmp != 0) return e0cmp
+
+        if (_e1 !is Comparable<*>) return 0
+        return (_e1 as Comparable<E1>).compareTo(other._e1)
+    }
 
     fun sref(@Suppress("UNUSED_PARAMETER") onUpdate: ((Tuple2<E0, E1>) -> Unit)? = null): Tuple2<E0, E1> {
         val e0 = _e0.sref()
@@ -27,13 +37,27 @@ data class Tuple2<E0, E1>(val _e0: E0, val _e1: E1) {
     }
 }
 
-data class Tuple3<E0, E1, E2>(val _e0: E0, val _e1: E1, val _e2: E2) {
+data class Tuple3<E0, E1, E2>(val _e0: E0, val _e1: E1, val _e2: E2): Comparable<Tuple3<E0, E1, E2>> {
     val element0: E0
         get() = _e0.sref()
     val element1: E1
         get() = _e1.sref()
     val element2: E2
         get() = _e2.sref()
+
+    @Suppress("UNCHECKED_CAST")
+    override fun compareTo(other: Tuple3<E0, E1, E2>): Int {
+        if (_e0 !is Comparable<*>) return 0
+        val e0cmp = (_e0 as Comparable<E0>).compareTo(other._e0)
+        if (e0cmp != 0) return e0cmp
+
+        if (_e1 !is Comparable<*>) return 0
+        val e1cmp = (_e1 as Comparable<E1>).compareTo(other._e1)
+        if (e1cmp != 0) return e1cmp
+
+        if (_e2 !is Comparable<*>) return 0
+        return (_e2 as Comparable<E2>).compareTo(other._e2)
+    }
 
     fun sref(@Suppress("UNUSED_PARAMETER") onUpdate: ((Tuple3<E0, E1, E2>) -> Unit)? = null): Tuple3<E0, E1, E2> {
         val e0 = _e0.sref()
@@ -46,7 +70,7 @@ data class Tuple3<E0, E1, E2>(val _e0: E0, val _e1: E1, val _e2: E2) {
     }
 }
 
-data class Tuple4<E0, E1, E2, E3>(val _e0: E0, val _e1: E1, val _e2: E2, val _e3: E3) {
+data class Tuple4<E0, E1, E2, E3>(val _e0: E0, val _e1: E1, val _e2: E2, val _e3: E3): Comparable<Tuple4<E0, E1, E2, E3>> {
     val element0: E0
         get() = _e0.sref()
     val element1: E1
@@ -55,6 +79,24 @@ data class Tuple4<E0, E1, E2, E3>(val _e0: E0, val _e1: E1, val _e2: E2, val _e3
         get() = _e2.sref()
     val element3: E3
         get() = _e3.sref()
+
+    @Suppress("UNCHECKED_CAST")
+    override fun compareTo(other: Tuple4<E0, E1, E2, E3>): Int {
+        if (_e0 !is Comparable<*>) return 0
+        val e0cmp = (_e0 as Comparable<E0>).compareTo(other._e0)
+        if (e0cmp != 0) return e0cmp
+
+        if (_e1 !is Comparable<*>) return 0
+        val e1cmp = (_e1 as Comparable<E1>).compareTo(other._e1)
+        if (e1cmp != 0) return e1cmp
+
+        if (_e2 !is Comparable<*>) return 0
+        val e2cmp = (_e2 as Comparable<E2>).compareTo(other._e2)
+        if (e2cmp != 0) return e2cmp
+
+        if (_e3 !is Comparable<*>) return 0
+        return (_e3 as Comparable<E3>).compareTo(other._e3)
+    }
 
     fun sref(@Suppress("UNUSED_PARAMETER") onUpdate: ((Tuple4<E0, E1, E2, E3>) -> Unit)? = null): Tuple4<E0, E1, E2, E3> {
         val e0 = _e0.sref()
@@ -68,7 +110,7 @@ data class Tuple4<E0, E1, E2, E3>(val _e0: E0, val _e1: E1, val _e2: E2, val _e3
     }
 }
 
-data class Tuple5<E0, E1, E2, E3, E4>(val _e0: E0, val _e1: E1, val _e2: E2, val _e3: E3, val _e4: E4) {
+data class Tuple5<E0, E1, E2, E3, E4>(val _e0: E0, val _e1: E1, val _e2: E2, val _e3: E3, val _e4: E4): Comparable<Tuple5<E0, E1, E2, E3, E4>> {
     val element0: E0
         get() = _e0.sref()
     val element1: E1
@@ -79,6 +121,28 @@ data class Tuple5<E0, E1, E2, E3, E4>(val _e0: E0, val _e1: E1, val _e2: E2, val
         get() = _e3.sref()
     val element4: E4
         get() = _e4.sref()
+
+    @Suppress("UNCHECKED_CAST")
+    override fun compareTo(other: Tuple5<E0, E1, E2, E3, E4>): Int {
+        if (_e0 !is Comparable<*>) return 0
+        val e0cmp = (_e0 as Comparable<E0>).compareTo(other._e0)
+        if (e0cmp != 0) return e0cmp
+
+        if (_e1 !is Comparable<*>) return 0
+        val e1cmp = (_e1 as Comparable<E1>).compareTo(other._e1)
+        if (e1cmp != 0) return e1cmp
+
+        if (_e2 !is Comparable<*>) return 0
+        val e2cmp = (_e2 as Comparable<E2>).compareTo(other._e2)
+        if (e2cmp != 0) return e2cmp
+
+        if (_e3 !is Comparable<*>) return 0
+        val e3cmp = (_e3 as Comparable<E3>).compareTo(other._e3)
+        if (e3cmp != 0) return e3cmp
+
+        if (_e4 !is Comparable<*>) return 0
+        return (_e4 as Comparable<E4>).compareTo(other._e4)
+    }
 
     fun sref(@Suppress("UNUSED_PARAMETER") onUpdate: ((Tuple5<E0, E1, E2, E3, E4>) -> Unit)? = null): Tuple5<E0, E1, E2, E3, E4> {
         val e0 = _e0.sref()
