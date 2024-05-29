@@ -135,7 +135,10 @@ public struct Character {
     public init(_ string: String) {
     }
 
-    @available(*, unavailable)
+    public var isASCII: Bool {
+        fatalError()
+    }
+
     public var asciiValue: UInt8? {
         fatalError()
     }

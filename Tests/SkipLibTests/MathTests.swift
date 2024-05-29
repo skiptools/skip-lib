@@ -188,4 +188,36 @@ final class MathTests: XCTestCase {
         XCTAssertTrue(floor(Double.nan).isNaN)
         XCTAssertEqual(floor(Double.infinity), Double.infinity)
     }
+
+    func testWrappingOperators() throws {
+        XCTAssertEqual(2, 1 &+ 1)
+        XCTAssertEqual(0, 1 &- 1)
+        XCTAssertEqual(12, 3 &* 4)
+
+        XCTAssertEqual(Int8(15), Int8(Int8(5) + Int8(10)))
+
+
+        XCTAssertEqual(Int8(-119), Int8(Int8.max &+ Int8(10)))
+
+        XCTAssertEqual(Int8.min, Int8(Int8.max &+ Int8(1)))
+        XCTAssertEqual(Int16.min, Int16(Int16.max &+ Int16(1)))
+        XCTAssertEqual(Int32.min, Int32(Int32.max &+ Int32(1)))
+        XCTAssertEqual(Int64.min, Int64(Int64.max &+ Int64(1)))
+
+        //XCTAssertEqual(UInt8.min, UInt8(UInt8.max &+ UInt8(1)))
+        XCTAssertEqual(UInt16.min, UInt16(UInt16.max &+ UInt16(1)))
+        XCTAssertEqual(UInt32.min, UInt32(UInt32.max &+ UInt32(1)))
+        XCTAssertEqual(UInt64.min, UInt64(UInt64.max &+ UInt64(1)))
+
+        XCTAssertEqual(Int8.max, Int8(Int8.min &- Int8(1)))
+        XCTAssertEqual(Int16.max, Int16(Int16.min &- Int16(1)))
+        XCTAssertEqual(Int32.max, Int32(Int32.min &- Int32(1)))
+        XCTAssertEqual(Int64.max, Int64(Int64.min &- Int64(1)))
+
+        //XCTAssertEqual(UInt8.max, UInt8(UInt8.min &- UInt8(1)))
+        XCTAssertEqual(UInt16.max, UInt16(UInt16.min &- UInt16(1)))
+        XCTAssertEqual(UInt32.max, UInt32(UInt32.min &- UInt32(1)))
+        XCTAssertEqual(UInt64.max, UInt64(UInt64.min &- UInt64(1)))
+    }
+
 }

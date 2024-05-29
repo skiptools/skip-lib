@@ -357,4 +357,15 @@ final class StringTests: XCTestCase {
         XCTAssertNotEqual(arr, shuffled2)
         XCTAssertEqual(Set(arr), Set(shuffled2))
     }
+
+    func testAsciiValue() {
+        XCTAssertEqual([UInt8(72), UInt8(101), UInt8(108), UInt8(108), UInt8(111), UInt8(32), UInt8(119), UInt8(111), UInt8(114), UInt8(108), UInt8(100), UInt8(33)], "Hello world!".compactMap(\.asciiValue))
+        XCTAssertEqual(false, Character("€").isASCII)
+        XCTAssertEqual(nil, Character("€").asciiValue)
+
+        XCTAssertEqual(true, Character("\r").isNewline)
+        XCTAssertEqual(true, Character("\n").isNewline)
+
+        XCTAssertEqual(UInt8(10), Character("\r\n").asciiValue) // special case for Swift's asciiValue: “A character with the value “\r\n” (CR-LF) is normalized to “\n” (LF) and has an asciiValue property equal to 10.“
+    }
 }
