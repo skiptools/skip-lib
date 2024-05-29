@@ -1,3 +1,9 @@
+## 0.7.13
+
+Released 2024-05-29
+
+  - Add Char.asciiValue and tests for wrapping operators &+, &-, &*
+
 ## 0.7.11
 
 Released 2024-05-17
