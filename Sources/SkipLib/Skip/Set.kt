@@ -14,6 +14,17 @@ fun <Element> setOf(vararg elements: Element): Set<Element> {
     return Set(storage, nocopy = true)
 }
 
+/// Create a set with the characters of the given string.
+///
+/// We can't make this a true constructor because Kotlin doesn't have enough information to infer the element type.
+fun Set(string: String): Set<Char> {
+    val storage = LinkedHashSet<Char>()
+    for (c in string) {
+        storage.add(c)
+    }
+    return Set(storage, nocopy = true)
+}
+
 /// Kotlin representation of a Swift Set.
 ///
 /// - Seealso: `KotlinInterop.kt` for functions to convert to/from Kotlin collection types.

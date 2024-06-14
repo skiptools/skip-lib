@@ -94,8 +94,9 @@ fun <RE> String.map(transform: (Char) -> RE): Array<RE> {
 fun <RE> Substring.map(transform: (Char) -> RE): Array<RE> = stringValue.map(transform)
 
 fun String.filter(isIncluded: (Char) -> Boolean): String {
+    val string = this
     return StringBuilder().apply {
-        forEach { if (isIncluded(it)) append(it) }
+        string.forEach { if (isIncluded(it)) append(it) }
     }.toString()
 }
 fun Substring.filter(isIncluded: (Char) -> Boolean): String = stringValue.filter(isIncluded)
