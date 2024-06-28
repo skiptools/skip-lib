@@ -89,7 +89,11 @@ fun String.shuffled(using: InOut<RandomNumberGenerator>? = null): Array<Char> {
 fun Substring.shuffled(using: InOut<RandomNumberGenerator>? = null): Array<Char> = stringValue.shuffled(using)
 
 fun <RE> String.map(transform: (Char) -> RE): Array<RE> {
-    return Array(map(transform), nocopy = true)
+    val list = ArrayList<RE>()
+    for (c in this) {
+        list.add(transform(c))
+    }
+    return Array(list, nocopy = true)
 }
 fun <RE> Substring.map(transform: (Char) -> RE): Array<RE> = stringValue.map(transform)
 
@@ -223,7 +227,11 @@ fun <R> Substring.reduce(unusedp: Nothing? = null, into: R, updateAccumulatingRe
 fun Substring.reversed(): Substring = Substring(stringValue.reversed(), startIndex)
 
 fun <RE> String.flatMap(transform: (Char) -> Sequence<RE>): Array<RE> {
-    return Array(flatMap { transform(it) }, nocopy = true)
+    val array = Array<RE>()
+    for (c in this) {
+        array.append(contentsOf = transform(c))
+    }
+    return array
 }
 fun <RE> Substring.flatMap(transform: (Char) -> Sequence<RE>): Array<RE> = stringValue.flatMap(transform)
 

@@ -259,6 +259,15 @@ final class StringTests: XCTestCase {
         XCTAssertEqual(str2, "ab++cd++efg++hi")
     }
 
+    func testMap() {
+        let str = "abc"
+        let mapped = str.map { String($0) }
+        XCTAssertEqual(mapped, ["a", "b", "c"])
+
+        let flatMapped = str.flatMap { [String($0), String($0)] }
+        XCTAssertEqual(flatMapped, ["a", "a", "b", "b", "c", "c"])
+    }
+
     func testStringFormat() {
         XCTAssertEqual(String(format: "%%"), "%") // Escaping percent sign
         XCTAssertEqual(String(format: "%d", 42), "42") // Integer format
