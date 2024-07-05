@@ -88,6 +88,17 @@ fun String.shuffled(using: InOut<RandomNumberGenerator>? = null): Array<Char> {
 }
 fun Substring.shuffled(using: InOut<RandomNumberGenerator>? = null): Array<Char> = stringValue.shuffled(using)
 
+fun String.count(where: (Char) -> Boolean): Int {
+    var count = 0
+    for (c in this) {
+        if (where(c)) {
+            count++
+        }
+    }
+    return count
+}
+fun Substring.count(where: (Char) -> Boolean): Int = stringValue.count(where)
+
 fun <RE> String.map(transform: (Char) -> RE): Array<RE> {
     val list = ArrayList<RE>()
     for (c in this) {

@@ -96,6 +96,16 @@ interface Sequence<Element>: IterableStorage<Element> {
         return Array(list, nocopy = true)
     }
 
+    fun count(where: (Element) -> Boolean): Int {
+        var count = 0
+        for (element in iterable) {
+            if (where(element)) {
+                count++
+            }
+        }
+        return count
+    }
+
     fun <RE> map(transform: (Element) -> RE): Array<RE> {
         return transformToArray { it.map(transform) }
     }

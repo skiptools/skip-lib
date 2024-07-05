@@ -41,6 +41,10 @@ extension Sequence {
         fatalError()
     }
 
+    public func count(where: (Element) throws -> Bool) rethrows -> Int {
+        fatalError()
+    }
+
     public func map<RE>(_ transform: (Element) throws -> RE) rethrows -> [RE] {
         fatalError()
     }
