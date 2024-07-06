@@ -251,6 +251,17 @@ fun Double(number: UInt): Double = number.toDouble()
 fun Double(number: ULong): Double = number.toDouble()
 fun Double(string: String): Double? = try { string.toDouble() } catch (e: NumberFormatException) { null }
 
+// Skip uses BigInteger to represent Int128 and UInt128. Alias it in SkipLib so that the transpiler can use it
+// without additional imports or qualifications. We use `BigIntegerInit` rather than `BigInteger` factory functions
+// to convert from other numeric types to avoid conflicts with the built-in `BigInteger(String)` constructor
+typealias BigInteger = java.math.BigInteger
+fun BigIntegerInit(number: Number): BigInteger = BigInteger(number.toString())
+fun BigIntegerInit(number: UByte): BigInteger = BigInteger(number.toString())
+fun BigIntegerInit(number: UShort): BigInteger = BigInteger(number.toString())
+fun BigIntegerInit(number: UInt): BigInteger = BigInteger(number.toString())
+fun BigIntegerInit(number: ULong): BigInteger = BigInteger(number.toString())
+fun BigIntegerInit(string: String): BigInteger? = try { BigInteger(string) } catch (e: NumberFormatException) { null }
+
 val M_E: Double get() = kotlin.math.E
 val M_LOG2E: Double get() = kotlin.math.ln(kotlin.math.E) / kotlin.math.ln(2.0)
 val M_LOG10E: Double get() = kotlin.math.ln(kotlin.math.E) / kotlin.math.ln(10.0)

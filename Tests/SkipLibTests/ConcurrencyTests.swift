@@ -174,28 +174,28 @@ final class ConcurrencyTests: XCTestCase {
 
     func testTaskGroupCancel() async throws {
         throw XCTSkip("Failing in CI")
-        let result = try await withThrowingTaskGroup(of: Int.self) { group in
-            group.addTask {
-                return try await self.delayedInt(millis: 200)
-            }
-            group.addTask {
-                return try await self.delayedInt(millis: 100)
-            }
-            group.addTask {
-                return try await self.delayedInt(millis: 400)
-            }
-            let result = try await group.next()
-            XCTAssertNotNil(result)
-            group.cancelAll()
-            XCTAssertTrue(group.isCancelled)
-            do {
-                let _ = try await group.next()
-                XCTFail()
-            } catch is CancellationError {
-            }
-            return result ?? 0
-        }
-        XCTAssertNotEqual(result, 0)
+//        let result = try await withThrowingTaskGroup(of: Int.self) { group in
+//            group.addTask {
+//                return try await self.delayedInt(millis: 200)
+//            }
+//            group.addTask {
+//                return try await self.delayedInt(millis: 100)
+//            }
+//            group.addTask {
+//                return try await self.delayedInt(millis: 400)
+//            }
+//            let result = try await group.next()
+//            XCTAssertNotNil(result)
+//            group.cancelAll()
+//            XCTAssertTrue(group.isCancelled)
+//            do {
+//                let _ = try await group.next()
+//                XCTFail()
+//            } catch is CancellationError {
+//            }
+//            return result ?? 0
+//        }
+//        XCTAssertNotEqual(result, 0)
     }
 
     func testAsyncLet() async throws {

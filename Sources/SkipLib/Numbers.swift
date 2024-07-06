@@ -48,6 +48,18 @@ extension Int64: CustomStringConvertible {
     public var description: String { return "" }
 }
 
+extension Int128: CustomStringConvertible {
+    @available(*, unavailable)
+    public static let max: Int128 = 0
+    @available(*, unavailable)
+    public static let min: Int128 = 0
+    @available(*, unavailable)
+    public static func random(in range: Range<Int128>) -> Int128 { fatalError() }
+    @available(*, unavailable)
+    public static func random(in range: Range<Int128>, using gen: inout RandomNumberGenerator) -> Int128 { fatalError() }
+    public var description: String { return "" }
+}
+
 extension UInt8: CustomStringConvertible {
     public static let max: UInt8 = 0
     public static let min: UInt8 = 0
@@ -88,6 +100,18 @@ extension UInt64: CustomStringConvertible {
     public var description: String { return "" }
 }
 
+extension UInt128: CustomStringConvertible {
+    @available(*, unavailable)
+    public static let max: UInt128 = 0
+    @available(*, unavailable)
+    public static let min: UInt128 = 0
+    @available(*, unavailable)
+    public static func random(in range: Range<UInt128>) -> UInt128 { fatalError() }
+    @available(*, unavailable)
+    public static func random(in range: Range<UInt128>, using gen: inout RandomNumberGenerator) -> UInt128 { fatalError() }
+    public var description: String { return "" }
+}
+
 extension Float: CustomStringConvertible {
     public static let nan: Float = 0.0
     public static let infinity: Float = 0.0
@@ -117,6 +141,8 @@ extension Double: CustomStringConvertible {
     public func rounded() -> Double
     public func rounded(_ rule: FloatingPointRoundingRule) -> Double
 }
+
+public typealias BigInteger = java.math.BigInteger
 
 public let M_E: Double = 0.0
 public let M_LOG2E: Double = 0.0
