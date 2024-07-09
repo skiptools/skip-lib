@@ -203,18 +203,18 @@ final class NumberTests: XCTestCase {
         #endif
     }
 
-    #if SKIP
-    func test128Bit() {
-        XCTAssertNil(Int128("abc"))
-
-        let a = 100
-        let sum = Int128(a) + Int128(200)
-        XCTAssertEqual(Int128(300), sum)
-
-        let i = Int(sum)
-        XCTAssertEqual(i, 300)
-    }
-    #endif
+//    #if SKIP
+//    func test128Bit() {
+//        XCTAssertNil(Int128("abc"))
+//
+//        let a = 100
+//        let sum = Int128(a) + Int128(200)
+//        XCTAssertEqual(Int128(300), sum)
+//
+//        let i = Int(sum)
+//        XCTAssertEqual(i, 300)
+//    }
+//    #endif
 
     func testEquatable() {
         // Check that numbers can be used as Equatable
