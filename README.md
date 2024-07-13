@@ -267,6 +267,7 @@ Support levels:
 <li><code>func sorted(by areInIncreasingOrder: (Element, Element) throws -&gt; Bool) rethrows -&gt; [Element]</code></li>
 <li><code>var startIndex: Int</code></li>
 <li><code>var count: Int</code></li>
+<li><code>func count&lt;E&gt;(where: (E) throws -> Bool) rethrows -> Int</code></li>
 <li><code>func withContiguousStorageIfAvailable&lt;R&gt;(_ body: (Any) throws -&gt; R) rethrows -&gt; R?</code></li>
 <li><code>func forEach(_ body: (Element) throws -&gt; Void) rethrows</code></li>
 <li><code>func drop(while predicate: (Element) throws -&gt; Bool) rethrows -&gt; [Element]</code></li>
