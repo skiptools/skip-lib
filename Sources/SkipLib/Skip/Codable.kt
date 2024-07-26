@@ -725,55 +725,55 @@ interface KeyedDecodingContainerProtocol<Key: CodingKey> {
     fun <T> decode(type: KClass<T>, forKey: CodingKey): T where T: Any
 
     fun decodeIfPresent(type: KClass<Boolean>, forKey: CodingKey): Boolean? {
-        return if (contains(forKey)) decode(type, forKey) else null
+        return if (contains(forKey) && !decodeNil(forKey)) decode(type, forKey) else null
     }
 
     fun decodeIfPresent(type: KClass<String>, forKey: CodingKey): String? {
-        return if (contains(forKey)) decode(type, forKey) else null
+        return if (contains(forKey) && !decodeNil(forKey)) decode(type, forKey) else null
     }
 
     fun decodeIfPresent(type: KClass<Double>, forKey: CodingKey): Double? {
-        return if (contains(forKey)) decode(type, forKey) else null
+        return if (contains(forKey) && !decodeNil(forKey)) decode(type, forKey) else null
     }
 
     fun decodeIfPresent(type: KClass<Float>, forKey: CodingKey): Float? {
-        return if (contains(forKey)) decode(type, forKey) else null
+        return if (contains(forKey) && !decodeNil(forKey)) decode(type, forKey) else null
     }
 
     fun decodeIfPresent(type: KClass<Byte>, forKey: CodingKey): Byte? {
-        return if (contains(forKey)) decode(type, forKey) else null
+        return if (contains(forKey) && !decodeNil(forKey)) decode(type, forKey) else null
     }
 
     fun decodeIfPresent(type: KClass<Short>, forKey: CodingKey): Short? {
-        return if (contains(forKey)) decode(type, forKey) else null
+        return if (contains(forKey) && !decodeNil(forKey)) decode(type, forKey) else null
     }
 
     fun decodeIfPresent(type: KClass<Int>, forKey: CodingKey): Int? {
-        return if (contains(forKey)) decode(type, forKey) else null
+        return if (contains(forKey) && !decodeNil(forKey)) decode(type, forKey) else null
     }
 
     fun decodeIfPresent(type: KClass<Long>, forKey: CodingKey): Long? {
-        return if (contains(forKey)) decode(type, forKey) else null
+        return if (contains(forKey) && !decodeNil(forKey)) decode(type, forKey) else null
     }
 
     fun decodeIfPresent(type: KClass<UByte>, forKey: CodingKey): UByte? {
-        return if (contains(forKey)) decode(type, forKey) else null
+        return if (contains(forKey) && !decodeNil(forKey)) decode(type, forKey) else null
     }
 
     fun decodeIfPresent(type: KClass<UShort>, forKey: CodingKey): UShort? {
-        return if (contains(forKey)) decode(type, forKey) else null
+        return if (contains(forKey) && !decodeNil(forKey)) decode(type, forKey) else null
     }
 
     fun decodeIfPresent(type: KClass<UInt>, forKey: CodingKey): UInt? {
-        return if (contains(forKey)) decode(type, forKey) else null
+        return if (contains(forKey) && !decodeNil(forKey)) decode(type, forKey) else null
     }
 
     fun decodeIfPresent(type: KClass<ULong>, forKey: CodingKey): ULong? {
-        return if (contains(forKey)) decode(type, forKey) else null
+        return if (contains(forKey) && !decodeNil(forKey)) decode(type, forKey) else null
     }
 
     fun <T> decodeIfPresent(type: KClass<T>, forKey: CodingKey): T? where T: Any {
-        return if (contains(forKey)) decode(type, forKey) else null
+        return if (contains(forKey) && !decodeNil(forKey)) decode(type, forKey) else null
     }
 
     fun <NestedKey> nestedContainer(keyedBy: KClass<NestedKey>, forKey: CodingKey): KeyedDecodingContainer<NestedKey> where NestedKey: CodingKey
@@ -926,7 +926,7 @@ class KeyedDecodingContainer<Key>(container: KeyedDecodingContainerProtocol<Codi
     }
 
     inline fun <reified E> decodeIfPresent(type: KClass<Array<*>>, elementType: KClass<E>, forKey: CodingKey): Array<E>? where E: Any {
-        return if (contains(forKey)) decode(type, elementType, forKey) else null
+        return if (contains(forKey) && !decodeNil(forKey)) decode(type, elementType, forKey) else null
     }
 
     inline fun <reified E> decode(type: KClass<Set<*>>, elementType: KClass<E>, forKey: CodingKey): Set<E> where E: Any {
@@ -934,7 +934,7 @@ class KeyedDecodingContainer<Key>(container: KeyedDecodingContainerProtocol<Codi
     }
 
     inline fun <reified E> decodeIfPresent(type: KClass<Set<*>>, elementType: KClass<E>, forKey: CodingKey): Set<E>? where E: Any {
-        return if (contains(forKey)) decode(type, elementType, forKey) else null
+        return if (contains(forKey) && !decodeNil(forKey)) decode(type, elementType, forKey) else null
     }
 
     inline fun <reified E> decode(type: KClass<Array<*>>, elementType: KClass<Array<*>>, nestedElementType: KClass<E>, forKey: CodingKey): Array<Array<E>> where E: Any {
@@ -942,7 +942,7 @@ class KeyedDecodingContainer<Key>(container: KeyedDecodingContainerProtocol<Codi
     }
 
     inline fun <reified E> decodeIfPresent(type: KClass<Array<*>>, elementType: KClass<Array<*>>, nestedElementType: KClass<E>, forKey: CodingKey): Array<Array<E>>? where E: Any {
-        return if (contains(forKey)) decode(type, elementType, nestedElementType, forKey) else null
+        return if (contains(forKey) && !decodeNil(forKey)) decode(type, elementType, nestedElementType, forKey) else null
     }
 
     inline fun <reified K, reified V> decode(type: KClass<Dictionary<*, *>>, keyType: KClass<K>, valueType: KClass<V>, forKey: CodingKey): Dictionary<K, V> where K: Any, V: Any {
@@ -954,7 +954,7 @@ class KeyedDecodingContainer<Key>(container: KeyedDecodingContainerProtocol<Codi
     }
 
     inline fun <reified K, reified V> decodeIfPresent(type: KClass<Dictionary<*, *>>, keyType: KClass<K>, valueType: KClass<V>, forKey: CodingKey): Dictionary<K, V>? where K: Any, V: Any {
-        return if (contains(forKey)) decode(type, keyType, valueType, forKey) else null
+        return if (contains(forKey) && !decodeNil(forKey)) decode(type, keyType, valueType, forKey) else null
     }
 
     inline fun <reified K, reified E> decode(type: KClass<Dictionary<*, *>>, keyType: KClass<K>, valueType: KClass<Array<*>>, nestedElementType: KClass<E>, forKey: CodingKey): Dictionary<K, Array<E>> where K: Any, E: Any {
@@ -966,7 +966,7 @@ class KeyedDecodingContainer<Key>(container: KeyedDecodingContainerProtocol<Codi
     }
 
     inline fun <reified K, reified E> decodeIfPresent(type: KClass<Dictionary<*, *>>, keyType: KClass<K>, valueType: KClass<Array<*>>, nestedElementType: KClass<E>, forKey: CodingKey): Dictionary<K, Array<E>>? where K: Any, E: Any {
-        return if (contains(forKey)) decode(type, keyType, valueType, nestedElementType, forKey) else null
+        return if (contains(forKey) && !decodeNil(forKey)) decode(type, keyType, valueType, nestedElementType, forKey) else null
     }
 }
 
@@ -994,55 +994,55 @@ interface UnkeyedDecodingContainerProtocol {
     fun <T> decode(type: KClass<T>): T where T : Any
 
     fun decodeIfPresent(type: KClass<Boolean>): Boolean? {
-        return if (isAtEnd) null else decode(type)
+        return if (isAtEnd || decodeNil()) null else decode(type)
     }
 
     fun decodeIfPresent(type: KClass<String>): String? {
-        return if (isAtEnd) null else decode(type)
+        return if (isAtEnd || decodeNil()) null else decode(type)
     }
 
     fun decodeIfPresent(type: KClass<Double>): Double? {
-        return if (isAtEnd) null else decode(type)
+        return if (isAtEnd || decodeNil()) null else decode(type)
     }
 
     fun decodeIfPresent(type: KClass<Float>): Float? {
-        return if (isAtEnd) null else decode(type)
+        return if (isAtEnd || decodeNil()) null else decode(type)
     }
 
     fun decodeIfPresent(type: KClass<Byte>): Byte? {
-        return if (isAtEnd) null else decode(type)
+        return if (isAtEnd || decodeNil()) null else decode(type)
     }
 
     fun decodeIfPresent(type: KClass<Short>): Short? {
-        return if (isAtEnd) null else decode(type)
+        return if (isAtEnd || decodeNil()) null else decode(type)
     }
 
     fun decodeIfPresent(type: KClass<Int>): Int? {
-        return if (isAtEnd) null else decode(type)
+        return if (isAtEnd || decodeNil()) null else decode(type)
     }
 
     fun decodeIfPresent(type: KClass<Long>): Long? {
-        return if (isAtEnd) null else decode(type)
+        return if (isAtEnd || decodeNil()) null else decode(type)
     }
 
     fun decodeIfPresent(type: KClass<UByte>): UByte? {
-        return if (isAtEnd) null else decode(type)
+        return if (isAtEnd || decodeNil()) null else decode(type)
     }
 
     fun decodeIfPresent(type: KClass<UShort>): UShort? {
-        return if (isAtEnd) null else decode(type)
+        return if (isAtEnd || decodeNil()) null else decode(type)
     }
 
     fun decodeIfPresent(type: KClass<UInt>): UInt? {
-        return if (isAtEnd) null else decode(type)
+        return if (isAtEnd || decodeNil()) null else decode(type)
     }
 
     fun decodeIfPresent(type: KClass<ULong>): ULong? {
-        return if (isAtEnd) null else decode(type)
+        return if (isAtEnd || decodeNil()) null else decode(type)
     }
 
     fun <T> decodeIfPresent(type: KClass<T>): T? where T: Any {
-        return if (isAtEnd) null else decode(type)
+        return if (isAtEnd || decodeNil()) null else decode(type)
     }
 
     fun <NestedKey> nestedContainer(keyedBy: KClass<NestedKey>): KeyedDecodingContainer<NestedKey> where NestedKey: CodingKey
@@ -1192,7 +1192,7 @@ class UnkeyedDecodingContainer(container: UnkeyedDecodingContainerProtocol): Unk
     }
 
     inline fun <reified E> decodeIfPresent(type: KClass<Array<*>>, elementType: KClass<E>): Array<E>? where E: Any {
-        return if (isAtEnd) null else decode(type, elementType)
+        return if (isAtEnd || decodeNil()) null else decode(type, elementType)
     }
 
     inline fun <reified E> decode(type: KClass<Set<*>>, elementType: KClass<E>): Set<E> where E: Any {
@@ -1200,7 +1200,7 @@ class UnkeyedDecodingContainer(container: UnkeyedDecodingContainerProtocol): Unk
     }
 
     inline fun <reified E> decodeIfPresent(type: KClass<Set<*>>, elementType: KClass<E>): Set<E>? where E: Any {
-        return if (isAtEnd) null else decode(type, elementType)
+        return if (isAtEnd || decodeNil()) null else decode(type, elementType)
     }
 
     inline fun <reified E> decode(type: KClass<Array<*>>, elementType: KClass<Array<*>>, nestedElementType: KClass<E>): Array<Array<E>> where E: Any {
@@ -1208,7 +1208,7 @@ class UnkeyedDecodingContainer(container: UnkeyedDecodingContainerProtocol): Unk
     }
 
     inline fun <reified E> decodeIfPresent(type: KClass<Array<*>>, elementType: KClass<Array<*>>, nestedElementType: KClass<E>): Array<Array<E>>? where E: Any {
-        return if (isAtEnd) null else decode(type, elementType, nestedElementType)
+        return if (isAtEnd || decodeNil()) null else decode(type, elementType, nestedElementType)
     }
 
     inline fun <reified K, reified V> decode(type: KClass<Dictionary<*, *>>, keyType: KClass<K>, valueType: KClass<V>): Dictionary<K, V> where K: Any, V: Any {
@@ -1220,7 +1220,7 @@ class UnkeyedDecodingContainer(container: UnkeyedDecodingContainerProtocol): Unk
     }
 
     inline fun <reified K, reified V> decodeIfPresent(type: KClass<Dictionary<*, *>>, keyType: KClass<K>, valueType: KClass<V>): Dictionary<K, V>? where K: Any, V: Any {
-        return if (isAtEnd) null else decode(type, keyType, valueType)
+        return if (isAtEnd || decodeNil()) null else decode(type, keyType, valueType)
     }
 
     inline fun <reified K, reified E> decode(type: KClass<Dictionary<*, *>>, keyType: KClass<K>, valueType: KClass<Array<*>>, nestedElementType: KClass<E>): Dictionary<K, Array<E>> where K: Any, E: Any {
@@ -1232,7 +1232,7 @@ class UnkeyedDecodingContainer(container: UnkeyedDecodingContainerProtocol): Unk
     }
 
     inline fun <reified K, reified E> decodeIfPresent(type: KClass<Dictionary<*, *>>, keyType: KClass<K>, valueType: KClass<Array<*>>, nestedElementType: KClass<E>): Dictionary<K, Array<E>>? where K: Any, E: Any {
-        return if (isAtEnd) null else decode(type, keyType, valueType, nestedElementType)
+        return if (isAtEnd || decodeNil()) null else decode(type, keyType, valueType, nestedElementType)
     }
 }
 
