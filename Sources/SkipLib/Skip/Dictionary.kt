@@ -56,7 +56,12 @@ class Dictionary<K, V>: Collection<Tuple2<K, V>>, MutableStruct, KotlinConvertin
 
     @Suppress("UNCHECKED_CAST")
     constructor(uniqueKeysWithValues: Sequence<Tuple2<K, V>>, nocopy: Boolean = false) {
-        if (nocopy && uniqueKeysWithValues is EntryCollection<*, *>) {
+        if (nocopy && uniqueKeysWithValues is Dictionary<*, *>) {
+            // Share storage with the given dictionary, marking it as shared in both
+            storage = (uniqueKeysWithValues as Dictionary<K, V>).storage
+            uniqueKeysWithValues.isStorageShared = true
+            isStorageShared = true
+        } else if (nocopy && uniqueKeysWithValues is EntryCollection<*, *>) {
             // Share storage with the given dictionary, marking it as shared in both
             storage = (uniqueKeysWithValues as EntryCollection<K, V>).dictionary.storage
             uniqueKeysWithValues.dictionary.isStorageShared = true
