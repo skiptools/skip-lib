@@ -423,11 +423,11 @@ fun String.replacing(regex: Regex, with: String): String {
 }
 
 operator fun String.Companion.invoke(format: String, vararg args: Any): String {
-    return objcStringFormatToJava(format).format(*args)
+    return format.kotlinFormatString.format(*args)
 }
 
 operator fun String.Companion.invoke(format: String, arguments: Array<Any>): String {
-    return objcStringFormatToJava(format).format(*arguments.toList().toTypedArray())
+    return format.kotlinFormatString.format(*arguments.toList().toTypedArray())
 }
 
 // Mapping of valid Objective-C format specifiers into Java format specifiers.
@@ -447,21 +447,21 @@ private val objc2JavaPatterns = mapOf(
 private val objcPatternSpecifiers = kotlin.text.Regex("(?<!%)%(\\d+\\$)?(${objc2JavaPatterns.keys.sorted().joinToString("|")})")
 
 // Convert from Swift String.init(format:) pattern into a Kotlin-compatible format string: https://kotlinlang.org/docs/strings.html#string-formatting
-private fun objcStringFormatToJava(objCFormat: String): String {
-    var javaFormat = objcPatternSpecifiers.replace(objCFormat) { matchResult ->
-        val matchedString = matchResult.value
-        val positionalArg = matchResult.groupValues[1] // may be empty
-        val objCSpecifier = matchResult.groupValues[2]
-        val javaSpecifier = objc2JavaPatterns[objCSpecifier] ?: objCSpecifier
-        "%${positionalArg}${javaSpecifier}"
+val String.kotlinFormatString: String
+    get() {
+        var format = objcPatternSpecifiers.replace(this) { matchResult ->
+            val matchedString = matchResult.value
+            val positionalArg = matchResult.groupValues[1] // may be empty
+            val objCSpecifier = matchResult.groupValues[2]
+            val javaSpecifier = objc2JavaPatterns[objCSpecifier] ?: objCSpecifier
+            "%${positionalArg}${javaSpecifier}"
+        }
+        if (format.startsWith("%0.")) {
+            // https://github.com/skiptools/skip-lib/issues/2 : a format like "%0.3f" is tolerated in Swift but raises a java.util.MissingFormatWidthException because the "0" is being treated as a flag
+            format = "%" + format.drop(2)
+        }
+        return format
     }
-    if (javaFormat.startsWith("%0.")) {
-        // https://github.com/skiptools/skip-lib/issues/2 : a format like "%0.3f" is tolerated in Swift but raises a java.util.MissingFormatWidthException because the "0" is being treated as a flag
-        javaFormat = "%" + javaFormat.drop(2)
-    }
-    return javaFormat
-}
-
 
 fun zip(sequence1: String, sequence2: String): Array<Tuple2<Char, Char>> {
     val zipped = sequence1.zip(sequence2)
