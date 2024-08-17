@@ -275,7 +275,7 @@ final class StringTests: XCTestCase {
         XCTAssertEqual(String(format: "%.2f", 3.14159), "3.14") // Float format with precision
         XCTAssertEqual(String(format: "%5d", 42), "   42") // Padding
         XCTAssertEqual(String(format: "%.3f", 2.71828), "2.718") // Float format with precision
-        XCTAssertEqual(String(format: "%0.4f", 2.71828), "2.7183") // Float format with precision with preceeding 0 (https://github.com/skiptools/skip-lib/issues/2)
+        XCTAssertEqual(String(format: "x %0.4f", 2.71828), "x 2.7183") // Float format with precision with preceeding 0 (https://github.com/skiptools/skip-lib/issues/2)
         XCTAssertEqual(String(format: "%.2f%%", 75.0), "75.00%") // Percent format
         XCTAssertEqual(String(format: "%3$d %2$d %1$d", 1, 2, 3), "3 2 1") // Argument reordering
         XCTAssertEqual(String(format: "%3$d %2$d %d", 1, 2, 3, 4), "3 2 1") // Extra arguments ignored

@@ -435,6 +435,8 @@ operator fun String.Companion.invoke(format: String, arguments: Array<Any>): Str
 // Convert: "%@" into "%s", "%llf" into "%f", "%ld" into "%d", and "%2$@ %1$lld %3$lf" into "%2$s %1$d %3$f"
 private val objc2JavaPatterns = mapOf(
     "@" to "s",
+    "d" to "d",
+    "f" to "f",
     "llf" to "f",
     "lf" to "f",
     "lld" to "d",
@@ -442,23 +444,24 @@ private val objc2JavaPatterns = mapOf(
     "u" to "d",
 )
 
-// This will create the regular expression: "(?<!%)%(\\d+\\$)?(@|llf|lf|lld|ld|u)"
+// This will create the regular expression: "(?<!%)%(\\d+\\$)?(\\d*\\.?\\d+)?(@|d|f|llf|lf|lld|ld|u)"
 // (?<!%) is a negative lookbehind assertion, ensuring that % is not preceded by another % (which is how literal "%" characters are escaped)
-private val objcPatternSpecifiers = kotlin.text.Regex("(?<!%)%(\\d+\\$)?(${objc2JavaPatterns.keys.sorted().joinToString("|")})")
+private val objcPatternSpecifiers = kotlin.text.Regex("(?<!%)%(\\d+\\$)?(\\d*\\.?\\d+)?(${objc2JavaPatterns.keys.sorted().joinToString("|")})")
 
 // Convert from Swift String.init(format:) pattern into a Kotlin-compatible format string: https://kotlinlang.org/docs/strings.html#string-formatting
 val String.kotlinFormatString: String
     get() {
-        var format = objcPatternSpecifiers.replace(this) { matchResult ->
+        val format = objcPatternSpecifiers.replace(this) { matchResult ->
             val matchedString = matchResult.value
             val positionalArg = matchResult.groupValues[1] // may be empty
-            val objCSpecifier = matchResult.groupValues[2]
+            var paddingPrecisionArg = matchResult.groupValues[2] // may be empty
+            val objCSpecifier = matchResult.groupValues[3]
             val javaSpecifier = objc2JavaPatterns[objCSpecifier] ?: objCSpecifier
-            "%${positionalArg}${javaSpecifier}"
-        }
-        if (format.startsWith("%0.")) {
             // https://github.com/skiptools/skip-lib/issues/2 : a format like "%0.3f" is tolerated in Swift but raises a java.util.MissingFormatWidthException because the "0" is being treated as a flag
-            format = "%" + format.drop(2)
+            if (paddingPrecisionArg.startsWith("0.")) {
+                paddingPrecisionArg = paddingPrecisionArg.drop(1)
+            }
+            "%${positionalArg}${paddingPrecisionArg}${javaSpecifier}"
         }
         return format
     }
