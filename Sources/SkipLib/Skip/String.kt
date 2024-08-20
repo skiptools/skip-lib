@@ -448,23 +448,42 @@ private val objc2JavaPatterns = mapOf(
 // (?<!%) is a negative lookbehind assertion, ensuring that % is not preceded by another % (which is how literal "%" characters are escaped)
 private val objcPatternSpecifiers = kotlin.text.Regex("(?<!%)%(\\d+\\$)?(\\d*\\.?\\d+)?(${objc2JavaPatterns.keys.sorted().joinToString("|")})")
 
-// Convert from Swift String.init(format:) pattern into a Kotlin-compatible format string: https://kotlinlang.org/docs/strings.html#string-formatting
+/// Convert from Swift String.init(format:) pattern into a Kotlin-compatible format string: https://kotlinlang.org/docs/strings.html#string-formatting
 val String.kotlinFormatString: String
-    get() {
-        val format = objcPatternSpecifiers.replace(this) { matchResult ->
-            val matchedString = matchResult.value
-            val positionalArg = matchResult.groupValues[1] // may be empty
-            var paddingPrecisionArg = matchResult.groupValues[2] // may be empty
-            val objCSpecifier = matchResult.groupValues[3]
-            val javaSpecifier = objc2JavaPatterns[objCSpecifier] ?: objCSpecifier
-            // https://github.com/skiptools/skip-lib/issues/2 : a format like "%0.3f" is tolerated in Swift but raises a java.util.MissingFormatWidthException because the "0" is being treated as a flag
-            if (paddingPrecisionArg.startsWith("0.")) {
-                paddingPrecisionArg = paddingPrecisionArg.drop(1)
-            }
+    get() = kotlinFormatInfo().first
+
+/// Convert from Swift String.init(format:) pattern into a Kotlin-compatible format string: https://kotlinlang.org/docs/strings.html#string-formatting.
+///
+/// Return tuple includes the indexes of the interpolation substitutions, if any.
+fun String.kotlinFormatInfo(interpolationIndex: Int = 0, removePositions: Boolean = false): Pair<String, List<Int>?> {
+    var nextInterpolationIndex = interpolationIndex + 1
+    var interpolationIndexes: MutableList<Int>? = null
+    val format = objcPatternSpecifiers.replace(this) { matchResult ->
+        val matchedString = matchResult.value
+        val positionalArg = matchResult.groupValues[1] // may be empty
+        if (interpolationIndexes == null) {
+            interpolationIndexes = ArrayList<Int>(3)
+        }
+        if (positionalArg.length > 1) {
+            interpolationIndexes!!.add(positionalArg.dropLast(1).toInt())
+        } else {
+            interpolationIndexes!!.add(nextInterpolationIndex++)
+        }
+        var paddingPrecisionArg = matchResult.groupValues[2] // may be empty
+        val objCSpecifier = matchResult.groupValues[3]
+        val javaSpecifier = objc2JavaPatterns[objCSpecifier] ?: objCSpecifier
+        // https://github.com/skiptools/skip-lib/issues/2 : a format like "%0.3f" is tolerated in Swift but raises a java.util.MissingFormatWidthException because the "0" is being treated as a flag
+        if (paddingPrecisionArg.startsWith("0.")) {
+            paddingPrecisionArg = paddingPrecisionArg.drop(1)
+        }
+        if (removePositions) {
+            "%${paddingPrecisionArg}${javaSpecifier}"
+        } else {
             "%${positionalArg}${paddingPrecisionArg}${javaSpecifier}"
         }
-        return format
     }
+    return Pair(format, interpolationIndexes)
+}
 
 fun zip(sequence1: String, sequence2: String): Array<Tuple2<Char, Char>> {
     val zipped = sequence1.zip(sequence2)
