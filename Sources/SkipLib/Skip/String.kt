@@ -39,8 +39,8 @@ fun String(repeating: String, count: Int): String {
 // Swift.String API
 fun String.lowercased(): String = lowercase()
 fun String.uppercased(): String = uppercase()
-fun Substring.lowercased(): Substring = Substring(stringValue.lowercased(), startIndex)
-fun Substring.uppercased(): Substring = Substring(stringValue.uppercase(), startIndex)
+fun Substring.lowercased(): String = stringValue.lowercased()
+fun Substring.uppercased(): String = stringValue.uppercase()
 
 fun String.hasPrefix(prefix: String): Boolean = startsWith(prefix)
 fun String.hasPrefix(prefix: Substring): Boolean = startsWith(prefix.stringValue)
@@ -58,7 +58,7 @@ fun Substring.contains(string: String): Boolean = stringValue.contains(string)
 fun Substring.contains(string: Substring): Boolean = stringValue.contains(string)
 
 // String.plus(Any?) used as-is
-operator fun Substring.plus(string: Any): Substring = Substring(string.toString(), startIndex)
+operator fun Substring.plus(string: Any): String = stringValue + string
 
 // MARK: - Sequence
 
@@ -511,6 +511,10 @@ val Char.isNewline: Boolean
         else -> false
     }
 
+val Char.isUppercase: Boolean
+    get() = isUpperCase()
+val Char.isLowercase: Boolean
+    get() = isLowerCase()
 fun Char.uppercased(): String = toString().uppercased()
 fun Char.lowercased(): String = toString().lowercased()
 

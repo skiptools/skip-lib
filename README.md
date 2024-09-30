@@ -175,6 +175,8 @@ Support levels:
 <li><code>init(_: String)</code></li>
 <li><code>var isNewline: Bool</code></li>
 <li><code>var isWhitespace: Bool</code></li>
+<li><code>var isUppercase: Bool</code></li>
+<li><code>var isLowercase: Bool</code></li>
 <li><code>func lowercased() -> String</code></li>
 <li><code>func uppercased() -> String</code></li>
           </ul>
