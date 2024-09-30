@@ -775,6 +775,8 @@ val IntRange.upperBound: Int
     get() = if (endInclusive == Int.MAX_VALUE) Int.MAX_VALUE else endInclusive + 1
 val IntRange.lowerBound: Int
     get() = start
+val IntRange.isEmpty: Boolean
+    get() = isEmpty()
 
 // IntRange.isEmpty, IntRange.contains can be used as-is
 

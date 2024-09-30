@@ -189,12 +189,10 @@ public struct Character {
         fatalError()
     }
 
-    @available(*, unavailable)
     public var isUppercase: Bool {
         fatalError()
     }
 
-    @available(*, unavailable)
     public var isLowercase: Bool {
         fatalError()
     }
