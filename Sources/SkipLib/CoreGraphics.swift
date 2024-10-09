@@ -7,6 +7,26 @@
 #if SKIP
 public typealias CGFloat = Double
 
+// Mirror Double's cast functions, which typealiasing doesn't cover
+public func CGFloat(number: Number) -> CGFloat {
+    return Double(number: number)
+}
+public func CGFloat(number: UInt8) -> CGFloat {
+    return Double(number: number)
+}
+public func CGFloat(number: UInt16) -> CGFloat {
+    return Double(number: number)
+}
+public func CGFloat(number: UInt32) -> CGFloat {
+    return Double(number: number)
+}
+public func CGFloat(number: UInt64) -> CGFloat {
+    return Double(number: number)
+}
+public func CGFloat(string: String) -> CGFloat? {
+    return Double(string: string)
+}
+
 public struct CGPoint: Hashable {
     public static let zero = CGPoint()
     public var x: Double
