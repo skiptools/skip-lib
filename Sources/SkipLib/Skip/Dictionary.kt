@@ -108,11 +108,24 @@ class Dictionary<K, V>: Collection<Tuple2<K, V>>, MutableStruct, KotlinConvertin
         })
     }
 
-    operator fun get(key: K, default: () -> V): V {
-        return get(key) ?: default().sref()
+    operator fun set(key: K, value: V?) {
+        willmutate()
+        if (value == null) {
+            mutableStorage.remove(key)
+        } else {
+            mutableStorage[key.sref()] = value.sref()
+        }
+        didmutate()
     }
 
-    operator fun set(key: K, value: V?) {
+    operator fun get(key: K, default: () -> V): V {
+        // Re-set this key if the returned MutableStruct reference is mutated
+        return get(key) ?: default().sref({
+            set(key, it)
+        })
+    }
+
+    operator fun set(key: K, default: () -> V, value: V?) {
         willmutate()
         if (value == null) {
             mutableStorage.remove(key)

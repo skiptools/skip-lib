@@ -45,7 +45,8 @@ public struct Dictionary<Key, Value>: Collection {
     }
 
     public subscript(key: Key, default defaultValue: /* @autoclosure () -> Value */ Value) -> Value {
-        fatalError()
+        get { fatalError() }
+        set {}
     }
 
     public func mapValues<T>(_ transform: (Value) throws -> T) rethrows -> Dictionary<Key, T> {
