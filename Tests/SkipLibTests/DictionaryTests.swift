@@ -68,9 +68,19 @@ final class DictionaryTests: XCTestCase {
     }
 
     func testSubscriptDefaultValue() {
-        let dict = ["a": 1]
+        var dict = ["a": 1]
         XCTAssertNil(dict["b"])
         XCTAssertEqual(2, dict["b", default: 2])
+
+        dict["a", default: 1] += 100
+        XCTAssertEqual(dict["a"], 101)
+
+        dict["b", default: 3] += 100
+        XCTAssertEqual(dict["b"], 103)
+
+        var arrayDict: [String: [Int]] = [:]
+        arrayDict["a", default: [1, 2]].append(3)
+        XCTAssertEqual(arrayDict["a"], [1, 2, 3])
     }
 
     func testDictionaryReferences() {
