@@ -1021,9 +1021,9 @@ There are, however, a few restrictions:
     let object = try decoder.decode(T.self, from: jsonData)
     ```
 
-It is common for developers to take advantage of `Decodable`-typed generic functions to be able to decode arbitrary types, so this last limitation is the most onerous. You must consider it when writing your decoding code, and it often requires refactoring of any existing decoding code being ported to Skip.
+It is common for developers to take advantage of `Decodable`-typed generic functions to be able to decode arbitrary types, so this last limitation is the most onerous. You must consider it when writing your decoding code, and it often requires refactoring existing decoding code being ported to Skip.
 
-One mechanism to ease this restriction and allow you to decode unknown generic types is to write **inline** decoding functions that take advantage of Kotlin's *reified types*. Inline functions, however, come with their own limitations and tradeoffs. You can read more about this topic in the [Kotlin language documentation](https://kotlinlang.org/docs/inline-functions.html#reified-type-parameters). Skip automatically converts any Swift function with the `@inline(__always)` attribute into a Kotlin inline function with reified generics. For example:
+One mechanism to ease this restriction and allow you to decode unknown generic types is to write `inline` decoding functions that take advantage of Kotlin's *reified types*. Inline functions, however, come with their own limitations and tradeoffs. You can read more about this topic in the [Kotlin language documentation](https://kotlinlang.org/docs/inline-functions.html#reified-type-parameters). Skip automatically converts any Swift function with the `@inline(__always)` attribute into a Kotlin inline function with reified generics. For example:
 
 ```swift
 @inline(__always) public func decode<T>(type: T.Type) throws -> T {
