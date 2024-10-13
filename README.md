@@ -998,34 +998,45 @@ See the explanatory comments in `Collections.kt` for more information on the des
 
 ### Codable
 
-Skip supports your custom `CodingKeys` as well as your custom `encode(to:)` and `init(from:)` functions for encoding and decoding. Skip is also able to synthesize default `Codable` conformance for the Android versions of your Swift types. The Android versions will encode and decode exactly like their Swift source types.
+Skip is able to synthesize default `Codable` conformance for the Android versions of your Swift types. The Android versions will encode and decode exactly like their Swift source types. Skip also supports your custom `CodingKeys` as well as your custom `encode(to:)` and `init(from:)` functions for encoding and decoding. 
 
 There are, however, a few restrictions:
 
 - Skip cannot synthesize `Codable` conformance for enums that are not `RawRepresentable`. You must implement the required protocol functions yourself.
 - If you implement your own `encode` function or `init(from:)` decoding constructor and you use `CodingKeys`, you must declare your own `CodingKeys` enum. You cannot rely on the synthesized enum.
 - `Array`, `Set`, and `Dictionary` are fully supported, but nesting of these types is limited. So for example Skip can encode and decode `Array<MyCodableType>` and `Dictionary<String, MyCodableType>`, but not `Array<Dictionary<String, MyCodableType>>`. Two forms of container nesting **are** currently supported: arrays-of-arrays - e.g. `Array<Array<MyCodableType>>` - and dictionaries-of-array-values - e.g. `Dictionary<String, Array<MyCodableType>>`. In practice, other nesting patters are rare.
-- When implementing your own `init(from: Decoder)` decoding, your `decode` calls must supply a concrete type literal to decode. The following will work:
+- When calling `decode`, **you must supply a concrete type literal to decode**. This applies to both top-level `Decoders` like `JSONDecoder` as well as containers like `KeyedDecodingContainer`. The following will work:
 
     ```swift
-    init(from decoder: Decoder) throws {
-        var container = try decoder.container(keyedBy: CodingKeys.self)
-        self.array = try container.decode([Int].self, forKey: .array) 
-    }
+    let object = try decoder.decode(MyType.self, from: jsonData) 
     ```
 
     But these examples will not work:
 
     ```swift
-    init(from decoder: Decoder) throws {
-        var container = try decoder.container(keyedBy: CodingKeys.self)
-        let arrayType = [Int].self
-        self.array = try container.decode(arrayType, forKey: .array) 
-    }
+    let type = MyType.self
+    let object = try decoder.decode(type, from: jsonData)
 
-    init(from decoder: Decoder) throws {
-        var container = try decoder.container(keyedBy: CodingKeys.self)
-        // T is a generic type of this class
-        self.array = try container.decode([T].self, forKey: .array) 
-    }
+    // T is a generic type
+    let object = try decoder.decode(T.self, from: jsonData)
     ```
+
+It is common for developers to take advantage of `Decodable`-typed generic functions to be able to decode arbitrary types, so this last limitation is the most onerous. You must consider it when writing your decoding code, and it often requires refactoring of any existing decoding code being ported to Skip.
+
+One mechanism to ease this restriction and allow you to decode unknown generic types is to write **inline** decoding functions that take advantage of Kotlin's *reified types*. Inline functions, however, come with their own limitations and tradeoffs. You can read more about this topic in the [Kotlin language documentation](https://kotlinlang.org/docs/inline-functions.html#reified-type-parameters). Skip automatically converts any Swift function with the `@inline(__always)` attribute into a Kotlin inline function with reified generics. For example:
+
+```swift
+@inline(__always) public func decode<T>(type: T.Type) throws -> T {
+   ...
+   return try decoder.decode(T.self, from: jsonData) 
+}
+```
+
+Transpiles to:
+
+```kotlin
+inline fun <reified T> decode(type: KClass<T>): T {
+    ...
+    return decoder.decode(T::class, from = jsonData) 
+} 
+```
