@@ -1023,20 +1023,22 @@ There are, however, a few restrictions:
 
 It is common for developers to take advantage of `Decodable`-typed generic functions to be able to decode arbitrary types, so this last limitation is the most onerous. You must consider it when writing your decoding code, and it often requires refactoring existing decoding code being ported to Skip.
 
-One mechanism to ease this restriction and allow you to decode unknown generic types is to write `inline` decoding functions that take advantage of Kotlin's *reified types*. Inline functions, however, come with their own limitations and tradeoffs. You can read more about this topic in the [Kotlin language documentation](https://kotlinlang.org/docs/inline-functions.html#reified-type-parameters). Skip automatically converts any Swift function with the `@inline(__always)` attribute into a Kotlin inline function with reified generics. For example:
+One mechanism to ease this restriction and allow you to decode unknown generic types is to write `inline` decoding functions that take advantage of Kotlin's *reified types*. Inline functions, however, come with their own limitations and tradeoffs. You can read more about this topic in the [Kotlin language documentation](https://kotlinlang.org/docs/inline-functions.html#reified-type-parameters). Skip automatically converts any Swift function with the `@inline(__always)` attribute into a Kotlin inline function with reified generics. 
+
+For example, a function like the following **will work** with Skip, so long as you call it with a concrete `Response` type or with a generic `Response` type from another `inline` function:
 
 ```swift
-@inline(__always) public func decode<T>(type: T.Type) throws -> T {
-   ...
-   return try decoder.decode(T.self, from: jsonData) 
+@inline(__always) public func send<R: Request, Response: Decodable>(request: R) async throws -> Response {
+    let data = try await download(request: request)
+    return try jsonDecoder.decode(Response.self, from: data)
 }
 ```
 
-Transpiles to:
+It transpiles to code like:
 
 ```kotlin
-inline fun <reified T> decode(type: KClass<T>): T {
-    ...
-    return decoder.decode(T::class, from = jsonData) 
+inline suspend fun <reified R, reified Response> send(request: R): Response where R: Request, Response: Decodable {
+    val data = download(request = request)
+    return jsonDecoder.decode(Response::class, from = data) 
 } 
 ```
