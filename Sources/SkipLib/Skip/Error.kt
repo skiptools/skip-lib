@@ -21,5 +21,9 @@ fun Throwable.aserror(): Error {
 }
 
 /// Wrap a Kotlin exception to implement `Swift.Error`.
-class ErrorException(cause: Throwable): Exception(cause), Error {
+class ErrorException: Exception, Error {
+    constructor(): super()
+    constructor(message: String?, cause: Throwable?): super(message, cause)
+    constructor(message: String?): this(message, null)
+    constructor(cause: Throwable?): this(null, cause)
 }
