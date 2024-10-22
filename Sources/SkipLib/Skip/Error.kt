@@ -24,6 +24,6 @@ fun Throwable.aserror(): Error {
 class ErrorException: Exception, Error {
     constructor(): super()
     constructor(message: String?, cause: Throwable?): super(message, cause)
-    constructor(message: String?): this(message, null)
-    constructor(cause: Throwable?): this(null, cause)
+    constructor(message: String?): super(message)
+    constructor(cause: Throwable?): super(cause)
 }
