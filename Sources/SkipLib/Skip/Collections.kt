@@ -573,7 +573,9 @@ interface BidirectionalCollection<Element>: Collection<Element>, MutableListStor
 
     fun removeLast(): Element {
         willMutateStorage()
-        val lastElement = mutableList.removeLast().sref()
+        // cannot use removeLast() anymore: https://developer.android.com/about/versions/15/behavior-changes-15#openjdk-api-changes
+        //val lastElement = mutableList.removeLast().sref()
+        val lastElement = mutableList.removeAt(mutableList.lastIndex).sref()
         didMutateStorage()
         return lastElement
     }

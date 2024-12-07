@@ -386,10 +386,14 @@ final class CollectionsTests: XCTestCase {
     }
 
     func testRemoveLast() {
-        var arr1 = [1, 3, 5]
-        XCTAssertEqual(5, arr1.removeLast())
-        XCTAssertEqual(3, arr1.removeLast())
-        XCTAssertEqual([1], arr1)
+        var arr = [1, 3, 5]
+        XCTAssertEqual(5, arr.removeLast())
+        XCTAssertEqual(3, arr.removeLast())
+        XCTAssertEqual([1], arr)
+        XCTAssertEqual(1, arr.popLast())
+        XCTAssertEqual(nil, arr.popLast())
+        XCTAssertEqual(0, arr.count)
+        XCTAssertTrue(arr.isEmpty)
     }
 }
 
