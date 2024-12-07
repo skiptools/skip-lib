@@ -1,3 +1,11 @@
+## 1.2.2
+
+Released 2024-12-07
+
+  - Merge pull request #12 from skiptools/fix-removeLast
+  - Change mutableList.removeLast() to mutableList.removeLast() due to compileSDK 35 issue
+  - Add testRemoveLast()
+
 ## 1.0.0
 
 Released 2024-08-15
