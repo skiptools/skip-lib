@@ -384,6 +384,13 @@ final class CollectionsTests: XCTestCase {
             i += 1
         }
     }
+
+    func testRemoveLast() {
+        var arr1 = [1, 3, 5]
+        XCTAssertEqual(5, arr1.removeLast())
+        XCTAssertEqual(3, arr1.removeLast())
+        XCTAssertEqual([1], arr1)
+    }
 }
 
 private enum ElementEnum: Int, CaseIterable {
