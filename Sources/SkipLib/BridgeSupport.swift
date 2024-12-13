@@ -12,6 +12,9 @@ public protocol SwiftCustomBridged {
 
 /// Implemented by the generated Kotlin side of a bridged type to provide its Swift projection.
 ///
+/// We keep this in SkipLib so that the Kotlin output of transpiled bridged modules does not have a
+/// dependency on SkipBridge. We can add the SkipBridge dependency only when compiling for bridging.
+///
 /// - Returns: A closure that returns a Swift projection of this object when invoked.
 /// - Warning: This protocol is not designed for general use. It is designed for generated bridge code.
 /// - Seealso: `SkipBridgeKt.BridgeSupport`
