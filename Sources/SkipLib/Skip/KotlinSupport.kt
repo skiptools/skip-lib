@@ -5,10 +5,6 @@
 // as published by the Free Software Foundation https://fsf.org
 package skip.lib
 
-/// Marker protocol for types that are custom bridged from the Swift side.
-interface SwiftCustomBridged {
-}
-
 /// A type that can convert to an underlying Kotlin instance.
 interface KotlinConverting<T> {
     /// Convert a transpiled Swift instance to its Kotlin equivalent.
