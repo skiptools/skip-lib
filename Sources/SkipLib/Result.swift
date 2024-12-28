@@ -6,10 +6,21 @@
 
 #if SKIP
 
+private typealias PlatformValue<Success> = kotlin.Result<Success>
+
 /// Kotlin representation of `Swift.Result`.
-public enum Result<Success, Failure> where Failure : Error {
+// SKIP DECLARE: sealed class Result<out Success, out Failure>: KotlinConverting<kotlin.Result<*>>, SwiftCustomBridged where Failure: Error
+public enum Result<Success, Failure>: KotlinConverting<PlatformValue<Success>>, SwiftCustomBridged where Failure : Error {
     case success(Success)
     case failure(Failure)
+
+    public init(platformValue: PlatformValue<Success>) {
+        if let failure = platformValue.exceptionOrNull() {
+            self = .failure(failure as Failure)
+        } else {
+            self = .success(platformValue.getOrThrow())
+        }
+    }
 
     public init(catching body: () throws -> Success) {
         do {
@@ -26,6 +37,15 @@ public enum Result<Success, Failure> where Failure : Error {
         case .failure(let failure):
             // SKIP REPLACE: throw failure as Throwable
             throw failure as! Swift.Error
+        }
+    }
+
+    public override func kotlin(nocopy: Bool = false) -> PlatformValue<Success> {
+        switch self {
+        case .success(let success):
+            return PlatformValue.success(success)
+        case .failure(let failure):
+            return PlatformValue.failure(failure as! Throwable)
         }
     }
 }
