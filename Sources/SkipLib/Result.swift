@@ -43,8 +43,10 @@ public enum Result<Success, Failure>: KotlinConverting<PlatformValue<Success>>, 
     public override func kotlin(nocopy: Bool = false) -> PlatformValue<Success> {
         switch self {
         case .success(let success):
+            // SKIP REPLACE: return kotlin.Result.success(success)
             return PlatformValue.success(success)
         case .failure(let failure):
+            // SKIP REPLACE: return kotlin.Result.failure(failure as Throwable)
             return PlatformValue.failure(failure as! Throwable)
         }
     }
