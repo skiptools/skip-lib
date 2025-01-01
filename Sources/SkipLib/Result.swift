@@ -6,19 +6,20 @@
 
 #if SKIP
 
-private typealias PlatformValue<Success> = kotlin.Result<Success>
-
 /// Kotlin representation of `Swift.Result`.
-// SKIP DECLARE: sealed class Result<out Success, out Failure>: KotlinConverting<kotlin.Result<*>>, SwiftCustomBridged where Failure: Error
-public enum Result<Success, Failure>: KotlinConverting<PlatformValue<Success>>, SwiftCustomBridged where Failure : Error {
+///
+/// - Note: We do not map to `KotlinConverting<kotlin.Result...>` because `KotlinResult` is a value type
+///   that is near impossible to use with our bridging reflection.
+// SKIP DECLARE: sealed class Result<out Success, out Failure>: KotlinConverting<Pair<*, *>>, SwiftCustomBridged where Failure: Error
+public enum Result<Success, Failure>: KotlinConverting<Pair<Success?, Failure?>>, SwiftCustomBridged where Failure : Error {
     case success(Success)
     case failure(Failure)
 
-    public init(platformValue: PlatformValue<Success>) {
-        if let failure = platformValue.exceptionOrNull() {
-            self = .failure(failure as Failure)
+    public init(platformValue: Pair<Success?, Failure?>) {
+        if let failure = platformValue.second {
+            self = .failure(failure)
         } else {
-            self = .success(platformValue.getOrThrow())
+            self = .success(platformValue.first!)
         }
     }
 
@@ -40,14 +41,12 @@ public enum Result<Success, Failure>: KotlinConverting<PlatformValue<Success>>, 
         }
     }
 
-    public override func kotlin(nocopy: Bool = false) -> PlatformValue<Success> {
+    public override func kotlin(nocopy: Bool = false) -> Pair<Success?, Failure?> {
         switch self {
         case .success(let success):
-            // SKIP REPLACE: return kotlin.Result.success(success)
-            return PlatformValue.success(success)
+            return Pair(success, nil)
         case .failure(let failure):
-            // SKIP REPLACE: return kotlin.Result.failure(failure as Throwable)
-            return PlatformValue.failure(failure as! Throwable)
+            return Pair(nil, failure)
         }
     }
 }
