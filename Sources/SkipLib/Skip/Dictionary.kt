@@ -223,6 +223,9 @@ class Dictionary<K, V>: Collection<Tuple2<K, V>>, MutableStruct, KotlinConvertin
         }
     }
 
+    companion object {
+    }
+
     private class EntryCollection<K, V>(val dictionary: Dictionary<K, V>): AbstractMutableCollection<Tuple2<K, V>>() {
         override val size: Int
             get() = dictionary.storage.size

@@ -156,4 +156,7 @@ class Array<Element>: RandomAccessCollection<Element>, RangeReplaceableCollectio
             return list
         }
     }
+
+    companion object {
+    }
 }
