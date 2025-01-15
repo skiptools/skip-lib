@@ -269,4 +269,7 @@ class Set<Element>: Collection<Element>, SetAlgebra<Set<Element>, Element>, Muta
             return set
         }
     }
+
+    companion object {
+    }
 }
