@@ -17,7 +17,7 @@ public protocol SwiftCustomBridged {
 ///
 /// - Returns: A closure that returns a Swift projection of this object when invoked.
 /// - Warning: This protocol is not designed for general use. It is designed for generated bridge code.
-/// - Seealso: `SkipBridgeKt.BridgeSupport`
+/// - Seealso: `SkipBridge.BridgeSupport`
 public protocol SwiftProjecting {
     func Swift_projection(options: Int) -> () -> Any
 }
