@@ -6,14 +6,16 @@
 
 #if SKIP
 
+import kotlin.coroutines.resume
+import kotlin.coroutines.resumeWithException
+import kotlin.coroutines.suspendCoroutine
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.channels.BufferOverflow
 import kotlinx.coroutines.channels.Channel
-import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.consumeAsFlow
 import kotlinx.coroutines.flow.flow
 
-public final class AsyncStream<Element>: AsyncSequence, KotlinConverting<Flow<Element>> where Element: Any {
+public final class AsyncStream<Element>: AsyncSequence, SwiftCustomBridged, KotlinConverting<kotlinx.coroutines.flow.Flow<Element>> where Element: Any {
     // SKIP NOWARN
     public final class Continuation<Element> : Sendable {
         // SKIP NOWARN
@@ -67,17 +69,15 @@ public final class AsyncStream<Element>: AsyncSequence, KotlinConverting<Flow<El
         }
 
         public func finish() {
-            channel.close()
-            if let onTermination {
-                self.onTermination = nil
-                onTermination(Termination.finished)
-            }
+            let _ = channel.close()
         }
 
         public var onTermination: ((Termination) -> Void)?
     }
 
     var continuation: Continuation<Element>? // Internal for makeStream()
+
+    public private(set) var swiftDataSource: AsyncStreamSwiftDataSource<Element>? // Bridging support
     private var producer: (() async -> Element?)?
     private var onCancel: (() -> Void)?
 
@@ -100,7 +100,7 @@ public final class AsyncStream<Element>: AsyncSequence, KotlinConverting<Flow<El
         self.onCancel = onCancel
     }
 
-    public init(flow: Flow<Element>, bufferingPolicy limit: Continuation.BufferingPolicy = Continuation.BufferingPolicy.unbounded) {
+    public init(flow: kotlinx.coroutines.flow.Flow<Element>, bufferingPolicy limit: Continuation.BufferingPolicy = Continuation.BufferingPolicy.unbounded) {
         self.init(nil, limit, { continuation in
             Task {
                 flow.collect { value in
@@ -109,6 +109,11 @@ public final class AsyncStream<Element>: AsyncSequence, KotlinConverting<Flow<El
                 continuation.finish()
             }
         })
+    }
+
+    public init(swiftDataSource: AsyncStreamSwiftDataSource<Element>) {
+        self.swiftDataSource = swiftDataSource
+        self.producer = { await swiftDataSource.next() }
     }
 
     public func makeAsyncIterator() -> Iterator<Element> {
@@ -136,7 +141,15 @@ public final class AsyncStream<Element>: AsyncSequence, KotlinConverting<Flow<El
             withTaskCancellationHandler {
                 if let channel = stream.continuation?.channel {
                     let result = channel.receiveCatching()
-                    return result.getOrNull()
+                    if result.isClosed {
+                        if let onTermination = stream.continuation?.onTermination {
+                            stream.continuation?.onTermination = nil
+                            onTermination(Continuation.Termination.finished)
+                        }
+                        return nil
+                    } else {
+                        return result.getOrNull()
+                    }
                 } else if let producer = stream.producer {
                     return producer()
                 } else {
@@ -159,7 +172,7 @@ public final class AsyncStream<Element>: AsyncSequence, KotlinConverting<Flow<El
         }
     }
 
-    public override func kotlin(nocopy: Bool = false) -> Flow<Element> {
+    public override func kotlin(nocopy: Bool = false) -> kotlinx.coroutines.flow.Flow<Element> {
         if let channel = continuation?.channel {
             return channel.consumeAsFlow()
         } else if let producer {
@@ -181,7 +194,7 @@ public final class AsyncStream<Element>: AsyncSequence, KotlinConverting<Flow<El
 // Unfortunately because of minor API differences between `AsyncStream` and `AsyncThrowingStream`, we can't
 // really share any code between them
 
-public final class AsyncThrowingStream<Element, Failure>: AsyncSequence, KotlinConverting<Flow<Element>> where Element: Any, Failure: Error {
+public final class AsyncThrowingStream<Element, Failure>: AsyncSequence, SwiftCustomBridged, KotlinConverting<kotlinx.coroutines.flow.Flow<Element>> where Element: Any, Failure: Error {
     // SKIP NOWARN
     public final class Continuation<Element, Failure> : Sendable where Element: Any, Failure: Error {
         // SKIP NOWARN
@@ -205,6 +218,7 @@ public final class AsyncThrowingStream<Element, Failure>: AsyncSequence, KotlinC
         }
 
         let channel: Channel<Element>
+        var terminationError: Failure?
 
         public init(channel: Channel<Element>) {
             self.channel = channel
@@ -237,16 +251,15 @@ public final class AsyncThrowingStream<Element, Failure>: AsyncSequence, KotlinC
 
         public func finish(throwing error: Failure? = nil) {
             channel.close()
-            if let onTermination {
-                self.onTermination = nil
-                onTermination(Termination.finished(error))
-            }
+            terminationError = error
         }
 
         public var onTermination: ((Termination) -> Void)?
     }
 
     var continuation: Continuation<Element, Failure>? // Internal for makeStream()
+
+    public private(set) var swiftDataSource: AsyncThrowingStreamSwiftDataSource<Element>? // Bridging support
     private var producer: (() async throws -> Element?)?
     private var onCancel: (() -> Void)?
 
@@ -269,7 +282,7 @@ public final class AsyncThrowingStream<Element, Failure>: AsyncSequence, KotlinC
         self.onCancel = onCancel
     }
 
-    public init(flow: Flow<Element>, bufferingPolicy limit: Continuation.BufferingPolicy = Continuation.BufferingPolicy.unbounded) {
+    public init(flow: kotlinx.coroutines.flow.Flow<Element>, bufferingPolicy limit: Continuation.BufferingPolicy = Continuation.BufferingPolicy.unbounded) {
         self.init(nil, limit, { continuation in
             Task {
                 do {
@@ -282,6 +295,11 @@ public final class AsyncThrowingStream<Element, Failure>: AsyncSequence, KotlinC
                 }
             }
         })
+    }
+
+    public init(swiftDataSource: AsyncThrowingStreamSwiftDataSource<Element>) {
+        self.swiftDataSource = swiftDataSource
+        self.producer = { try await swiftDataSource.next() }
     }
 
     public func makeAsyncIterator() -> Iterator<Element, Failure> {
@@ -311,7 +329,17 @@ public final class AsyncThrowingStream<Element, Failure>: AsyncSequence, KotlinC
                 if let channel = stream.continuation?.channel {
                     let result = channel.receiveCatching()
                     if result.isClosed {
-                        return nil
+                        let terminationError = stream.continuation?.terminationError
+                        stream.continuation?.terminationError = nil
+                        if let onTermination = stream.continuation?.onTermination {
+                            stream.continuation?.onTermination = nil
+                            onTermination(Continuation.Termination.finished(terminationError))
+                        }
+                        if let terminationError {
+                            throw terminationError as! Throwable
+                        } else {
+                            return nil
+                        }
                     } else {
                         return result.getOrThrow()
                     }
@@ -337,7 +365,7 @@ public final class AsyncThrowingStream<Element, Failure>: AsyncSequence, KotlinC
         }
     }
 
-    public override func kotlin(nocopy: Bool = false) -> Flow<Element> {
+    public override func kotlin(nocopy: Bool = false) -> kotlinx.coroutines.flow.Flow<Element> {
         if let channel = continuation?.channel {
             return channel.consumeAsFlow()
         } else if let producer {
@@ -354,6 +382,139 @@ public final class AsyncThrowingStream<Element, Failure>: AsyncSequence, KotlinC
             return flow { }
         }
     }
+}
+
+// MARK: Bridge Support
+
+public final class AsyncStreamBridgingDataSource {
+    private var stream: AsyncStream<Any>?
+    private var throwingStream: AsyncThrowingStream<Any, Error>?
+    private var flow: kotlinx.coroutines.flow.Flow<Any>?
+
+    public init(stream: AsyncStream<Any>) {
+        self.stream = stream
+    }
+
+    public init(stream: AsyncThrowingStream<Any, Error>) {
+        self.throwingStream = stream
+    }
+
+    public init(flow: kotlinx.coroutines.flow.Flow<Any>) {
+        self.flow = flow
+    }
+
+    public func collect(onNext: (Any) -> Void, onFinish: (Throwable?) -> Void) {
+        Task {
+            if let stream {
+                let itr = stream.makeAsyncIterator()
+                while let next = await itr.next() {
+                    onNext(next)
+                }
+                onFinish(nil)
+            } else if let throwingStream {
+                let itr = throwingStream.makeAsyncIterator()
+                do {
+                    while let next = try await itr.next() {
+                        onNext(next)
+                    }
+                    onFinish(nil)
+                } catch {
+                    onFinish(error as? Throwable)
+                }
+            } else if let flow {
+                do {
+                    flow.collect {
+                        onNext($0)
+                    }
+                    onFinish(nil)
+                } catch {
+                    onFinish(error as? Throwable)
+                }
+            }
+        }
+    }
+}
+
+public final class AsyncStreamSwiftDataSource<Element> {
+    public private(set) var Swift_producer: Int64
+
+    public init(Swift_producer: Int64) {
+        self.Swift_producer = Swift_producer
+    }
+
+    deinit {
+        Swift_producer = Swift_release(Swift_producer)
+    }
+
+    public func next() async throws -> Element? {
+        suspendCoroutine { continuation in
+            Swift_next(Swift_producer) { element in
+                continuation.resume(element as? Element)
+            }
+        }
+    }
+
+    public func asFlow() -> kotlinx.coroutines.flow.Flow<Element> {
+        return flow {
+            while true {
+                if let value = next() {
+                    emit(value)
+                } else {
+                    break
+                }
+            }
+        }
+    }
+
+    // @JvmName is needed for test cases, as the name is otherwise mangled to append "$SkipLib_debug"
+    // SKIP INSERT: @JvmName("Swift_next")
+    // SKIP EXTERN
+    func Swift_next(Swift_producer: Int64, callback: (Any?) -> Void)
+    // SKIP EXTERN
+    func Swift_release(Swift_producer: Int64) -> Int64
+}
+
+public final class AsyncThrowingStreamSwiftDataSource<Element> {
+    public private(set) var Swift_producer: Int64
+
+    public init(Swift_producer: Int64) {
+        self.Swift_producer = Swift_producer
+    }
+
+    deinit {
+        Swift_producer = Swift_release(Swift_producer: Swift_producer)
+    }
+
+    public func next() async throws -> Element? {
+        suspendCoroutine { continuation in
+            Swift_next(Swift_producer) { element, error in
+                if let error {
+                    continuation.resumeWithException(error)
+                } else {
+                    continuation.resume(element as? Element)
+                }
+            }
+        }
+    }
+
+    public func asFlow() -> kotlinx.coroutines.flow.Flow<Element> {
+        return flow {
+            while true {
+                if let value = next() {
+                    emit(value)
+                } else {
+                    break
+                }
+            }
+        }
+    }
+
+    // @JvmName is needed for test cases, as the name is otherwise mangled to append "$SkipLib_debug"
+    // SKIP INSERT: @JvmName("Swift_next")
+    // SKIP EXTERN
+    func Swift_next(Swift_producer: Int64, callback: (Any?, Throwable?) -> Void)
+    // SKIP EXTERN
+    func Swift_release(Swift_producer: Int64) -> Int64
 }
 
 #endif
