@@ -497,9 +497,8 @@ class Async {
     }
 }
 
-/// Kotlin representation of `Swift.Sendable`.
-interface Sendable {
-}
+/// Allow use of `Swift.Sendable`.
+typealias Sendable = Any
 
 /// Kotlin representation of `Swift.CancellationError` when a `Task` is cancelled.
 class CancellationError(cause: Throwable? = null): Exception(cause), Error {
