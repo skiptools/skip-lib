@@ -249,12 +249,30 @@ fun <RE> String.compactMap(transform: (Char) -> RE?): Array<RE> {
 fun <RE> Substring.compactMap(transform: (Char) -> RE?): Array<RE> = stringValue.compactMap(transform)
 
 fun String.split(separator: Char, maxSplits: Int = Int.max, omittingEmptySubsequences: Boolean = true): Array<String> {
-    val limit = if (maxSplits == Int.max) 0 else maxSplits
-    var splits = split(separator, limit = limit)
-    if (omittingEmptySubsequences) {
-        splits = splits.filter { !it.isEmpty }
+    if (this.isEmpty()) return if (omittingEmptySubsequences) Array() else Array(listOf(""))
+
+    val result = mutableListOf<String>()
+    var start = 0
+    var splits = 0
+
+    for (i in this.indices) {
+        if (this[i] == separator && splits < maxSplits) {
+            val part = this.substring(start, i)
+            if (!omittingEmptySubsequences || part.isNotEmpty()) {
+                result.add(part)
+            }
+            start = i + 1
+            splits++
+            if (splits >= maxSplits) { break }
+        }
     }
-    return Array(splits, nocopy = true)
+
+    val part = this.substring(start)
+    if (!omittingEmptySubsequences || part.isNotEmpty()) {
+        result.add(part)
+    }
+
+    return Array(result, nocopy = true)
 }
 fun Substring.split(separator: Char, maxSplits: Int = Int.max, omittingEmptySubsequences: Boolean = true): Array<String> = stringValue.split(separator = separator, maxSplits = maxSplits, omittingEmptySubsequences = omittingEmptySubsequences)
 
