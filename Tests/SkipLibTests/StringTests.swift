@@ -256,6 +256,23 @@ final class StringTests: XCTestCase {
         XCTAssertEqual(str2, "ab++cd++efg++hi")
     }
 
+    func testSplitMax() {
+        let str = "ab,cd,efg,,hi"
+        XCTAssertEqual(["ab,cd,efg,,hi"], str.split(separator: ",", maxSplits: 0))
+        XCTAssertEqual(["ab", "cd,efg,,hi"], str.split(separator: ",", maxSplits: 1))
+        XCTAssertEqual(["ab", "cd", "efg,,hi"], str.split(separator: ",", maxSplits: 2))
+        XCTAssertEqual(["ab", "cd", "efg", ",hi"], str.split(separator: ",", maxSplits: 3))
+        XCTAssertEqual(["ab", "cd", "efg", "hi"], str.split(separator: ",", maxSplits: 4))
+
+        XCTAssertEqual(["ab,cd,efg,,hi"], str.split(separator: ",", maxSplits: 0, omittingEmptySubsequences: false))
+        XCTAssertEqual(["ab", "cd,efg,,hi"], str.split(separator: ",", maxSplits: 1, omittingEmptySubsequences: false))
+        XCTAssertEqual(["ab", "cd", "efg,,hi"], str.split(separator: ",", maxSplits: 2, omittingEmptySubsequences: false))
+        XCTAssertEqual(["ab", "cd", "efg", ",hi"], str.split(separator: ",", maxSplits: 3, omittingEmptySubsequences: false))
+        XCTAssertEqual(["ab", "cd", "efg", "", "hi"], str.split(separator: ",", maxSplits: 4, omittingEmptySubsequences: false))
+
+        XCTAssertEqual([""], "".split(separator: ",", omittingEmptySubsequences: false))
+    }
+
     func testMap() {
         let str = "abc"
         let mapped = str.map { String($0) }
