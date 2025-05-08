@@ -16,3 +16,11 @@ let package = Package(
         .testTarget(name: "SkipLibTests", dependencies: ["SkipLib", .product(name: "SkipTest", package: "skip")], plugins: [.plugin(name: "skipstone", package: "skip")]),
     ]
 )
+
+if ProcessInfo.processInfo.environment["SKIP_BRIDGE"] ?? "0" != "0" {
+    // all library types must be dynamic to support bridging
+    package.products = package.products.map({ product in
+        guard let libraryProduct = product as? Product.Library else { return product }
+        return .library(name: libraryProduct.name, type: .dynamic, targets: libraryProduct.targets)
+    })
+}
