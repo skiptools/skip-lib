@@ -1,6 +1,6 @@
 # SkipLib
 
-Swift standard library for [Skip](https://skip.tools) apps.
+Swift standard library for [Skip Lite](https://skip.tools) transpiled Swift.
 
 See what API is currently implemented [here](#swift-standard-library-support).
 
