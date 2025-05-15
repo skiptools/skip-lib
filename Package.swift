@@ -1,6 +1,5 @@
 // swift-tools-version: 5.9
 import PackageDescription
-import Foundation
 
 let package = Package(
     name: "skip-lib",
@@ -9,8 +8,8 @@ let package = Package(
         .library(name: "SkipLib", targets: ["SkipLib"]),
     ],
     dependencies: [
-        .package(url: "https://source.skip.tools/skip.git", from: "1.2.5"),
-        .package(url: "https://source.skip.tools/skip-unit.git", from: "1.1.0"),
+        .package(url: "https://source.skip.tools/skip.git", from: "1.5.14"),
+        .package(url: "https://source.skip.tools/skip-unit.git", from: "1.1.3"),
     ],
     targets: [
         .target(name: "SkipLib", dependencies: [.product(name: "SkipUnit", package: "skip-unit")], plugins: [.plugin(name: "skipstone", package: "skip")]),
@@ -18,7 +17,7 @@ let package = Package(
     ]
 )
 
-if ProcessInfo.processInfo.environment["SKIP_BRIDGE"] ?? "0" != "0" {
+if Context.environment["SKIP_BRIDGE"] ?? "0" != "0" {
     // all library types must be dynamic to support bridging
     package.products = package.products.map({ product in
         guard let libraryProduct = product as? Product.Library else { return product }
