@@ -996,6 +996,19 @@ Corresponding Kotlin types - `List`, `Set`, `Map`, `String`, etc - do not share 
 
 See the explanatory comments in `Collections.kt` for more information on the design of SkipLib's internal collections support.
 
+#### Converting between Skip and Kotlin collections
+
+It is important to note that Skip's `skip.lib.Array` is not the same as a Java/Kotlin `kotlin.Array`, so if you need to pass a Skip array into a Java API that expects a Java-style Array, you need to convert it like so:
+
+```swift
+#if SKIP
+let skipArray: skip.lib.Array<String> = ["ABC", "DEF"]
+let kotlinList: kotlin.collections.List<String> = skipArray.toList()
+let kotlinArray: kotlin.Array<String> = kotlinList.toTypedArray()
+java.util.Arrays.sort(kotlinArray) // same as a Java array
+#endif
+```
+
 ### Codable
 
 Skip is able to synthesize default `Codable` conformance for the Android versions of your Swift types. The Android versions will encode and decode exactly like their Swift source types. Skip also supports your custom `CodingKeys` as well as your custom `encode(to:)` and `init(from:)` functions for encoding and decoding. 
