@@ -453,7 +453,6 @@ extension RangeReplaceableCollection {
     public mutating func replaceSubrange(_ subrange: any RangeExpression<Int>, with newElements: any Collection<Element>) {
     }
 
-    @available(*, unavailable)
     public mutating func reserveCapacity(_ n: Int) {
     }
 

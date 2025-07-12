@@ -154,6 +154,13 @@ class Array<Element>: RandomAccessCollection<Element>, RangeReplaceableCollectio
         }
     }
 
+    fun reserveCapacity(n: Int) {
+        val mlist = mutableList
+        if (mlist is ArrayList) {
+            mlist.ensureCapacity(n)
+        }
+    }
+
     companion object {
     }
 }
