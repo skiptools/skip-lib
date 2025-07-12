@@ -392,6 +392,11 @@ final class CollectionsTests: XCTestCase {
         XCTAssertEqual(0, arr.count)
         XCTAssertTrue(arr.isEmpty)
     }
+
+    func testReserveCapacity() {
+        var arr = [1, 3, 5]
+        arr.reserveCapacity(100)
+    }
 }
 
 private enum ElementEnum: Int, CaseIterable {
