@@ -16,5 +16,5 @@ jobs:
     #uses: skiptools/actions/.github/workflows/skip-framework.yml@v1
     uses: skiptools/actions/.github/workflows/skip-framework.yml@linux
     with:
-      runs-on: "['macos-13', 'ubuntu-24.04', 'ubuntu-24.04-arm']"
+      runs-on: "['macos-13', 'ubuntu-24.04']"
 
