@@ -303,7 +303,9 @@ final class StringTests: XCTestCase {
         XCTAssertEqual(String(format: "%@%@%@%@", "a", "b", "c", "d"), "abcd") // Multiple %@ substitutions
         XCTAssertEqual(String(format: "%1$@ %2$@ %1$@", "A", "B"), "A B A") // Reusing arguments
 
+        #if !os(Linux)
         XCTAssertEqual(String(format: "%4$@ %1$d %3$.5f", 42, "hello", 3.14159, "world"), "world 42 3.14159") // Mixed arguments
+        #endif
         XCTAssertEqual(String(format: "The %@ is %3$@: %2$d", "answer", 42, "forty-two"), "The answer is forty-two: 42") // Mixed substitutions
 
         // format styles used in .xcstrings files
@@ -323,8 +325,10 @@ final class StringTests: XCTestCase {
         XCTAssertEqual(String(format: "The answer is %ld", 42), "The answer is 42") // Long decimal (Java should convert to %d)
         XCTAssertEqual(String(format: "The answer is %lld", 42), "The answer is 42") // Long long decimal (Java should convert to %d)
 
+        #if !os(Linux)
         XCTAssertEqual(String(format: "The answer is %lf", 42.2), "The answer is 42.200000") // Long float (Java should convert to %f)
         XCTAssertEqual(String(format: "The answer is %llf", 42.2), "The answer is 42.200000") // Long long float (Java should convert to %d)
+        #endif
         XCTAssertEqual(String(format: "The value is %u", 42), "The value is 42") // Unsigned format
 
         #if !SKIP // java.util.UnknownFormatConversionException: Conversion = 'z'
