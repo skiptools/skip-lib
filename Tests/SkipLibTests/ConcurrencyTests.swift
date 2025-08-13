@@ -542,7 +542,7 @@ final class ConcurrencyTests: XCTestCase {
         #if SKIP
         return Int(java.lang.System.currentTimeMillis())
         #else
-        return Int(CFAbsoluteTimeGetCurrent() * 1000)
+        return Int(Date.now.timeIntervalSince1970 * 1000)
         #endif
     }
 
