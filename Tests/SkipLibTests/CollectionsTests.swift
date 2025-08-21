@@ -397,6 +397,32 @@ final class CollectionsTests: XCTestCase {
         var arr = [1, 3, 5]
         arr.reserveCapacity(100)
     }
+
+    func testRanges() {
+        let rangeExclusiveInt = 1..<3
+        XCTAssertEqual(rangeExclusiveInt.lowerBound, 1)
+        XCTAssertEqual(rangeExclusiveInt.upperBound, 3)
+
+        let rangeInclusiveInt = 1...3
+        XCTAssertEqual(rangeInclusiveInt.lowerBound, 1)
+        // XCTAssertEqual(rangeInclusiveInt.upperBound, 3) // java.lang.AssertionError: 4 != 3 // https://github.com/skiptools/skip-lib/issues/30
+
+        let rangeExclusiveInt16 = Int16(1)..<Int16(3)
+        XCTAssertEqual(rangeExclusiveInt16.lowerBound, 1)
+        XCTAssertEqual(rangeExclusiveInt16.upperBound, 3)
+
+        let rangeExclusiveInt64 = Int64(1)..<Int64(3)
+        XCTAssertEqual(rangeExclusiveInt64.lowerBound, 1)
+        XCTAssertEqual(rangeExclusiveInt64.upperBound, 3)
+
+        let rangeExclusiveUInt64 = UInt64(1)..<UInt64(3)
+        XCTAssertEqual(rangeExclusiveUInt64.lowerBound, UInt64(1))
+        XCTAssertEqual(rangeExclusiveUInt64.upperBound, UInt64(3))
+
+        let rangeExclusiveUInt = UInt(1)..<UInt(3)
+        XCTAssertEqual(rangeExclusiveUInt.lowerBound, UInt(1))
+        XCTAssertEqual(rangeExclusiveUInt.upperBound, UInt(3))
+    }
 }
 
 private enum ElementEnum: Int, CaseIterable {
