@@ -782,3 +782,58 @@ val IntRange.isEmpty: Boolean
 fun <RE> IntRange.map(transform: (Int) -> RE): Array<RE> {
     return Array((this as Iterable<Int>).map(transform), nocopy = true)
 }
+
+val UIntRange.upperBound: UInt
+    get() = if (endInclusive == UInt.MAX_VALUE) UInt.MAX_VALUE else endInclusive + UInt(1)
+val UIntRange.lowerBound: UInt
+    get() = start
+val UIntRange.isEmpty: Boolean
+    get() = isEmpty()
+
+// UIntRange.isEmpty, UIntRange.contains can be used as-is
+
+fun <RE> UIntRange.map(transform: (UInt) -> RE): Array<RE> {
+    return Array((this as Iterable<UInt>).map(transform), nocopy = true)
+}
+
+val LongRange.upperBound: Long
+    get() = if (endInclusive == Long.MAX_VALUE) Long.MAX_VALUE else endInclusive + 1
+val LongRange.lowerBound: Long
+    get() = start
+val LongRange.isEmpty: Boolean
+    get() = isEmpty()
+
+
+// LongRange.isEmpty, LongRange.contains can be used as-is
+
+fun <RE> LongRange.map(transform: (Long) -> RE): Array<RE> {
+    return Array((this as Iterable<Long>).map(transform), nocopy = true)
+}
+
+val ULongRange.upperBound: ULong
+    get() = if (endInclusive == ULong.MAX_VALUE) ULong.MAX_VALUE else endInclusive + ULong(1)
+val ULongRange.lowerBound: ULong
+    get() = start
+val ULongRange.isEmpty: Boolean
+    get() = isEmpty()
+
+
+// ULongRange.isEmpty, ULongRange.contains can be used as-is
+
+fun <RE> ULongRange.map(transform: (ULong) -> RE): Array<RE> {
+    return Array((this as Iterable<ULong>).map(transform), nocopy = true)
+}
+
+val CharRange.upperBound: Char
+    get() = if (endInclusive == Char.MAX_VALUE) Char.MAX_VALUE else endInclusive + 1
+val CharRange.lowerBound: Char
+    get() = start
+val CharRange.isEmpty: Boolean
+    get() = isEmpty()
+
+
+// CharRange.isEmpty, CharRange.contains can be used as-is
+
+fun <RE> CharRange.map(transform: (Char) -> RE): Array<RE> {
+    return Array((this as Iterable<Char>).map(transform), nocopy = true)
+}
