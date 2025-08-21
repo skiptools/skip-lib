@@ -399,9 +399,13 @@ final class CollectionsTests: XCTestCase {
     }
 
     func testRanges() {
+        let rangeExclusiveInt = 1..<3
+        XCTAssertEqual(rangeExclusiveInt.lowerBound, 1)
+        XCTAssertEqual(rangeExclusiveInt.upperBound, 3)
+
         let rangeInclusiveInt = 1...3
         XCTAssertEqual(rangeInclusiveInt.lowerBound, 1)
-        // XCTAssertEqual(rangeInclusiveInt.upperBound, 3) // java.lang.AssertionError: 4 != 3
+        // XCTAssertEqual(rangeInclusiveInt.upperBound, 3) // java.lang.AssertionError: 4 != 3 // https://github.com/skiptools/skip-lib/issues/30
 
         let rangeExclusiveInt16 = Int16(1)..<Int16(3)
         XCTAssertEqual(rangeExclusiveInt16.lowerBound, 1)
@@ -418,10 +422,6 @@ final class CollectionsTests: XCTestCase {
         let rangeExclusiveUInt = UInt(1)..<UInt(3)
         XCTAssertEqual(rangeExclusiveUInt.lowerBound, UInt(1))
         XCTAssertEqual(rangeExclusiveUInt.upperBound, UInt(3))
-
-        let rangeExclusiveInt = 1..<3
-        XCTAssertEqual(rangeExclusiveInt.lowerBound, 1)
-        XCTAssertEqual(rangeExclusiveInt.upperBound, 3)
     }
 }
 
