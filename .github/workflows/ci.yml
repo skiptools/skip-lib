@@ -13,7 +13,7 @@ permissions:
 
 jobs:
   call-workflow:
-    uses: skiptools/actions/.github/workflows/skip-framework.yml@linux-android-sdk
+    uses: skiptools/actions/.github/workflows/skip-framework.yml@skip-action
     with:
       runs-on: "['macos-13', 'ubuntu-24.04']"
 
