@@ -1,6 +1,6 @@
 # SkipLib
 
-Swift standard library for [Skip Lite](https://skip.tools) transpiled Swift.
+Swift standard library for [Skip Lite](https://skip.dev) transpiled Swift.
 
 See what API is currently implemented [here](#swift-standard-library-support).
 
@@ -13,7 +13,7 @@ SkipLib vends the `skip.lib` Kotlin package. It serves two purposes:
 
 ## Dependencies
 
-SkipLib depends on the [skip](https://source.skip.tools/skip) transpiler plugin and has no additional library dependencies.
+SkipLib depends on the [skip](https://source.skip.dev/skip) transpiler plugin and has no additional library dependencies.
 
 It is part of the core *SkipStack* and is not intended to be imported directly.
 The module is transparently adopted through the automatic addition of `import skip.lib.*` to transpiled files by the Skip transpiler.
@@ -29,7 +29,7 @@ See [Swift Standard Library Support](#swift-standard-library-support).
 
 ## Contributing
 
-We welcome contributions to SkipLib. The Skip product [documentation](https://skip.tools/docs/contributing/) includes helpful instructions and tips on local Skip library development. 
+We welcome contributions to SkipLib. The Skip product [documentation](https://skip.dev/docs/contributing/) includes helpful instructions and tips on local Skip library development. 
 
 The most pressing need is to reduce the amount of unimplemented API. To help fill in unimplemented API in SkipLib:
 
@@ -46,7 +46,7 @@ Apart from the Skip transpiler itself, SkipLib implements the lowest levels of t
 
 Most Skip libraries *call* Kotlin API, but are *written* in Swift, relying on the Skip transpiler for translation to Kotlin. Most of SkipLib, however, is written in pure Kotlin. Consider SkipLib's implementation of Swift's `Array`. SkipLib divides its `Array` support into two files:
 
-1. `Sources/SkipLib/Array.swift` acts as a Swift header file, declaring the `Array` type's Swift API but stubbing out the implementation. The `// SKIP SYMBOLFILE` comment at the top of the file marks it as such. Read more about special Skip comments in the Skip product [documentation](https://skip.tools/docs/platformcustomization/#skip-comments).
+1. `Sources/SkipLib/Array.swift` acts as a Swift header file, declaring the `Array` type's Swift API but stubbing out the implementation. The `// SKIP SYMBOLFILE` comment at the top of the file marks it as such. Read more about special Skip comments in the Skip product [documentation](https://skip.dev/docs/platformcustomization/#skip-comments).
 1. `Sources/SkipLib/Skip/Array.kt` contains the actual `Array` implementation in Kotlin. 
 
 This pattern is used for most Swift types throughout SkipLib. Meanwhile, SwiftLib implementations of constructs built directly into the Swift language - e.g. tuples or `inout` parameters - only have a Kotlin file, with no corresponding Swift symbol file.
