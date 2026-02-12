@@ -1,6 +1,6 @@
 # SkipLib
 
-Swift standard library for [Skip Lite](https://skip.dev/docs/status#skip_lite) transpiled Swift.
+Swift standard library for [Skip Lite](https://skip.dev/docs/modes/#lite) transpiled Swift.
 
 See what API is currently implemented [here](#swift-standard-library-support).
 
