@@ -169,6 +169,25 @@ final class ConcurrencyTests: XCTestCase {
         XCTAssertEqual(results.count, 2)
     }
 
+    func testThrowingTaskGroupWaitForAllPropagatesThrow() async throws {
+        do {
+            let _ = try await withThrowingTaskGroup(of: Void.self) { group in
+                group.addTask {
+                    try await Task.sleep(nanoseconds: 10_000_000)
+                }
+                group.addTask {
+                    try await Task.sleep(nanoseconds: 5_000_000)
+                    throw ConcurrencyTestsError()
+                }
+                try await group.waitForAll()
+                XCTFail("waitForAll should have thrown")
+            }
+            XCTFail("Should have thrown ConcurrencyTestsError")
+        } catch {
+            XCTAssertTrue(error is ConcurrencyTestsError, "Caught wrong error type: \(error)")
+        }
+    }
+
     func testTaskGroupCancel() async throws {
         throw XCTSkip("Failing in CI")
 //        let result = try await withThrowingTaskGroup(of: Int.self) { group in

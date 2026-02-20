@@ -323,7 +323,23 @@ open class TaskGroup<ChildTaskResult>(private val throwErrors: Boolean = false):
         try {
             val deferreds = tasks.map { it.deferred }
             if (!deferreds.isEmpty()) {
-                deferreds.awaitAll()
+                val results = deferreds.awaitAll()
+                if (throwErrors) {
+                    var firstNonCancellationError: Throwable? = null
+                    for (result in results) {
+                        try {
+                            result.get()
+                        } catch (e: CancellationError) {
+                            // Expected when siblings were cancelled (e.g. in finally after body threw)
+                            // Do not propagate - would supersede the original error
+                        } catch (e: Exception) {
+                            if (firstNonCancellationError == null) {
+                                firstNonCancellationError = e
+                            }
+                        }
+                    }
+                    firstNonCancellationError?.let { throw it }
+                }
             }
         } catch (_: CancellationException) { // Parent Task's Job was cancelled?
         }
