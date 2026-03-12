@@ -1,113 +1,114 @@
 // Copyright 2023–2025 Skip
 // SPDX-License-Identifier: LGPL-3.0-only WITH LGPL-3.0-linking-exception
+import Testing
 import XCTest
 
-final class NumberTests: XCTestCase {
-    func testNumberMinMax() {
+@Suite struct NumberTests {
+    @Test func numberMinMax() {
         #if !SKIP
-        XCTAssertGreaterThan(Int8.max, Int8.min)
-        XCTAssertGreaterThan(Int16.max, Int16.min)
-        XCTAssertGreaterThan(Int32.max, Int32.min)
-        XCTAssertGreaterThan(Int64.max, Int64.min)
+        #expect(Int8.max > Int8.min)
+        #expect(Int16.max > Int16.min)
+        #expect(Int32.max > Int32.min)
+        #expect(Int64.max > Int64.min)
 
-        XCTAssertGreaterThan(UInt8.max, UInt8.min)
-        XCTAssertGreaterThan(UInt16.max, UInt16.min)
-        XCTAssertGreaterThan(UInt32.max, UInt32.min)
-        XCTAssertGreaterThan(UInt64.max, UInt64.min)
+        #expect(UInt8.max > UInt8.min)
+        #expect(UInt16.max > UInt16.min)
+        #expect(UInt32.max > UInt32.min)
+        #expect(UInt64.max > UInt64.min)
 
-        XCTAssertEqual(Int8.max, Int8(127))
-        XCTAssertEqual(Int8.min, Int8(-128))
+        #expect(Int8.max == Int8(127))
+        #expect(Int8.min == Int8(-128))
 
-        XCTAssertEqual(UInt8.max, UInt8(255))
-        XCTAssertEqual(UInt8.min, UInt8(0))
+        #expect(UInt8.max == UInt8(255))
+        #expect(UInt8.min == UInt8(0))
 
-        XCTAssertEqual(Int64.max, Int64(9223372036854775807))
+        #expect(Int64.max == Int64(9223372036854775807))
 
         #if !SKIP
-        XCTAssertEqual(Int64.min, Int64(-9223372036854775808))
+        #expect(Int64.min == Int64(-9223372036854775808))
         #endif
         #if SKIP
         // Kotlin seems to disallow referencing Long.MIN_VALUE for some reason
         // XCTAssertEqual(Int64.min, Int64(-9223372036854775808)) // The value is out of range
         // But Long.MIN_VALUE+1 seems to be OK…
-        XCTAssertEqual(Int64.min + 1, Int64(-9223372036854775807))
+        #expect(Int64.min + 1 == Int64(-9223372036854775807))
         #endif
 
         // XCTAssertEqual(UInt.max, UInt(18446744073709551615))
-        XCTAssertEqual(UInt.min, UInt(0))
+        #expect(UInt.min == UInt(0))
         #endif
     }
 
-    func testNumberInitializers() {
-        XCTAssertEqual(Int(100), 100)
-        XCTAssertEqual(Int32(100), 100)
+    @Test func numberInitializers() {
+        #expect(Int(100) == 100)
+        #expect(Int32(100) == 100)
 
-        XCTAssertEqual(Int8(100), 100)
-        XCTAssertEqual(Int16(100), 100)
-        XCTAssertEqual(Int64(100), 100)
+        #expect(Int8(100) == 100)
+        #expect(Int16(100) == 100)
+        #expect(Int64(100) == 100)
 
         #if !SKIP
-        XCTAssertEqual(UInt(100), 100) // java.lang.AssertionError: expected: java.lang.Integer<100> but was: kotlin.UInt<100>
-        XCTAssertEqual(UInt8(100), 100)
-        XCTAssertEqual(UInt16(100), 100)
-        XCTAssertEqual(UInt32(100), 100)
-        XCTAssertEqual(UInt64(100), 100)
+        #expect(UInt(100) == 100) // java.lang.AssertionError: expected: java.lang.Integer<100> but was: kotlin.UInt<100>
+        #expect(UInt8(100) == 100)
+        #expect(UInt16(100) == 100)
+        #expect(UInt32(100) == 100)
+        #expect(UInt64(100) == 100)
 
         // java.lang.ClassCastException: class java.lang.Integer cannot be cast to class java.lang.Byte (java.lang.Integer and java.lang.Byte are in module java.base of loader 'bootstrap')
-        XCTAssertEqual(100 as Int, 100)
-        XCTAssertEqual(100 as Int8, 100)
-        XCTAssertEqual(100 as Int16, 100)
-        XCTAssertEqual(100 as Int32, 100)
-        XCTAssertEqual(100 as Int64, 100)
+        #expect(100 as Int == 100)
+        #expect(100 as Int8 == 100)
+        #expect(100 as Int16 == 100)
+        #expect(100 as Int32 == 100)
+        #expect(100 as Int64 == 100)
         #endif
     }
 
-    func testNumberConversions() {
-        XCTAssertEqual(Int(13), 13)
-        XCTAssertEqual(Int8(13), Int8(13))
-        XCTAssertEqual(Int(Int32(13)), 13)
-        XCTAssertEqual(Int(Int64(13)), 13)
+    @Test func numberConversions() {
+        #expect(Int(13) == 13)
+        #expect(Int8(13) == Int8(13))
+        #expect(Int(Int32(13)) == 13)
+        #expect(Int(Int64(13)) == 13)
 
-        XCTAssertEqual(Int(UInt(13)), 13)
-        XCTAssertEqual(Int(UInt8(13)), 13)
-        XCTAssertEqual(Int(UInt32(13)), 13)
-        XCTAssertEqual(Int(UInt64(13)), 13)
+        #expect(Int(UInt(13)) == 13)
+        #expect(Int(UInt8(13)) == 13)
+        #expect(Int(UInt32(13)) == 13)
+        #expect(Int(UInt64(13)) == 13)
 
-        XCTAssertEqual(Double(13), 13.0)
-        XCTAssertEqual(Double(Float(13)), 13.0)
+        #expect(Double(13) == 13.0)
+        #expect(Double(Float(13)) == 13.0)
         XCTAssertEqual(Double(13), 13.0, accuracy: 0.0)
         XCTAssertEqual(Double(Float(13)), 13.0, accuracy: 0.0)
 
-        XCTAssertEqual(Int(Double(Float(1.3)) * 10.0), 12)
+        #expect(Int(Double(Float(1.3)) * 10.0) == 12)
     }
 
-    func testIntegers() {
+    @Test func integers() {
         let a: Int32 = 10
         let b: Int32 = 3
 
         // Test addition
-        XCTAssertEqual(a + b, 13)
+        #expect(a + b == 13)
 
         // Test subtraction
-        XCTAssertEqual(a - b, 7)
+        #expect(a - b == 7)
 
         // Test multiplication
-        XCTAssertEqual(a * b, 30)
+        #expect(a * b == 30)
 
         // Test division
-        XCTAssertEqual(a / b, 3)
+        #expect(a / b == 3)
 
         // Test modulo
-        XCTAssertEqual(a % b, 1)
+        #expect(a % b == 1)
 
         // Test negation
-        XCTAssertEqual(-a, -10)
+        #expect(-a == -10)
 
         // Test equality
-        XCTAssertNotEqual(a, b)
+        #expect(a != b)
     }
 
-    func testFloatingPoint() {
+    @Test func floatingPoint() {
         let a: Double = 1.23
         let b: Double = 4.56
 
@@ -127,10 +128,10 @@ final class NumberTests: XCTestCase {
         XCTAssertEqual(-a, -1.23, accuracy: 0.001)
 
         // Test equality
-        XCTAssertNotEqual(a, b)
+        #expect(a != b)
     }
 
-    func testUnsignedIntegers() {
+    @Test func unsignedIntegers() {
         let a: UInt8 = UInt8(200)
         let b: UInt8 = UInt8(50)
 
@@ -138,99 +139,99 @@ final class NumberTests: XCTestCase {
         // automatic coercion to unsigned types doesn't work
 
         // Test addition
-        XCTAssertEqual(a + b, 250) // java.lang.AssertionError: expected: java.lang.Integer<250> but was: kotlin.UInt<250>
+        #expect(a + b == 250) // java.lang.AssertionError: expected: java.lang.Integer<250> but was: kotlin.UInt<250>
 
         // Test subtraction
-        XCTAssertEqual(a - b, 150)
+        #expect(a - b == 150)
 
         // Test multiplication
         //XCTAssertEqual(a * b, 10000)
 
         // Test division
-        XCTAssertEqual(a / b, 4)
+        #expect(a / b == 4)
 
         // Test modulo
-        XCTAssertEqual(a % b, 0)
+        #expect(a % b == 0)
 
         // Test overflow behavior
-        XCTAssertFalse(a.addingReportingOverflow(b).overflow)
-        XCTAssertTrue(a.addingReportingOverflow(UInt8.max).overflow)
+        #expect(!a.addingReportingOverflow(b).overflow)
+        #expect(a.addingReportingOverflow(UInt8.max).overflow)
 
         // Test equality
-        XCTAssertNotEqual(a, b)
+        #expect(a != b)
         #endif
     }
 
-    func testFixedWidthIntegers() {
+    @Test func fixedWidthIntegers() {
         let a: Int16 = -300
         let b: Int16 = 600
 
         // Test addition
-        XCTAssertEqual(a + b, 300)
+        #expect(a + b == 300)
 
         // Test subtraction
-        XCTAssertEqual(b - a, 900)
+        #expect(b - a == 900)
 
         // Test multiplication
         //XCTAssertEqual(a * b, -180000)
 
         // Test division
-        XCTAssertEqual(b / a, -2)
+        #expect(b / a == -2)
 
         // Test overflow behavior
         #if !SKIP
-        XCTAssertFalse(a.addingReportingOverflow(b).overflow)
-        XCTAssertFalse(a.addingReportingOverflow(Int16.max).overflow)
-        XCTAssertTrue(b.addingReportingOverflow(Int16.max).overflow)
+        #expect(!a.addingReportingOverflow(b).overflow)
+        #expect(!a.addingReportingOverflow(Int16.max).overflow)
+        #expect(b.addingReportingOverflow(Int16.max).overflow)
         #endif
 
         // Test equality
-        XCTAssertNotEqual(a, b)
+        #expect(a != b)
     }
 
-    func testMinMax() {
-        XCTAssertEqual(1, min(1, 2))
-        XCTAssertEqual(2, max(1, 2))
+    @Test func minMax() {
+        #expect(1 == min(1, 2))
+        #expect(2 == max(1, 2))
 
-        XCTAssertTrue(isWholeNumber(min(1, 2)))
-        XCTAssertFalse(isWholeNumber(min(1.1, 2.2)))
-        XCTAssertFalse(isWholeNumber(min(Double(1), 2.2)))
+        #expect(isWholeNumber(min(1, 2)))
+        #expect(!isWholeNumber(min(1.1, 2.2)))
+        #expect(!isWholeNumber(min(Double(1), 2.2)))
         #if !SKIP
-        XCTAssertFalse(isWholeNumber(min(1, 2.2))) // inferred type is IntegerLiteralType[Int,Long,Byte,Short] but Comparable<Double> was expected
+        #expect(!isWholeNumber(min(1, 2.2))) // inferred type is IntegerLiteralType[Int,Long,Byte,Short] but Comparable<Double> was expected
         #endif
     }
 
     #if SKIP
-    func test128Bit() {
-        XCTAssertNil(Int128("abc"))
+    @Test func int128Bit() {
+        #expect(Int128("abc") == nil)
 
         let a = 100
         let sum = Int128(a) + Int128(200)
-        XCTAssertEqual(Int128(300), sum)
+        #expect(Int128(300) == sum)
 
         let i = Int(sum)
-        XCTAssertEqual(i, 300)
+        #expect(i == 300)
     }
     #endif
 
-    func testEquatable() {
+    @Test func equatable() {
         // Check that numbers can be used as Equatable
-        XCTAssertTrue(isEquatable(1))
-        XCTAssertTrue(isEquatable(1.0))
-        XCTAssertTrue(isEqual(1, 1))
-        XCTAssertFalse(isEqual(1, 2))
-        XCTAssertTrue(isEqual(1.0, 1.0))
-        XCTAssertFalse(isEqual(1.0, 2.0))
+        #expect(isEquatable(1))
+        #expect(isEquatable(1.0))
+        #expect(isEqual(1, 1))
+        #expect(!isEqual(1, 2))
+        #expect(isEqual(1.0, 1.0))
+        #expect(!isEqual(1.0, 2.0))
     }
 
-    func testHashable() {
+    @Test func hashable() {
         // Check that numbers can be used as Hashable
-        XCTAssertTrue(isHashable(1))
-        XCTAssertTrue(isHashable(1.0))
-        XCTAssertTrue(hashValueEqual(1, 1))
-        XCTAssertFalse(hashValueEqual(1, 2))
-        XCTAssertTrue(hashValueEqual(1.0, 1.0))
-        XCTAssertFalse(hashValueEqual(1.0, 2.0))
+        #expect(isHashable(1))
+        #expect(isHashable(1.0))
+        #expect(hashValueEqual(1, 1))
+        #expect(!hashValueEqual(1, 2))
+        #expect(hashValueEqual(1.0, 1.0))
+        #expect(!hashValueEqual(1.0, 2.0))
     }
 
     private func isWholeNumber(_ i: Int) -> Bool {
@@ -254,9 +255,9 @@ final class NumberTests: XCTestCase {
         return lhs.hashValue == rhs.hashValue
     }
 
-    func testRandomNumbers() {
-        XCTAssertEqual(0, Int.random(in: 0 ... 0))
-        XCTAssertEqual(100, Int.random(in: 100 ..< 101))
+    @Test func randomNumbers() {
+        #expect(0 == Int.random(in: 0 ... 0))
+        #expect(100 == Int.random(in: 100 ..< 101))
 
         checkRandomRange({ Int.random(in: 0 ..< 3) }, min: 0, max: 2)
         checkRandomRange({ Int.random(in: 0 ... 3) }, min: 0, max: 3)
@@ -273,12 +274,12 @@ final class NumberTests: XCTestCase {
 
         for _ in 0..<10 {
             let nextDouble = Double.random(in: -2.5...2.5)
-            XCTAssertGreaterThanOrEqual(nextDouble, -2.5)
-            XCTAssertLessThanOrEqual(nextDouble, 2.5)
+            #expect(nextDouble >= -2.5)
+            #expect(nextDouble <= 2.5)
 
             let nextFloat = Float.random(in: Float(-2.5)...Float(2.5))
-            XCTAssertGreaterThanOrEqual(nextFloat, Float(-2.5))
-            XCTAssertLessThanOrEqual(nextFloat, Float(2.5))
+            #expect(nextFloat >= Float(-2.5))
+            #expect(nextFloat <= Float(2.5))
         }
     }
 
@@ -287,7 +288,7 @@ final class NumberTests: XCTestCase {
         for _ in 0..<100 {
             randoms.append(generator())
         }
-        XCTAssertEqual(randoms.min(), min)
-        XCTAssertEqual(randoms.max(), max)
+        #expect(randoms.min() == min)
+        #expect(randoms.max() == max)
     }
 }

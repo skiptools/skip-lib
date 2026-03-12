@@ -1,30 +1,30 @@
-import XCTest
+import Testing
 
-final class StringInterpolationTests: XCTestCase {
-    func testDefaultStringInterpolation() {
-        // “Do not call this initializer directly. It is used by the compiler when interpreting string interpolations.”
+@Suite struct StringInterpolationTests {
+    @Test func defaultStringInterpolation() {
+        // "Do not call this initializer directly. It is used by the compiler when interpreting string interpolations."
         var def = DefaultStringInterpolation(literalCapacity: 9, interpolationCount: 1)
         def.appendLiteral("Number ")
         def.appendInterpolation(1)
         def.appendLiteral("!")
-        XCTAssertEqual("Number 1!", String(stringInterpolation: def))
+        #expect("Number 1!" == String(stringInterpolation: def))
     }
 
-    func testManualStringInterpolation() {
+    @Test func manualStringInterpolation() {
         var str = StringExpressibleExample.StringInterpolation()
         str.appendLiteral("ABC")
         str.appendInterpolation(1)
         str.appendInterpolation(1.1)
         str.appendLiteral("XYZ")
 
-        XCTAssertEqual(["ABC", "1", "1.1", "XYZ"], str.elements.map({ String(describing: $0) }))
+        #expect(["ABC", "1", "1.1", "XYZ"] == str.elements.map({ String(describing: $0) }))
     }
 
-    func testAutomaticStringInterpolation() {
-        XCTAssertEqual("string", intepolate("\("string")"))
-        XCTAssertEqual("1", intepolate("\(1)"))
-        XCTAssertEqual("A string and 1 thing", "A \("string") and \(1) \(Thing())")
-        XCTAssertEqual("A string and 2 things", intepolate("A \("string") and \(2) \(Thing())s"))
+    @Test func automaticStringInterpolation() {
+        #expect("string" == intepolate("\("string")"))
+        #expect("1" == intepolate("\(1)"))
+        #expect("A string and 1 thing" == "A \("string") and \(1) \(Thing())")
+        #expect("A string and 2 things" == intepolate("A \("string") and \(2) \(Thing())s"))
     }
 }
 
