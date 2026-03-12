@@ -1,58 +1,58 @@
 // Copyright 2023–2025 Skip
 // SPDX-License-Identifier: LGPL-3.0-only WITH LGPL-3.0-linking-exception
-import XCTest
+import Testing
 
-final class StructTests: XCTestCase {
-    func testStructMutate() {
+@Suite struct StructTests {
+    @Test func structMutate() {
         var struct1a = Struct1(i: 2)
         struct1a.i += 1
-        XCTAssertEqual(struct1a.i, 3)
+        #expect(struct1a.i == 3)
 
         var struct1b = struct1a
         struct1b.i += 1
-        XCTAssertEqual(struct1b.i, 4)
-        XCTAssertEqual(struct1a.i, 3)
+        #expect(struct1b.i == 4)
+        #expect(struct1a.i == 3)
     }
 
-    func testStructMutateDidSet() {
+    @Test func structMutateDidSet() {
         let holder = StructHolder()
-        XCTAssertEqual(holder.structSetCount, 0)
+        #expect(holder.structSetCount == 0)
 
         holder.struct1.i += 1
-        XCTAssertEqual(holder.struct1.i, 1)
-        XCTAssertEqual(holder.structSetCount, 1)
+        #expect(holder.struct1.i == 1)
+        #expect(holder.structSetCount == 1)
 
         var struct1 = holder.struct1
-        XCTAssertEqual(struct1.i, 1)
+        #expect(struct1.i == 1)
         struct1.i += 1
-        XCTAssertEqual(struct1.i, 2)
-        XCTAssertEqual(holder.struct1.i, 1)
-        XCTAssertEqual(holder.structSetCount, 1)
+        #expect(struct1.i == 2)
+        #expect(holder.struct1.i == 1)
+        #expect(holder.structSetCount == 1)
 
         holder.struct1.i += 2
-        XCTAssertEqual(holder.struct1.i, 3)
-        XCTAssertEqual(holder.structSetCount, 2)
-        XCTAssertEqual(struct1.i, 2)
+        #expect(holder.struct1.i == 3)
+        #expect(holder.structSetCount == 2)
+        #expect(struct1.i == 2)
     }
 
-    func testNestedStructDidSet() {
+    @Test func nestedStructDidSet() {
         let holder = StructHolder()
         holder.struct2.s1.i = 3
-        XCTAssertEqual(holder.struct2.s1.i, 3)
-        XCTAssertEqual(holder.structSetCount, 1)
+        #expect(holder.struct2.s1.i == 3)
+        #expect(holder.structSetCount == 1)
 
         var struct2 = holder.struct2
         struct2.s1.i = 2
-        XCTAssertEqual(holder.struct2.s1.i, 3)
-        XCTAssertEqual(holder.structSetCount, 1)
+        #expect(holder.struct2.s1.i == 3)
+        #expect(holder.structSetCount == 1)
 
         holder.struct2.s1.i = 1
-        XCTAssertEqual(holder.struct2.s1.i, 1)
-        XCTAssertEqual(holder.structSetCount, 2)
-        XCTAssertEqual(struct2.s1.i, 2)
+        #expect(holder.struct2.s1.i == 1)
+        #expect(holder.structSetCount == 2)
+        #expect(struct2.s1.i == 2)
     }
 
-    func testStructReferences() {
+    @Test func structReferences() {
         var struct1a = Struct1()
         struct1a.i += 1
         var struct1b = struct1a
@@ -62,9 +62,9 @@ final class StructTests: XCTestCase {
 
         struct1a.i += 1
 
-        XCTAssertEqual(struct1a.i, 2)
-        XCTAssertEqual(struct1b.i, 2)
-        XCTAssertEqual(struct1c.i, 3)
+        #expect(struct1a.i == 2)
+        #expect(struct1b.i == 2)
+        #expect(struct1c.i == 3)
     }
 }
 

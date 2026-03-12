@@ -1,35 +1,35 @@
 // Copyright 2023–2025 Skip
 // SPDX-License-Identifier: LGPL-3.0-only WITH LGPL-3.0-linking-exception
-import XCTest
+import Testing
 
-final class KotlinConvertingTests: XCTestCase {
-    func testCustomKotlinConversion() throws {
+@Suite struct KotlinConvertingTests {
+    @Test func customKotlinConversion() throws {
         #if SKIP
-        XCTAssertTrue(CustomKotlinConverting().kotlin() is java.util.Date)
+        #expect(CustomKotlinConverting().kotlin() is java.util.Date)
         #endif
     }
 
-    func testArrayDeepConversion() throws {
+    @Test func arrayDeepConversion() throws {
         let a = [[1, 2], [3, 4]]
         let aa = a as Any
         #if SKIP
         let ka = a.kotlin() as! MutableList<MutableList<Int>>
         let kaa = aa.kotlin()
         let kl = listOf(listOf(1, 2), listOf(3, 4))
-        XCTAssertEqual(ka, kl)
-        XCTAssertEqual(kaa, kl)
+        #expect(ka == kl)
+        #expect(kaa == kl)
         #endif
     }
 
-    func testDictionaryDeepConversion() throws {
+    @Test func dictionaryDeepConversion() throws {
         let d = ["a": [1, 2], "b": [3, 4]]
         let da = d as Any
         #if SKIP
         let kd = d.kotlin() as! MutableMap<String, MutableList<Int>>
         let kda = da.kotlin()
         let km = mapOf(Pair("a", listOf(1, 2)), Pair("b", listOf(3, 4)))
-        XCTAssertEqual(kd, km)
-        XCTAssertEqual(kda, km)
+        #expect(kd == km)
+        #expect(kda == km)
         #endif
     }
 }

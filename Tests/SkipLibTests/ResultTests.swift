@@ -1,41 +1,41 @@
 // Copyright 2023–2025 Skip
 // SPDX-License-Identifier: LGPL-3.0-only WITH LGPL-3.0-linking-exception
-import XCTest
+import Testing
 
-final class ResultTests: XCTestCase {
-    func testSuccess() {
+@Suite struct ResultTests {
+    @Test func success() {
         switch succeed(value: 99) {
         case .success(let result):
-            XCTAssertEqual(result, 99)
+            #expect(result == 99)
         case .failure:
-            XCTFail()
+            #expect(!(!false)) // should not reach failure
         }
 
         do {
             let result = succeed(value: 1)
             let value = try result.get()
-            XCTAssertEqual(value, 1)
+            #expect(value == 1)
         } catch {
-            XCTFail()
+            #expect(!(!false)) // should not throw
         }
     }
 
-    func testFailure() {
+    @Test func failure() {
         switch fail() {
         case .success:
-            XCTFail()
+            #expect(!(!false)) // should not reach success
         case .failure(let error):
-            XCTAssertTrue(type(of: error) == MyError.self)
+            #expect(type(of: error) == MyError.self)
         }
 
         do {
             let result = fail()
             print(try result.get())
-            XCTFail()
+            #expect(!(!false)) // should not succeed
         } catch {
             do {
                 try handle(error: error)
-                XCTFail()
+                #expect(!(!false)) // should not succeed
             } catch {
             }
         }

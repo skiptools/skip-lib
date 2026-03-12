@@ -1,86 +1,86 @@
 // Copyright 2023–2025 Skip
 // SPDX-License-Identifier: LGPL-3.0-only WITH LGPL-3.0-linking-exception
-import XCTest
+import Testing
 
-final class DictionaryTests: XCTestCase {
-    func testDictionaryLiteralInit() {
+@Suite struct DictionaryTests {
+    @Test func dictionaryLiteralInit() {
         let emptyDictionary: [String: Int] = [:]
-        XCTAssertEqual(emptyDictionary.count, 0)
+        #expect(emptyDictionary.count == 0)
 
         let emptyDictionary2: Dictionary<String, Int> = [:]
-        XCTAssertEqual(emptyDictionary2.count, 0)
+        #expect(emptyDictionary2.count == 0)
 
         let emptyDictionary3 = [String: Int]()
-        XCTAssertEqual(emptyDictionary3.count, 0)
+        #expect(emptyDictionary3.count == 0)
 
         let emptyDictionary4 = Dictionary<String, Int>()
-        XCTAssertEqual(emptyDictionary4.count, 0)
+        #expect(emptyDictionary4.count == 0)
 
         let singleElementDictionary = ["a": 1]
-        XCTAssertEqual(singleElementDictionary.count, 1)
-        XCTAssertEqual(singleElementDictionary["a"], 1)
+        #expect(singleElementDictionary.count == 1)
+        #expect(singleElementDictionary["a"] == 1)
 
         let multipleElementDictionary = ["a": 1, "b": 2]
-        XCTAssertEqual(multipleElementDictionary.count, 2)
-        XCTAssertEqual(multipleElementDictionary["a"], 1)
-        XCTAssertEqual(multipleElementDictionary["b"], 2)
+        #expect(multipleElementDictionary.count == 2)
+        #expect(multipleElementDictionary["a"] == 1)
+        #expect(multipleElementDictionary["b"] == 2)
     }
 
-    func testSubscriptDidSet() {
+    @Test func subscriptDidSet() {
         let holder = DictionaryHolder()
         holder.dictionary["a"] = 1
-        XCTAssertEqual(holder.dictionary.count, 1)
-        XCTAssertEqual(holder.dictionarySetCount, 1)
+        #expect(holder.dictionary.count == 1)
+        #expect(holder.dictionarySetCount == 1)
 
         var dictionary = holder.dictionary
         dictionary["a"] = 100
-        XCTAssertEqual(holder.dictionary["a"], 1)
-        XCTAssertEqual(holder.dictionary.count, 1)
-        XCTAssertEqual(holder.dictionarySetCount, 1)
+        #expect(holder.dictionary["a"] == 1)
+        #expect(holder.dictionary.count == 1)
+        #expect(holder.dictionarySetCount == 1)
 
         holder.dictionary["a"] = 99
-        XCTAssertEqual(holder.dictionary["a"], 99)
-        XCTAssertEqual(holder.dictionary.count, 1)
-        XCTAssertEqual(holder.dictionarySetCount, 2)
-        XCTAssertEqual(dictionary["a"], 100)
+        #expect(holder.dictionary["a"] == 99)
+        #expect(holder.dictionary.count == 1)
+        #expect(holder.dictionarySetCount == 2)
+        #expect(dictionary["a"] == 100)
     }
 
-    func testNestedSubscriptDidSet() {
+    @Test func nestedSubscriptDidSet() {
         let holder = DictionaryHolder()
         holder.dictionaryOfDictionaries["a"] = ["a": 1, "b": 2, "c": 3]
-        XCTAssertEqual(holder.dictionaryOfDictionaries.count, 1)
-        XCTAssertEqual(holder.dictionarySetCount, 1)
+        #expect(holder.dictionaryOfDictionaries.count == 1)
+        #expect(holder.dictionarySetCount == 1)
 
         var dictionary = holder.dictionaryOfDictionaries
         dictionary["a"]!["b"] = 200
-        XCTAssertEqual(holder.dictionaryOfDictionaries["a"], ["a": 1, "b": 2, "c": 3])
-        XCTAssertEqual(holder.dictionaryOfDictionaries.count, 1)
-        XCTAssertEqual(holder.dictionarySetCount, 1)
+        #expect(holder.dictionaryOfDictionaries["a"] == ["a": 1, "b": 2, "c": 3])
+        #expect(holder.dictionaryOfDictionaries.count == 1)
+        #expect(holder.dictionarySetCount == 1)
 
         holder.dictionaryOfDictionaries["a"]!["b"] = 199
-        XCTAssertEqual(holder.dictionaryOfDictionaries["a"]!["b"], 199)
-        XCTAssertEqual(holder.dictionaryOfDictionaries.count, 1)
-        XCTAssertEqual(holder.dictionarySetCount, 2)
-        XCTAssertEqual(dictionary["a"]?["b"], 200)
+        #expect(holder.dictionaryOfDictionaries["a"]!["b"] == 199)
+        #expect(holder.dictionaryOfDictionaries.count == 1)
+        #expect(holder.dictionarySetCount == 2)
+        #expect(dictionary["a"]?["b"] == 200)
     }
 
-    func testSubscriptDefaultValue() {
+    @Test func subscriptDefaultValue() {
         var dict = ["a": 1]
-        XCTAssertNil(dict["b"])
-        XCTAssertEqual(2, dict["b", default: 2])
+        #expect(dict["b"] == nil)
+        #expect(2 == dict["b", default: 2])
 
         dict["a", default: 1] += 100
-        XCTAssertEqual(dict["a"], 101)
+        #expect(dict["a"] == 101)
 
         dict["b", default: 3] += 100
-        XCTAssertEqual(dict["b"], 103)
+        #expect(dict["b"] == 103)
 
         var arrayDict: [String: [Int]] = [:]
         arrayDict["a", default: [1, 2]].append(3)
-        XCTAssertEqual(arrayDict["a"], [1, 2, 3])
+        #expect(arrayDict["a"] == [1, 2, 3])
     }
 
-    func testDictionaryReferences() {
+    @Test func dictionaryReferences() {
         var dict: [String: Int] = [:]
         dict["a"] = 1
         var dict2 = dict
@@ -90,12 +90,12 @@ final class DictionaryTests: XCTestCase {
 
         dict["z"] = 0
 
-        XCTAssertEqual(dict.count, 2)
-        XCTAssertEqual(dict2.count, 2)
-        XCTAssertEqual(dict3.count, 3)
+        #expect(dict.count == 2)
+        #expect(dict2.count == 2)
+        #expect(dict3.count == 3)
     }
 
-    func testIterate() {
+    @Test func iterate() {
         let dict = ["a": 1, "b": 2, "c": 3]
         var keys: [String] = []
         var values: [Int] = []
@@ -103,8 +103,8 @@ final class DictionaryTests: XCTestCase {
             keys.append(key)
             values.append(value)
         }
-        XCTAssertEqual(keys.sorted(), ["a", "b", "c"])
-        XCTAssertEqual(values.sorted(), [1, 2, 3])
+        #expect(keys.sorted() == ["a", "b", "c"])
+        #expect(values.sorted() == [1, 2, 3])
 
         keys.removeAll()
         values.removeAll()
@@ -112,8 +112,8 @@ final class DictionaryTests: XCTestCase {
             keys.append(entry.key)
             values.append(entry.value)
         }
-        XCTAssertEqual(keys.sorted(), ["a", "b", "c"])
-        XCTAssertEqual(values.sorted(), [1, 2, 3])
+        #expect(keys.sorted() == ["a", "b", "c"])
+        #expect(values.sorted() == [1, 2, 3])
 
         keys.removeAll()
         values.removeAll()
@@ -122,29 +122,29 @@ final class DictionaryTests: XCTestCase {
             keys.append(key)
             values.append(value)
         }
-        XCTAssertEqual(keys.sorted(), ["a", "b", "c"])
-        XCTAssertEqual(values.sorted(), [1, 2, 3])
+        #expect(keys.sorted() == ["a", "b", "c"])
+        #expect(values.sorted() == [1, 2, 3])
     }
 
-    func testKeysValues() {
+    @Test func keysValues() {
         let dict = ["a": 1, "b": 2, "c": 3]
-        XCTAssertTrue(dict.keys.contains("b"))
-        XCTAssertFalse(dict.keys.contains("d"))
-        XCTAssertTrue(dict.values.contains(1))
-        XCTAssertFalse(dict.values.contains(4))
+        #expect(dict.keys.contains("b"))
+        #expect(!dict.keys.contains("d"))
+        #expect(dict.values.contains(1))
+        #expect(!dict.values.contains(4))
         let keys = Array(dict.keys).sorted()
         let values = Array(dict.values).sorted()
-        XCTAssertEqual(keys, ["a", "b", "c"])
-        XCTAssertEqual(values, [1, 2, 3])
+        #expect(keys == ["a", "b", "c"])
+        #expect(values == [1, 2, 3])
     }
 
-    func testPopFirst() {
+    @Test func popFirst() {
         var dict = ["a": 1]
         let popped = dict.popFirst()
-        XCTAssertEqual(popped?.key, "a")
-        XCTAssertEqual(popped?.value, 1)
-        XCTAssertTrue(dict.isEmpty)
-        XCTAssertNil(dict.popFirst())
+        #expect(popped?.key == "a")
+        #expect(popped?.value == 1)
+        #expect(dict.isEmpty)
+        #expect(dict.popFirst() == nil)
     }
 }
 

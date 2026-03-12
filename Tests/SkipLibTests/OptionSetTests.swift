@@ -1,6 +1,6 @@
 // Copyright 2023–2025 Skip
 // SPDX-License-Identifier: LGPL-3.0-only WITH LGPL-3.0-linking-exception
-import XCTest
+import Testing
 
 private struct TestOptionSet: OptionSet {
     let rawValue: Int
@@ -22,37 +22,37 @@ struct TestUnsignedOptionSet: OptionSet {
     static let all: TestUnsignedOptionSet = [.s1, .s2, .s3]
 }
 
-final class OptionSetTests: XCTestCase {
-    func testContains() {
+@Suite struct OptionSetTests {
+    @Test func contains() {
         let set: TestOptionSet = [.s1, .s3]
-        XCTAssertTrue(set.contains(.s1))
-        XCTAssertFalse(set.contains(.s2))
-        XCTAssertTrue(set.contains(.s3))
-        XCTAssertFalse(set.contains(.all))
+        #expect(set.contains(.s1))
+        #expect(!set.contains(.s2))
+        #expect(set.contains(.s3))
+        #expect(!set.contains(.all))
 
-        XCTAssertTrue(TestOptionSet.all.contains(.s1))
-        XCTAssertTrue(TestOptionSet.all.contains(.s2))
-        XCTAssertTrue(TestOptionSet.all.contains(.s3))
-        XCTAssertTrue(TestOptionSet.all.contains(.all))
+        #expect(TestOptionSet.all.contains(.s1))
+        #expect(TestOptionSet.all.contains(.s2))
+        #expect(TestOptionSet.all.contains(.s3))
+        #expect(TestOptionSet.all.contains(.all))
     }
 
-    func testInsert() {
+    @Test func insert() {
         var set: TestOptionSet = []
-        XCTAssertFalse(set.contains(.s1))
+        #expect(!set.contains(.s1))
         let (inserted, member) = set.insert(.s1)
-        XCTAssertTrue(inserted)
-        XCTAssertEqual(member, .s1)
+        #expect(inserted)
+        #expect(member == .s1)
         let (inserted2, member2) = set.insert(.s1)
-        XCTAssertFalse(inserted2)
-        XCTAssertEqual(member2, .s1)
-        XCTAssertTrue(set.contains(.s1))
+        #expect(!inserted2)
+        #expect(member2 == .s1)
+        #expect(set.contains(.s1))
 
-        XCTAssertFalse(set.contains(.s2))
-        XCTAssertFalse(set.contains(.s3))
+        #expect(!set.contains(.s2))
+        #expect(!set.contains(.s3))
         let (insertedAll, memberAll) = set.insert(.all)
-        XCTAssertTrue(insertedAll)
-        XCTAssertEqual(memberAll, .all)
-        XCTAssertTrue(set.contains(.s2))
-        XCTAssertTrue(set.contains(.s3))
+        #expect(insertedAll)
+        #expect(memberAll == .all)
+        #expect(set.contains(.s2))
+        #expect(set.contains(.s3))
     }
 }

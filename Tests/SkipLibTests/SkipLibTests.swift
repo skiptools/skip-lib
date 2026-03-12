@@ -1,45 +1,39 @@
 // Copyright 2023–2025 Skip
 // SPDX-License-Identifier: LGPL-3.0-only WITH LGPL-3.0-linking-exception
-import XCTest
+import Testing
 #if !SKIP
 @testable import SkipLib
 #endif
 
-final class SkipLibTests: XCTestCase {
-    func testSkipLib() throws {
-        XCTAssertEqual(3, 1 + 2)
-        XCTAssertEqual("SkipLib", SkipLibInternalModuleName())
-        XCTAssertEqual("SkipLib", SkipLibPublicModuleName())
-    }
+@Test func skipLibModuleName() throws {
+    #expect(3 == 1 + 2)
+    #expect("SkipLib" == SkipLibInternalModuleName())
+    #expect("SkipLib" == SkipLibPublicModuleName())
+}
 
-    func testUnitTests() throws {
+@Suite struct SkipLibTests {
+    @Test func unitTests() throws {
         // test the various test assertions and ensure the JUnit implementations match the XCUnit ones
-        XCTAssertEqual(1, 1)
-        XCTAssertEqual(1, 1, "one == one")
+        #expect(1 == 1)
 
-        XCTAssertNotEqual(1, 2)
-        XCTAssertNotEqual(1, 2, "one != two")
+        #expect(1 != 2)
 
-        XCTAssertGreaterThanOrEqual(1, 1)
-        XCTAssertGreaterThanOrEqual(1, 1, "one >= one")
+        #expect(1 >= 1)
 
-        XCTAssertGreaterThan(2, 1)
-        XCTAssertGreaterThan(2, 1, "two > one")
+        #expect(2 > 1)
 
-        XCTAssertLessThanOrEqual(1, 1)
-        XCTAssertLessThanOrEqual(1, 1, "one <= one")
+        #expect(1 <= 1)
 
-        XCTAssertLessThan(1, 2)
-        XCTAssertLessThan(1, 2, "one < two")
+        #expect(1 < 2)
     }
 
-    func testFatalError() throws {
+    @Test func fatalError() throws {
         if ({ false }()) {
-            fatalError("this is a fatal error")
+            Swift.fatalError("this is a fatal error")
         }
 
         if ({ false }()) {
-            fatalError() // no-arg
+            Swift.fatalError() // no-arg
         }
     }
 }

@@ -1,8 +1,8 @@
 // Copyright 2024–2025 Skip
 // SPDX-License-Identifier: LGPL-3.0-only WITH LGPL-3.0-linking-exception
-import XCTest
+import Testing
 
-final class CodableTests: XCTestCase {
+@Suite struct CodableTests {
 }
 
 // Just verify that this transpiles into valid code

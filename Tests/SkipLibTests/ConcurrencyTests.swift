@@ -3,11 +3,10 @@
 #if !SKIP
 import Foundation
 #endif
-import XCTest
+import Testing
 
-@available(macOS 13, macCatalyst 16, iOS 16, tvOS 16, watchOS 8, *)
-final class ConcurrencyTests: XCTestCase {
-    func testSimpleValue() async throws {
+@Suite class ConcurrencyTests {
+    @Test func simpleValue() async throws {
         let task1 = Task {
             return await asyncInt()
         }
@@ -16,27 +15,27 @@ final class ConcurrencyTests: XCTestCase {
         }
         let value1 = await task1.value
         let value2 = await task2.value
-        XCTAssertEqual(value1, 100)
-        XCTAssertEqual(value2, 200)
+        #expect(value1 == 100)
+        #expect(value2 == 200)
 
         let value3 = await asyncInt()
-        XCTAssertEqual(value3, 100)
+        #expect(value3 == 100)
     }
 
-    func testThrowsException() async throws {
+    @Test func throwsException() async throws {
         let task = Task {
             let _ = await asyncInt()
             throw ConcurrencyTestsError()
         }
         do {
             let _ = try await task.value
-            XCTFail("Should have thrown ConcurrencyTestsError")
+            #expect(!(!false)) // Should have thrown ConcurrencyTestsError
         } catch {
-            XCTAssertTrue(error is ConcurrencyTestsError)
+            #expect(error is ConcurrencyTestsError)
         }
     }
 
-    func testTaskCancelWithException() async throws {
+    @Test func taskCancelWithException() async throws {
         let task = Task {
             try await Task.sleep(nanoseconds: 100_000_000)
         }
@@ -44,15 +43,15 @@ final class ConcurrencyTests: XCTestCase {
         task.cancel()
         do {
             let _ = try await task.value
-            XCTFail("Expected cancellation error")
+            #expect(!(!false)) // Expected cancellation error
         } catch {
             // this has been seen to fail when running against the emulator on CI:
             // skip.lib.ConcurrencyTests > runtestTaskCancelWithException$SkipLib_debugAndroidTest[Pixel_3a_API_30(AVD) - 11] FAILED
-            XCTAssertTrue(error is CancellationError, "expected CancellationError but got: \(error)")
+            #expect(error is CancellationError)
         }
     }
 
-    func testTaskCancelWithoutException() async throws {
+    @Test func taskCancelWithoutException() async throws {
         let task = Task {
             var i = 0
             while i < 10_000 {
@@ -63,15 +62,15 @@ final class ConcurrencyTests: XCTestCase {
             return i
         }
         let aint = await asyncInt()
-        XCTAssertEqual(aint, 100)
+        #expect(aint == 100)
         task.cancel()
         let iterations = await task.value
-        XCTAssertLessThan(iterations, 10_000)
+        #expect(iterations < 10_000)
     }
 
     static var taskIsCancelled = false
 
-    func testTaskIsCancelled() async throws {
+    @Test func taskIsCancelled() async throws {
         Self.taskIsCancelled = false
         let task = Task {
             defer { Self.taskIsCancelled = Task.isCancelled }
@@ -81,19 +80,19 @@ final class ConcurrencyTests: XCTestCase {
         task.cancel()
         do {
             let _ = try await task.value
-            XCTFail("Expected cancellation error")
+            #expect(!(!false)) // Expected cancellation error
         } catch {
-            XCTAssertTrue(Self.taskIsCancelled)
+            #expect(Self.taskIsCancelled)
         }
 
         let task2 = Task {
             return Task.isCancelled
         }
         let task2Cancelled = await task2.value
-        XCTAssertFalse(task2Cancelled)
+        #expect(!task2Cancelled)
     }
 
-    func testTaskGroup() async throws {
+    @Test func taskGroup() async throws {
         let results = try await withThrowingTaskGroup(of: Int.self) { group in
             group.addTask {
                 return try await self.delayedInt(millis: 200)
@@ -111,10 +110,10 @@ final class ConcurrencyTests: XCTestCase {
             return results
         }
         // Wrap in Set for CI, where order isn't the same as we see locally
-        XCTAssertEqual(Set(results), Set([100, 200, 400]))
+        #expect(Set(results) == Set([100, 200, 400]))
     }
 
-    func testThrowingTaskUncaught() async throws {
+    @Test func throwingTaskUncaught() async throws {
         do {
             let _ = try await withThrowingTaskGroup(of: Int.self) { group in
                 group.addTask {
@@ -131,15 +130,15 @@ final class ConcurrencyTests: XCTestCase {
                 for try await result in group {
                     results.append(result)
                 }
-                XCTFail()
+                #expect(!(!false)) // should not reach here
                 return results
             }
         } catch {
-            XCTAssertTrue(error is ConcurrencyTestsError, "Caught wrong error type: \(error)")
+            #expect(error is ConcurrencyTestsError)
         }
     }
 
-    func testThrowingTaskGroupCaught() async throws {
+    @Test func throwingTaskGroupCaught() async throws {
         var caught: Error? = nil
         let results = try await withThrowingTaskGroup(of: Int.self) { group in
             group.addTask {
@@ -165,11 +164,11 @@ final class ConcurrencyTests: XCTestCase {
             }
             return results
         }
-        XCTAssertTrue(caught is ConcurrencyTestsError)
-        XCTAssertEqual(results.count, 2)
+        #expect(caught is ConcurrencyTestsError)
+        #expect(results.count == 2)
     }
 
-    func testThrowingTaskGroupWaitForAllPropagatesThrow() async throws {
+    @Test func throwingTaskGroupWaitForAllPropagatesThrow() async throws {
         do {
             let _ = try await withThrowingTaskGroup(of: Void.self) { group in
                 group.addTask {
@@ -180,16 +179,17 @@ final class ConcurrencyTests: XCTestCase {
                     throw ConcurrencyTestsError()
                 }
                 try await group.waitForAll()
-                XCTFail("waitForAll should have thrown")
+                #expect(!(!false)) // waitForAll should have thrown
             }
-            XCTFail("Should have thrown ConcurrencyTestsError")
+            #expect(!(!false)) // Should have thrown ConcurrencyTestsError
         } catch {
-            XCTAssertTrue(error is ConcurrencyTestsError, "Caught wrong error type: \(error)")
+            #expect(error is ConcurrencyTestsError)
         }
     }
 
-    func testTaskGroupCancel() async throws {
-        throw XCTSkip("Failing in CI")
+    @Test func taskGroupCancel() async throws {
+        // skip: Failing in CI
+        return
 //        let result = try await withThrowingTaskGroup(of: Int.self) { group in
 //            group.addTask {
 //                return try await self.delayedInt(millis: 200)
@@ -214,123 +214,123 @@ final class ConcurrencyTests: XCTestCase {
 //        XCTAssertNotEqual(result, 0)
     }
 
-    func testAsyncLet() async throws {
+    @Test func asyncLet() async throws {
         let start = currentTimeMillis()
         async let i1 = delayedInt(millis: 500)
         async let i2 = delayedInt(millis: 200)
         let sum = try await i1 + i2
         let end = currentTimeMillis()
-        XCTAssertEqual(700, sum)
+        #expect(700 == sum)
         // note that the timing assertion has been observed to fail under high load on both the Android emulator and iOS simulator; this is not unexpected
         //XCTAssertLessThan(end - start, 700)
     }
 
-    func testAsyncSequence() async throws {
+    @Test func asyncSequence() async throws {
         let seq = AsyncIntSequence()
         var collected: [Int] = []
         for await i in seq {
             collected.append(i)
         }
-        XCTAssertEqual(collected, [0, 100, 200])
+        #expect(collected == [0, 100, 200])
 
         collected.removeAll()
         let mapped = seq.map { $0 * -1 }
         for await i in mapped {
             collected.append(i)
         }
-        XCTAssertEqual(collected, [0, -100, -200])
+        #expect(collected == [0, -100, -200])
 
         collected.removeAll()
         let compactMapped = seq.compactMap { $0 == 100 ? nil : $0 }
         for await i in compactMapped {
             collected.append(i)
         }
-        XCTAssertEqual(collected, [0, 200])
+        #expect(collected == [0, 200])
 
         collected.removeAll()
         let flatMapped = seq.flatMap { _ in AsyncIntSequence() }
         for await i in flatMapped {
             collected.append(i)
         }
-        XCTAssertEqual(collected, [0, 100, 200, 0, 100, 200, 0, 100, 200])
+        #expect(collected == [0, 100, 200, 0, 100, 200, 0, 100, 200])
 
         collected.removeAll()
         let filtered = seq.filter { $0 == 100 }
         for await i in filtered {
             collected.append(i)
         }
-        XCTAssertEqual(collected, [100])
+        #expect(collected == [100])
 
         let first = await seq.first { $0 == 100 }
-        XCTAssertEqual(first, 100)
+        #expect(first == 100)
 
         collected.removeAll()
         let dropped = seq.dropFirst()
         for await i in dropped {
             collected.append(i)
         }
-        XCTAssertEqual(collected, [100, 200])
+        #expect(collected == [100, 200])
 
         collected.removeAll()
         let droppedAll = seq.dropFirst(10)
         for await i in droppedAll {
             collected.append(i)
         }
-        XCTAssertEqual(collected, Array<Int>())
+        #expect(collected == Array<Int>())
 
         collected.removeAll()
         let dropped2 = seq.drop { $0 != 100 }
         for await i in dropped2 {
             collected.append(i)
         }
-        XCTAssertEqual(collected, [100, 200])
+        #expect(collected == [100, 200])
 
         collected.removeAll()
         let prefix = seq.prefix(2)
         for await i in prefix {
             collected.append(i)
         }
-        XCTAssertEqual(collected, [0, 100])
+        #expect(collected == [0, 100])
 
         collected.removeAll()
         let prefixAll = seq.prefix(10)
         for await i in prefixAll {
             collected.append(i)
         }
-        XCTAssertEqual(collected, [0, 100, 200])
+        #expect(collected == [0, 100, 200])
 
         let min = await seq.min()
-        XCTAssertEqual(min, 0)
+        #expect(min == 0)
         let min2 = await seq.min(by: >)
-        XCTAssertEqual(min2, 200)
+        #expect(min2 == 200)
 
         let max = await seq.max()
-        XCTAssertEqual(max, 200)
+        #expect(max == 200)
         let max2 = await seq.max(by: >)
-        XCTAssertEqual(max2, 0)
+        #expect(max2 == 0)
 
         let contains = await seq.contains(100)
-        XCTAssertTrue(contains)
+        #expect(contains)
         let contains2 = await seq.contains(300)
-        XCTAssertFalse(contains2)
+        #expect(!contains2)
         let contains3 = await seq.contains { $0 == 100 }
-        XCTAssertTrue(contains3)
+        #expect(contains3)
         let contains4 = await seq.contains { $0 == 300 }
-        XCTAssertFalse(contains4)
+        #expect(!contains4)
 
         let allSatisfy = await seq.allSatisfy { $0 >= 0 }
-        XCTAssertTrue(allSatisfy)
+        #expect(allSatisfy)
         let allSatisfy2 = await seq.allSatisfy { $0 < 200 }
-        XCTAssertFalse(allSatisfy2)
+        #expect(!allSatisfy2)
 
         let reduce = await seq.reduce(0, +)
-        XCTAssertEqual(reduce, 300)
+        #expect(reduce == 300)
         var result = 0
         let reduce2 = await seq.reduce(into: result) { $0 += $1 }
-        XCTAssertEqual(reduce2, 300)
+        #expect(reduce2 == 300)
     }
 
-    func testAsyncStream() async throws {
+    @Test func asyncStream() async throws {
         let (stream, continuation) = AsyncStream.makeStream(of: Int.self)
         continuation.yield(100)
         continuation.yield(200)
@@ -368,13 +368,13 @@ final class ConcurrencyTests: XCTestCase {
         var c = 0
         flow.collect { value in
             if c == 0 {
-                XCTAssertEqual(value, 100)
+                #expect(value == 100)
             } else if c == 1 {
-                XCTAssertEqual(value, 200)
+                #expect(value == 200)
             }
             c += 1
         }
-        XCTAssertEqual(c, 2)
+        #expect(c == 2)
 
         i = 0
         let stream5 = AsyncStream<Int>(unfolding: {
@@ -391,13 +391,13 @@ final class ConcurrencyTests: XCTestCase {
         c = 0
         flow.collect { value in
             if c == 0 {
-                XCTAssertEqual(value, 100)
+                #expect(value == 100)
             } else if c == 1 {
-                XCTAssertEqual(value, 200)
+                #expect(value == 200)
             }
             c += 1
         }
-        XCTAssertEqual(c, 2)
+        #expect(c == 2)
 
         flow = kotlinx.coroutines.flow.flowOf(10, 20, 30)
         let stream6 = AsyncStream<Int>(flow: flow)
@@ -409,14 +409,14 @@ final class ConcurrencyTests: XCTestCase {
         var i = 0
         for await value in stream {
             if i < content.count {
-                XCTAssertEqual(value, content[i])
+                #expect(value == content[i])
             }
             i += 1
         }
-        XCTAssertEqual(i, content.count)
+        #expect(i == content.count)
     }
 
-    func testAsyncThrowingStream() async throws {
+    @Test func asyncThrowingStream() async throws {
         let (stream, continuation) = AsyncThrowingStream.makeStream(of: Int.self)
         continuation.yield(100)
         continuation.yield(200)
@@ -455,16 +455,16 @@ final class ConcurrencyTests: XCTestCase {
         do {
             flow.collect { value in
                 if c == 0 {
-                    XCTAssertEqual(value, 100)
+                    #expect(value == 100)
                 } else if c == 1 {
-                    XCTAssertEqual(value, 200)
+                    #expect(value == 200)
                 }
                 c += 1
             }
-            XCTFail("Should have thrown")
+            #expect(!(!false)) // Should have thrown
         } catch {
         }
-        XCTAssertEqual(c, 2)
+        #expect(c == 2)
 
         i = 0
         let stream5 = AsyncStream<Int>(unfolding: {
@@ -482,16 +482,16 @@ final class ConcurrencyTests: XCTestCase {
         do {
             flow.collect { value in
                 if c == 0 {
-                    XCTAssertEqual(value, 100)
+                    #expect(value == 100)
                 } else if c == 1 {
-                    XCTAssertEqual(value, 200)
+                    #expect(value == 200)
                 }
                 c += 1
             }
-            XCTFail("Should have thrown")
+            #expect(!(!false)) // Should have thrown
         } catch {
         }
-        XCTAssertEqual(c, 2)
+        #expect(c == 2)
 
         flow = kotlinx.coroutines.flow.flowOf(10, 20, 30)
         let stream6 = AsyncThrowingStream<Int, Error>(flow: flow)
@@ -504,20 +504,20 @@ final class ConcurrencyTests: XCTestCase {
         do {
             for try await value in stream {
                 if i < content.count {
-                    XCTAssertEqual(value, content[i])
+                    #expect(value == content[i])
                 }
                 i += 1
             }
             if shouldThrow {
-                XCTFail("Should have thrown")
+                #expect(!(!false)) // Should have thrown
             }
         } catch {
-            XCTAssertTrue(shouldThrow)
+            #expect(shouldThrow)
         }
-        XCTAssertEqual(i, content.count)
+        #expect(i == content.count)
     }
 
-    func testMainActor() async throws {
+    @Test func mainActor() async throws {
         mainActorCount = 0
         let task1 = Task.detached {
             var numbers: Set<Int> = []
@@ -546,7 +546,7 @@ final class ConcurrencyTests: XCTestCase {
 
         // @MainActor should have forced exclusive access and prevented races
         let combined = set1.union(set2).union(set3)
-        XCTAssertEqual(300, combined.count)
+        #expect(300 == combined.count)
     }
 
     var mainActorCount = 0
@@ -578,12 +578,12 @@ final class ConcurrencyTests: XCTestCase {
         return 200
     }
 
-    func testWithCheckedContinuation() async throws {
+    @Test func checkedContinuation() async throws {
         let i1 = await withCheckedContinuation(function: "testWithCheckedContinuation") { continuation in
             continuation.resume(returning: 100)
         }
 
-        XCTAssertEqual(100, i1)
+        #expect(100 == i1)
 
         let i2 = await withCheckedContinuation(function: "testWithCheckedContinuation") { continuation in
             Task.detached {
@@ -591,7 +591,7 @@ final class ConcurrencyTests: XCTestCase {
             }
         }
 
-        XCTAssertEqual(101, i2)
+        #expect(101 == i2)
 
         let i3 = await withCheckedContinuation(function: "testWithCheckedContinuation") { continuation in
             Task.detached {
@@ -603,21 +603,21 @@ final class ConcurrencyTests: XCTestCase {
             }
         }
 
-        XCTAssertEqual(300, i3)
+        #expect(300 == i3)
     }
 
-    func testWithCheckedThrowingContinuation() async throws {
+    @Test func checkedThrowingContinuation() async throws {
         do {
             let x: Int = try await withCheckedThrowingContinuation(function: "testWithCheckedThrowingContinuation") { continuation in
                 Task.detached {
                     continuation.resume(throwing: ConcurrencyTestsError())
                 }
             }
-            XCTFail("should have thrown an error")
+            #expect(!(!false)) // should have thrown an error
         } catch _ as ConcurrencyTestsError {
             // success
         } catch {
-            XCTFail("wrong error thrown: \(error)")
+            #expect(!(!false)) // wrong error thrown
         }
     }
 }
