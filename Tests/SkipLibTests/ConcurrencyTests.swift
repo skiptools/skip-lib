@@ -37,7 +37,7 @@ import Testing
 
     @Test func taskCancelWithException() async throws {
         let task = Task {
-            try await Task.sleep(nanoseconds: 100_000_000)
+            try await Task.sleep(nanoseconds: 500_000_000)
         }
         try await Task.sleep(nanoseconds: 1_000_000)
         task.cancel()
