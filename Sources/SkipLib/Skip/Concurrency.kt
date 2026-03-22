@@ -82,10 +82,16 @@ class Task<T> {
 
         suspend fun sleep(nanoseconds: Long) = sleep(ULong(nanoseconds))
         suspend fun sleep(nanoseconds: ULong) {
+            sleep(Duration.milliseconds(Long(nanoseconds / 1_000_000UL)))
+        }
+
+        suspend fun sleep(for_: Duration) {
+            val millis = for_.toMilliseconds()
+            if (millis <= 0L) return
             val job = Job()
             withContext(job) {
                 withTaskCancellationHandler(operation = {
-                    delay(timeMillis = Long(nanoseconds / 1_000_000UL))
+                    delay(timeMillis = millis)
                 }, onCancel = {
                     job.cancel()
                 })

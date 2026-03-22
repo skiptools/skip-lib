@@ -60,8 +60,7 @@ public struct Task<Success, Failure> where Failure: Error {
     public static func sleep(until deadline: Any, tolerance: Any? = nil, clock: Any) async throws {
     }
 
-    @available(*, unavailable)
-    public static func sleep(for duration: /* Duration */ Double) async throws {
+    public static func sleep(for duration: Duration) async throws {
     }
 }
 

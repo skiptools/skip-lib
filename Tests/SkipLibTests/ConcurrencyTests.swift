@@ -606,6 +606,121 @@ import Testing
         #expect(300 == i3)
     }
 
+    // MARK: - Duration Tests
+
+    // Helper to access Duration components cross-platform.
+    // On native Swift, Duration.seconds/attoseconds properties require macOS 15+,
+    // but Duration.components is available from macOS 13+.
+    // On Skip, the custom Duration type has direct seconds/attoseconds properties.
+    func secs(_ d: Duration) -> Int64 {
+        #if SKIP
+        return d.seconds
+        #else
+        return d.components.seconds
+        #endif
+    }
+    func attos(_ d: Duration) -> Int64 {
+        #if SKIP
+        return d.attoseconds
+        #else
+        return d.components.attoseconds
+        #endif
+    }
+
+    @Test func durationSeconds() {
+        let d = Duration.seconds(3)
+        #expect(secs(d) == 3)
+        #expect(attos(d) == 0)
+    }
+
+    @Test func durationMilliseconds() {
+        let d = Duration.milliseconds(1500)
+        #expect(secs(d) == 1)
+        #expect(attos(d) == 500_000_000_000_000_000)
+    }
+
+    @Test func durationMicroseconds() {
+        let d = Duration.microseconds(2_500_000)
+        #expect(secs(d) == 2)
+        #expect(attos(d) == 500_000_000_000_000_000)
+    }
+
+    @Test func durationNanoseconds() {
+        let d = Duration.nanoseconds(1_500_000_000)
+        #expect(secs(d) == 1)
+        #expect(attos(d) == 500_000_000_000_000_000)
+    }
+
+    @Test func durationSecondsDouble() {
+        let d = Duration.seconds(2.5)
+        #expect(secs(d) == 2)
+        #expect(attos(d) == 500_000_000_000_000_000)
+    }
+
+    @Test func durationZero() {
+        let d = Duration.zero
+        #expect(secs(d) == 0)
+        #expect(attos(d) == 0)
+    }
+
+    @Test func durationComparison() {
+        let a = Duration.seconds(1)
+        let b = Duration.seconds(2)
+        let c = Duration.milliseconds(1500)
+        #expect(a < b)
+        #expect(c < b)
+        #expect(a < c)
+        #expect(!(b < a))
+    }
+
+    @Test func durationAddition() {
+        let a = Duration.seconds(1)
+        let b = Duration.milliseconds(500)
+        let sum = a + b
+        #expect(secs(sum) == 1)
+        #expect(attos(sum) == 500_000_000_000_000_000)
+    }
+
+    @Test func durationSubtraction() {
+        let a = Duration.seconds(2)
+        let b = Duration.milliseconds(500)
+        let diff = a - b
+        #expect(secs(diff) == 1)
+        #expect(attos(diff) == 500_000_000_000_000_000)
+    }
+
+    @Test func durationMultiplication() {
+        let d = Duration.seconds(2)
+        let result = d * 3
+        #expect(secs(result) == 6)
+        #expect(attos(result) == 0)
+    }
+
+    @Test func durationDivision() {
+        let d = Duration.seconds(6)
+        let result = d / 3
+        #expect(secs(result) == 2)
+        #expect(attos(result) == 0)
+    }
+
+    @Test func taskSleepForDuration() async throws {
+        let start = currentTimeMillis()
+        try await Task.sleep(for: .milliseconds(100))
+        let elapsed = currentTimeMillis() - start
+        // Should have slept for at least 80ms (allowing for timer imprecision)
+        #expect(elapsed >= 80)
+        // Should not have slept for more than 500ms
+        #expect(elapsed < 500)
+    }
+
+    @Test func taskSleepForSeconds() async throws {
+        let start = currentTimeMillis()
+        try await Task.sleep(for: .seconds(0.1))
+        let elapsed = currentTimeMillis() - start
+        #expect(elapsed >= 80)
+        #expect(elapsed < 500)
+    }
+
     @Test func checkedThrowingContinuation() async throws {
         do {
             let x: Int = try await withCheckedThrowingContinuation(function: "testWithCheckedThrowingContinuation") { continuation in
