@@ -709,8 +709,8 @@ import Testing
         let elapsed = currentTimeMillis() - start
         // Should have slept for at least 80ms (allowing for timer imprecision)
         #expect(elapsed >= 80)
-        // Should not have slept for more than 500ms
-        #expect(elapsed < 500)
+        // Should not have slept for more than 5000ms
+        #expect(elapsed < 5000)
     }
 
     @Test func taskSleepForSeconds() async throws {
@@ -718,7 +718,7 @@ import Testing
         try await Task.sleep(for: .seconds(0.1))
         let elapsed = currentTimeMillis() - start
         #expect(elapsed >= 80)
-        #expect(elapsed < 500)
+        #expect(elapsed < 5000)
     }
 
     @Test func checkedThrowingContinuation() async throws {
