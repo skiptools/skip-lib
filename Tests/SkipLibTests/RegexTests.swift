@@ -21,6 +21,7 @@ import Testing
         #expect("1z1" == "1x1".replacing(try Regex("[a-z]"), with: "z"))
         #expect("Z1X1" == "!1X1".replacing(try Regex("^[^a-zA-Z0-9]"), with: "Z"))
         #expect("1X1Z" == "1X1!".replacing(try Regex("[^a-zA-Z0-9]$"), with: "Z"))
+        #expect("\\d" == "x".replacing(try Regex("x"), with: "\\d"))
 
         #expect("Hello, Alice!" == "Hello, Bob!".replacing(try Regex("Hello, (\\w+)!"), with: "Hello, Alice!"))
 
