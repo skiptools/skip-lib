@@ -67,6 +67,10 @@ public struct String: RandomAccessCollection {
     public func replacing(_ regex: Regex, with: String) -> String {
         fatalError()
     }
+
+    public func replacing(_ regex: Regex, maxReplacements: Int = Int.max, with replacement: (Regex.Match) throws -> String) rethrows -> String {
+        fatalError()
+    }
 }
 
 public struct Substring: RandomAccessCollection {

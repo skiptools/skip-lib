@@ -24,6 +24,10 @@ import Testing
 
         #expect("Hello, Alice!" == "Hello, Bob!".replacing(try Regex("Hello, (\\w+)!"), with: "Hello, Alice!"))
 
+        #expect("1zz1" == "1z1".replacing(try Regex("([a-z])"), with: { match in
+            return match[1].substring! + match[1].substring!
+        }))
+
         #if SKIP
         // skip: regular expression support is incomplete
         return

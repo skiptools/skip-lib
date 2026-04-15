@@ -437,6 +437,10 @@ fun String.replacing(regex: Regex, with: String): String {
     return regex.replace(this, with)
 }
 
+fun String.replacing(regex: Regex, maxReplacements: Int = Int.max, with: (Regex.Match) -> String): String {
+    return regex.replace(this, maxReplacements = maxReplacements, with = with)
+}
+
 operator fun String.Companion.invoke(format: String, vararg args: Any): String {
     return format.kotlinFormatString.format(*args)
 }
