@@ -64,6 +64,10 @@ public struct String: RandomAccessCollection {
         fatalError()
     }
 
+    public func replacing(_ other: String, with: String) -> String {
+        fatalError()
+    }
+
     public func replacing(_ regex: Regex, with: String) -> String {
         fatalError()
     }

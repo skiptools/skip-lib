@@ -13,6 +13,8 @@ import Testing
     }
 
     @Test func regexReplace() throws {
+        #expect("X" == "1".replacing("1", with: "X"))
+        #expect("AX" == "A\\w".replacing("\\w", with: "X"))
         #expect("X" == "1".replacing(try Regex("[0-9]"), with: "X"))
         #expect("XXX" == "1X1".replacing(try Regex("[0-9]"), with: "X"))
         #expect("1Z1" == "1X1".replacing(try Regex("[A-Z]"), with: "Z"))
