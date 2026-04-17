@@ -257,6 +257,45 @@ import Testing
         #expect(str2 == "ab++cd++efg++hi")
     }
 
+    @Test func splitByString() {
+        // Round-trip: multi-character separator (Kotlin `indexOf` loop)
+        let joined = "ab++cd++efg++hi"
+        #expect(["ab", "cd", "efg", "hi"] == joined.split(separator: "++"))
+
+        // No match → single component
+        #expect(["hello"] == "hello".split(separator: "++"))
+
+        // Empty subject, default omitting empties
+        #expect(0 == "".split(separator: "::").count)
+
+        // maxSplits with multi-character separator
+        #expect(["a", "b++c"] == "a++b++c".split(separator: "++", maxSplits: 1))
+        #expect(["a++b++c"] == "a++b++c".split(separator: "++", maxSplits: 0))
+
+        // Consecutive separators → empty pieces when not omitted (Kotlin scans non-overlapping occurrences)
+        #expect(["a", "", "b"] == "a::::b".split(separator: "::", omittingEmptySubsequences: false))
+        #expect(["a", "b"] == "a::::b".split(separator: "::", omittingEmptySubsequences: true))
+        #expect(["a"] == "::::a".split(separator: "::", maxSplits: 1, omittingEmptySubsequences: true))
+
+        // Non-overlapping scan (separator does not skip past shared characters)
+        #expect(["bar", "baz"] == "foobarfoobaz".split(separator: "foo"))
+        #expect(["ba"] == "ababa".split(separator: "aba"))
+
+        // Empty separator: Kotlin `splitOnEmptyStringSeparator` (Unicode scalars; matches Swift for ASCII)
+        #expect(["a", "b", "cd"] == "abcd".split(separator: "", maxSplits: 2))
+        #expect(["", "a", "b"] == "ab".split(separator: "", maxSplits: 2, omittingEmptySubsequences: false))
+
+        // Non-ASCII: multi-scalar separator and content (UTF-16 `indexOf` / Kotlin `String.indexOf`)
+        #expect(["你好", "世界", "！"] == "你好++世界++！".split(separator: "++"))
+        #expect(["مرحبا", "بالعالم"] == "مرحبا##بالعالم".split(separator: "##"))
+        #expect(["a", "b", "c"] == "a∑b∑c".split(separator: "∑"))
+
+        // Supplementary-plane scalars (emoji): delimiter and segments are full scalar substrings
+        #expect(["😀", "🎉"] == "😀++🎉".split(separator: "++"))
+        #expect(["a", "b", "c"] == "a🙂b🙂c".split(separator: "🙂"))
+        #expect(["😀", "😀", "😀"] == "😀😀😀".split(separator: "", maxSplits: 2))
+    }
+
     @Test func splitMax() {
         let str = "ab,cd,efg,,hi"
         #expect(["ab,cd,efg,,hi"] == str.split(separator: ",", maxSplits: 0))

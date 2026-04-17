@@ -56,7 +56,7 @@ public struct String: RandomAccessCollection {
     }
 
     // Support in String although it is not yet supported in Collection
-    public func split(separator: Character, maxSplits: Int = Int.max, omittingEmptySubsequences: Bool = true) -> [String] {
+    public func split(separator: String, maxSplits: Int = Int.max, omittingEmptySubsequences: Bool = true) -> [String] {
         fatalError()
     }
 
@@ -109,7 +109,7 @@ public struct Substring: RandomAccessCollection {
     }
 
     // Support in String although it is not yet supported in Collection
-    public func split(separator: Character, maxSplits: Int = Int.max, omittingEmptySubsequences: Bool = true) -> [String] {
+    public func split(separator: String, maxSplits: Int = Int.max, omittingEmptySubsequences: Bool = true) -> [String] {
         fatalError()
     }
 }
