@@ -62,6 +62,24 @@ public struct Regex : RegexComponent {
         let safeReplacement = java.util.regex.Matcher.quoteReplacement(replacement)
         return _regex.replace(string, safeReplacement)
     }
+
+    public func replace(_ string: String, maxReplacements: Int = Int.max, with replacement: (Match) throws -> String) rethrows -> String {
+        if maxReplacements <= 0 {
+            return string
+        }
+
+        var replacementCount = 0
+        return _regex.replace(string) { match in
+            let replacementValue: String
+            if replacementCount < maxReplacements {
+                replacementCount += 1
+                replacementValue = try replacement(Match(match: match))
+            } else {
+                replacementValue = match.value
+            }
+            return java.util.regex.Matcher.quoteReplacement(replacementValue)
+        }
+    }
 }
 
 #endif
