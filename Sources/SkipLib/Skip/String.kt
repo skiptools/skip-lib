@@ -2,6 +2,7 @@
 // SPDX-License-Identifier: MPL-2.0
 package skip.lib
 
+import java.lang.Character
 import java.util.Random
 
 /// Allow Swift code to reference Substring type.
@@ -248,33 +249,57 @@ fun <RE> String.compactMap(transform: (Char) -> RE?): Array<RE> {
 }
 fun <RE> Substring.compactMap(transform: (Char) -> RE?): Array<RE> = stringValue.compactMap(transform)
 
-fun String.split(separator: Char, maxSplits: Int = Int.max, omittingEmptySubsequences: Boolean = true): Array<String> {
-    if (this.isEmpty()) return if (omittingEmptySubsequences) Array() else Array(listOf(""))
+fun String.split(separator: String, maxSplits: Int = Int.max, omittingEmptySubsequences: Boolean = true): Array<String> {
+    if (!omittingEmptySubsequences) {
+        val limit = if (maxSplits == Int.max) 0 else maxSplits + 1
+        return Array(split(separator, limit = limit))
+    }
+
+    if (separator.isEmpty()) {
+        return splitOnEmptyStringSeparatorIncludingEmptySubsequences(maxSplits)
+    }
 
     val result = mutableListOf<String>()
     var start = 0
     var splits = 0
 
-    for (i in this.indices) {
-        if (this[i] == separator && splits < maxSplits) {
-            val part = this.substring(start, i)
-            if (!omittingEmptySubsequences || part.isNotEmpty()) {
-                result.add(part)
-            }
-            start = i + 1
+    while (splits < maxSplits) {
+        val found = indexOf(separator, start)
+        if (found < 0) break
+        val part = substring(start, found)
+        if (part.isNotEmpty()) {
+            result.add(part)
             splits++
-            if (splits >= maxSplits) { break }
         }
+        start = found + separator.length
     }
-
-    val part = this.substring(start)
-    if (!omittingEmptySubsequences || part.isNotEmpty()) {
-        result.add(part)
+    val rest = substring(start)
+    if (rest.isNotEmpty()) {
+        result.add(rest)
     }
-
     return Array(result, nocopy = true)
 }
-fun Substring.split(separator: Char, maxSplits: Int = Int.max, omittingEmptySubsequences: Boolean = true): Array<String> = stringValue.split(separator = separator, maxSplits = maxSplits, omittingEmptySubsequences = omittingEmptySubsequences)
+
+// Ideally, this would use Kotlin split, but Kotlin split mangles emojis
+private fun String.splitOnEmptyStringSeparatorIncludingEmptySubsequences(maxSplits: Int): Array<String> {
+    val result = mutableListOf<String>()
+    var remainder = this
+    var splits = 0
+    while (splits < maxSplits && remainder.isNotEmpty()) {
+        val cp = Character.codePointAt(remainder, 0)
+        val len = Character.charCount(cp)
+        val first = remainder.substring(0, len)
+        result.add(first)
+        remainder = remainder.substring(len)
+        splits++
+    }
+    if (remainder.isNotEmpty()) {
+        result.add(remainder)
+    }
+    return Array(result, nocopy = true)
+}
+
+fun Substring.split(separator: String, maxSplits: Int = Int.max, omittingEmptySubsequences: Boolean = true): Array<String> = stringValue.split(separator = separator, maxSplits = maxSplits, omittingEmptySubsequences = omittingEmptySubsequences)
 
 fun String.joined(): String = this
 fun Substring.joined(): String = stringValue
