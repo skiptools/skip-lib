@@ -433,6 +433,10 @@ fun String.matches(of: Regex): Array<Regex.Match> {
     return of.matches(this)
 }
 
+fun String.replacing(other: String, with: String): String {
+    return replace(oldValue = other, newValue = with)
+}
+
 fun String.replacing(regex: Regex, with: String): String {
     return regex.replace(this, with)
 }
