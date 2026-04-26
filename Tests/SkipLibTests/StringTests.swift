@@ -161,6 +161,28 @@ import Testing
         #expect(str2 == "abcdefbcd")
     }
 
+    @Test func escapedStrings() {
+        let str1 = "abc $xyz"
+        #expect(str1 == #"abc $xyz"#)
+
+        let str2 = """
+            abc $xyz
+            123 456
+        """
+        #expect(str2 == "    abc $xyz\n    123 456")
+
+        let value = "VALUE"
+
+        let str3 = "abc \(value)"
+        #expect(str3 == #"abc VALUE"#)
+
+        let str4 = """
+            abc \(value)
+            123 456
+        """
+        #expect(str4 == "    abc VALUE\n    123 456")
+    }
+
     @Test func unicodeStrings() {
         #if SKIP
         // skip: TODO: testUnicodeStrings
