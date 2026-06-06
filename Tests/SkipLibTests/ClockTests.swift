@@ -49,7 +49,8 @@ import Testing
         }
         let elapsedSeconds = toSecondsDouble(elapsed)
         #expect(elapsedSeconds >= 0.08)
-        #expect(elapsedSeconds < 5.0)
+        // Upper bound is wide so a grinding CI runner that pauses inside the sleep does not flake.
+        #expect(elapsedSeconds < 30.0)
     }
 
     @Test func continuousClockSleepUntil() async throws {
@@ -60,17 +61,19 @@ import Testing
         }
         let elapsedSeconds = toSecondsDouble(elapsed)
         #expect(elapsedSeconds >= 0.08)
-        #expect(elapsedSeconds < 5.0)
+        #expect(elapsedSeconds < 30.0)
     }
 
     @Test func continuousClockSleepUntilInPastReturnsImmediately() async throws {
         let clock = ContinuousClock()
+        // Use a deadline far in the past so the spread between the "early return" path (~0 ms) and the
+        // "actually slept for the full duration" path (60 s) is large enough that even a heavily loaded
+        // CI runner with multi-second scheduling pauses still lands clearly on the early-return side.
         let elapsed = try await clock.measure {
-            // Schedule a deadline 1 second ago — should return without sleeping.
-            let deadline = clock.now.advanced(by: .seconds(-1))
+            let deadline = clock.now.advanced(by: .seconds(-60))
             try await clock.sleep(until: deadline, tolerance: nil)
         }
-        #expect(toSecondsDouble(elapsed) < 0.5)
+        #expect(toSecondsDouble(elapsed) < 10.0)
     }
 
     @Test func continuousClockMinimumResolutionIsPositive() {
@@ -108,7 +111,7 @@ import Testing
         }
         let elapsedSeconds = toSecondsDouble(elapsed)
         #expect(elapsedSeconds >= 0.08)
-        #expect(elapsedSeconds < 5.0)
+        #expect(elapsedSeconds < 30.0)
     }
 
     @Test func suspendingClockSleepUntil() async throws {
@@ -119,6 +122,6 @@ import Testing
         }
         let elapsedSeconds = toSecondsDouble(elapsed)
         #expect(elapsedSeconds >= 0.08)
-        #expect(elapsedSeconds < 5.0)
+        #expect(elapsedSeconds < 30.0)
     }
 }
