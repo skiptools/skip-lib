@@ -76,6 +76,10 @@ data class Duration private constructor(
         }
     }
 
+    /** Seconds and attoseconds components, matching Swift's `Duration.components`. */
+    val components: Tuple2<Long, Long>
+        get() = Tuple2(seconds, attoseconds)
+
     /** Total duration in nanoseconds. */
     fun toNanoseconds(): Long {
         return seconds * 1_000_000_000L + attoseconds / ATTOSECONDS_PER_NANOSECOND
