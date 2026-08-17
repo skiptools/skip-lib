@@ -216,7 +216,7 @@ Released 2023-09-28
   - Link explicitly to repos for issues and prs for doc generation
   - Update README.md for consistency between modules
   - Update README.md
-  - Set issue/pr links to https://source.skip.tools/skip/ for external docs
+  - Set issue/pr links to https://github.com/skiptools/skip/ for external docs
   - Remove links to source from README as they break doc generation
 
 ## 0.4.3
