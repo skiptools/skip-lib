@@ -26,7 +26,15 @@ abstract class TopLevelEncoder<Output> {
 
     fun <T> encode(value: T): Output where T: Any {
         val encoder = encoder()
-        if (value is Sequence<*>) {
+        if (value is Dictionary<*, *>) {
+            // A Dictionary reaching this type-erased path is also a Sequence<Tuple2>, so it must be
+            // routed to key-aware encoding before the generic Sequence branch below (see skiptools/skip-foundation#62).
+            if (dictionaryEncodesAsObject(value)) {
+                encodeAsDictionary(value, encoder)
+            } else {
+                encodeAsArray(value, encoder)
+            }
+        } else if (value is Sequence<*>) {
             val container = encoder.unkeyedContainer()
             for (element in value.iterable) {
                 codableUnkeyedEncode(element, container)
@@ -55,7 +63,7 @@ abstract class TopLevelEncoder<Output> {
         }
     }
 
-    fun <K, V> encodeAsArray(value: Dictionary<K, V>, encoder: Encoder) where K: Any, V: Any {
+    fun encodeAsArray(value: Dictionary<*, *>, encoder: Encoder) {
         val container = encoder.unkeyedContainer()
         for ((dkey, dvalue) in value.storage) {
             codableUnkeyedEncode(dkey, container)
@@ -202,7 +210,16 @@ class KeyedEncodingContainer<Key>(container: KeyedEncodingContainerProtocol<Codi
     }
 
     override fun <T> encode(value: T?, forKey: CodingKey) where T: Any {
-        if (value is Sequence<*>) {
+        if (value is Dictionary<*, *>) {
+            // A Dictionary reaching this type-erased path (e.g. an optional dictionary whose
+            // encodeIfPresent resolves to the generic overload) is also a Sequence<Tuple2>, so it
+            // must be routed to key-aware encoding before the Sequence branch below (see skiptools/skip-foundation#62).
+            if (dictionaryEncodesAsObject(value)) {
+                encodeAsDictionary(value, forKey)
+            } else {
+                encodeAsArray(value, forKey)
+            }
+        } else if (value is Sequence<*>) {
             val container = nestedUnkeyedContainer(forKey)
             container.encode(contentsOf = value)
         } else {
@@ -303,7 +320,7 @@ class KeyedEncodingContainer<Key>(container: KeyedEncodingContainerProtocol<Codi
         }
     }
 
-    fun <K, V> encodeAsArray(value: Dictionary<K, V>, forKey: CodingKey) where K: Any, V: Any {
+    fun encodeAsArray(value: Dictionary<*, *>, forKey: CodingKey) {
         val container = nestedUnkeyedContainer(forKey)
         for ((dkey, dvalue) in value.storage) {
             codableUnkeyedEncode(dkey, container)
@@ -407,7 +424,15 @@ class UnkeyedEncodingContainer(container: UnkeyedEncodingContainerProtocol) : Un
     }
 
     override fun <T : Any> encode(value: T) {
-        if (value is Sequence<*>) {
+        if (value is Dictionary<*, *>) {
+            // A Dictionary reaching this type-erased path is also a Sequence<Tuple2>, so it must be
+            // routed to key-aware encoding before the generic Sequence branch below (see skiptools/skip-foundation#62).
+            if (dictionaryEncodesAsObject(value)) {
+                encodeAsDictionary(value)
+            } else {
+                encodeAsArray(value)
+            }
+        } else if (value is Sequence<*>) {
             val container = nestedUnkeyedContainer()
             container.encode(contentsOf = value)
         } else {
@@ -444,7 +469,7 @@ class UnkeyedEncodingContainer(container: UnkeyedEncodingContainerProtocol) : Un
         }
     }
 
-    fun <K, V> encodeAsArray(value: Dictionary<K, V>) where K: Any, V: Any {
+    fun encodeAsArray(value: Dictionary<*, *>) {
         val container = nestedUnkeyedContainer()
         for ((dkey, dvalue) in value.storage) {
             codableUnkeyedEncode(dkey, container)
@@ -532,7 +557,15 @@ class SingleValueEncodingContainer(container: SingleValueEncodingContainerProtoc
     }
 
     override fun <T : Any> encode(value: T) {
-        if (value is Sequence<*>) {
+        if (value is Dictionary<*, *>) {
+            // A Dictionary reaching this type-erased path is also a Sequence<Tuple2>, so it must be
+            // routed to key-aware encoding before the generic Sequence branch below (see skiptools/skip-foundation#62).
+            if (dictionaryEncodesAsObject(value)) {
+                encodeAsDictionary(value)
+            } else {
+                encodeAsArray(value)
+            }
+        } else if (value is Sequence<*>) {
             val container = nestedUnkeyedContainer()
             container.encode(contentsOf = value)
         } else {
@@ -565,12 +598,37 @@ class SingleValueEncodingContainer(container: SingleValueEncodingContainerProtoc
         }
     }
 
-    fun <K, V> encodeAsArray(value: Dictionary<K, V>) where K: Any, V: Any {
+    fun encodeAsArray(value: Dictionary<*, *>) {
         val container = nestedUnkeyedContainer()
         for ((dkey, dvalue) in value.storage) {
             codableUnkeyedEncode(dkey, container)
             codableUnkeyedEncode(dvalue, container)
         }
+    }
+}
+
+// A Dictionary that reaches a type-erased Codable path has lost its static Key type. Swift encodes
+// dictionaries keyed by Int or String as keyed objects and all others as unkeyed arrays of
+// alternating key/value; recover that decision from the runtime key type. An empty dictionary has no
+// key to inspect, so it defaults to the keyed-object form used by the overwhelmingly common
+// String/Int-keyed case.
+private fun dictionaryEncodesAsObject(value: Dictionary<*, *>): Boolean {
+    for ((dkey, _) in value.storage) {
+        return dkey is Int || dkey is String
+    }
+    return true
+}
+
+private fun encodeDictionaryAsObject(value: Dictionary<*, *>, container: KeyedEncodingContainerProtocol<CodingKey>) {
+    for ((dkey, dvalue) in value.storage) {
+        codableDictionaryKeyedEncode(dvalue, dkey, container)
+    }
+}
+
+private fun encodeDictionaryAsArray(value: Dictionary<*, *>, container: UnkeyedEncodingContainer) {
+    for ((dkey, dvalue) in value.storage) {
+        codableUnkeyedEncode(dkey, container)
+        codableUnkeyedEncode(dvalue, container)
     }
 }
 
@@ -589,6 +647,15 @@ fun <T> codableDictionaryKeyedEncode(value: T?, forKey: Any?, container: KeyedEn
         is ULong -> container.encode(value, key)
         is Float -> container.encode(value, key)
         is Double -> container.encode(value, key)
+        is Dictionary<*, *> -> {
+            // Route a nested Dictionary value to key-aware encoding before the Sequence branch,
+            // since Dictionary is also a Sequence<Tuple2> (see skiptools/skip-foundation#62).
+            if (dictionaryEncodesAsObject(value)) {
+                encodeDictionaryAsObject(value, container.nestedContainer(keyedBy = DictionaryCodingKey::class, key))
+            } else {
+                encodeDictionaryAsArray(value, container.nestedUnkeyedContainer(key))
+            }
+        }
         is Sequence<*> -> {
             val valueContainer = container.nestedUnkeyedContainer(key)
             valueContainer.encode(contentsOf = value)
@@ -612,6 +679,15 @@ fun <T> codableUnkeyedEncode(value: T?, container: UnkeyedEncodingContainer) whe
         is ULong -> container.encode(value)
         is Float -> container.encode(value)
         is Double -> container.encode(value)
+        is Dictionary<*, *> -> {
+            // Route a Dictionary element to key-aware encoding before the Sequence branch, since
+            // Dictionary is also a Sequence<Tuple2> (see skiptools/skip-foundation#62).
+            if (dictionaryEncodesAsObject(value)) {
+                encodeDictionaryAsObject(value, container.nestedContainer(keyedBy = DictionaryCodingKey::class))
+            } else {
+                encodeDictionaryAsArray(value, container.nestedUnkeyedContainer())
+            }
+        }
         is Sequence<*> -> {
             val nestedContainer = container.nestedUnkeyedContainer()
             nestedContainer.encode(contentsOf = value)
@@ -635,6 +711,15 @@ fun <T> codableSingleValueEncode(value: T?, container: SingleValueEncodingContai
         is ULong -> container.encode(value)
         is Float -> container.encode(value)
         is Double -> container.encode(value)
+        is Dictionary<*, *> -> {
+            // Route a Dictionary value to key-aware encoding before the Sequence branch, since
+            // Dictionary is also a Sequence<Tuple2> (see skiptools/skip-foundation#62).
+            if (dictionaryEncodesAsObject(value)) {
+                encodeDictionaryAsObject(value, container.nestedContainer(keyedBy = DictionaryCodingKey::class))
+            } else {
+                encodeDictionaryAsArray(value, container.nestedUnkeyedContainer())
+            }
+        }
         is Sequence<*> -> {
             val nestedContainer = container.nestedUnkeyedContainer()
             nestedContainer.encode(contentsOf = value)
