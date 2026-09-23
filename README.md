@@ -13,7 +13,7 @@ SkipLib vends the `skip.lib` Kotlin package. It serves two purposes:
 
 ## Dependencies
 
-SkipLib depends on the [skip](https://source.skip.dev/skip) transpiler plugin and has no additional library dependencies.
+SkipLib depends on the [skip](https://github.com/skiptools/skip) transpiler plugin and has no additional library dependencies.
 
 It is part of the core *Skip Core Frameworks* and is not intended to be imported directly.
 The module is transparently adopted through the automatic addition of `import skip.lib.*` to transpiled files by the Skip transpiler.
