@@ -466,6 +466,7 @@ public final class AsyncStreamSwiftDataSource<Element> {
     // SKIP INSERT: @JvmName("Swift_next")
     // SKIP EXTERN
     func Swift_next(Swift_producer: Int64, callback: (Any?) -> Void)
+    // SKIP INSERT: @JvmName("Swift_release")
     // SKIP EXTERN
     func Swift_release(Swift_producer: Int64) -> Int64
 }
@@ -509,6 +510,7 @@ public final class AsyncThrowingStreamSwiftDataSource<Element> {
     // SKIP INSERT: @JvmName("Swift_next")
     // SKIP EXTERN
     func Swift_next(Swift_producer: Int64, callback: (Any?, Throwable?) -> Void)
+    // SKIP INSERT: @JvmName("Swift_release")
     // SKIP EXTERN
     func Swift_release(Swift_producer: Int64) -> Int64
 }
