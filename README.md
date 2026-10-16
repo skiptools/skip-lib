@@ -370,6 +370,7 @@ Support levels:
 <li><code>init()</code></li>
 <li><code>init(minimumCapacity: Int)</code></li>
 <li><code>init(uniqueKeysWithValues keysAndValues: any Sequence&lt;(Key, Value)&gt;)</code></li>
+<li><code>init(_ keysAndValues: any Sequence&lt;(Key, Value)&gt;, uniquingKeysWith combine: (Value, Value) throws -&gt; Value) rethrows</code></li>
 <li><code>func filter(_ isIncluded: ((Key, Value)) throws -&gt; Bool) rethrows -&gt; Dictionary&lt;Key, Value&gt;</code></li>
 <li><code>subscript(key: Key) -&gt; Value?</code></li>
 <li><code>subscript(key: Key, default defaultValue: Value) -&gt; Value</code></li>

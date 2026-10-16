@@ -26,6 +26,108 @@ import Testing
         #expect(multipleElementDictionary["b"] == 2)
     }
 
+    @Test func uniquingKeysInitCombinesInSequenceOrder() {
+        let pairs = [("a", 1), ("b", 2), ("a", 3), ("a", 4)]
+        var combinedValues: [Int] = []
+
+        let result = Dictionary(pairs, uniquingKeysWith: { old, new in
+            combinedValues.append(old)
+            combinedValues.append(new)
+            return old * 10 + new
+        })
+
+        #expect(result == ["a": 134, "b": 2])
+        #expect(combinedValues == [1, 3, 13, 4])
+    }
+
+    @Test func uniquingKeysInitCanKeepFirstOrLastValue() {
+        let pairs = [("a", 1), ("b", 2), ("a", 3)]
+
+        let first = Dictionary(pairs, uniquingKeysWith: { old, _ in old })
+        let last = Dictionary(pairs, uniquingKeysWith: { _, new in new })
+
+        #expect(first == ["a": 1, "b": 2])
+        #expect(last == ["a": 3, "b": 2])
+    }
+
+    @Test func uniquingKeysInitPreservesNilValues() {
+        let pairs: [(String, Int?)] = [("a", nil), ("a", 1), ("a", nil), ("b", nil)]
+        var combinations = 0
+        var sawInitialNil = false
+
+        let result = Dictionary(pairs, uniquingKeysWith: { old, new in
+            if combinations == 0 {
+                sawInitialNil = old == nil
+            }
+            combinations += 1
+            return new
+        })
+
+        #expect(combinations == 2)
+        #expect(sawInitialNil)
+        #expect(result.count == 2)
+        #expect(result.keys.contains("a"))
+        #expect(result.keys.contains("b"))
+        #expect(result.values.allSatisfy { $0 == nil })
+    }
+
+    @Test func uniquingKeysInitDoesNotCombineUniqueOrEmptyInput() {
+        let pairs = [("a", 1), ("b", 2)]
+        let emptyPairs: [(String, Int)] = []
+        var combinations = 0
+        let combine: (Int, Int) -> Int = { _, new in
+            combinations += 1
+            return new
+        }
+
+        let result = Dictionary(pairs, uniquingKeysWith: combine)
+        let empty = Dictionary(emptyPairs, uniquingKeysWith: combine)
+
+        #expect(result == ["a": 1, "b": 2])
+        #expect(empty.isEmpty)
+        #expect(combinations == 0)
+    }
+
+    @Test func uniquingKeysInitPropagatesCombinerError() {
+        let pairs = [("a", 1), ("a", 2), ("a", 3)]
+        var combinations = 0
+        var caughtExpectedError = false
+        let combine: (Int, Int) throws -> Int = { _, _ in
+            combinations += 1
+            throw CombinationError.failed
+        }
+
+        do {
+            _ = try Dictionary(pairs, uniquingKeysWith: combine)
+        } catch {
+            caughtExpectedError = error is CombinationError
+        }
+
+        #expect(caughtExpectedError)
+        #expect(combinations == 1)
+    }
+
+    @Test func uniquingKeysInitPreservesValueSemantics() {
+        var original = [1]
+        let pairs = [("a", original), ("a", [2])]
+        var combined: [Int] = []
+
+        var result = Dictionary(pairs, uniquingKeysWith: { old, new in
+            combined = old + new
+            return combined
+        })
+        original.append(3)
+        combined.append(4)
+        var copy = result
+        copy["a"]?.append(5)
+        result["a"]?.append(6)
+
+        #expect(pairs[0].1 == [1])
+        #expect(result["a"] == [1, 2, 6])
+        #expect(copy["a"] == [1, 2, 5])
+        #expect(combined == [1, 2, 4])
+    }
+
     @Test func subscriptDidSet() {
         let holder = DictionaryHolder()
         holder.dictionary["a"] = 1
@@ -160,5 +262,12 @@ private class DictionaryHolder {
         didSet {
             dictionarySetCount += 1
         }
+    }
+}
+
+// MARK: - Test Errors
+private extension DictionaryTests {
+    enum CombinationError: Error {
+        case failed
     }
 }

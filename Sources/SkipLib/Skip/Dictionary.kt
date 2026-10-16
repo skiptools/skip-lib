@@ -77,6 +77,19 @@ class Dictionary<K, V>: Collection<Tuple2<K, V>>, MutableStruct, KotlinConvertin
     }
 
     @Suppress("UNCHECKED_CAST")
+    constructor(keysAndValues: Sequence<Tuple2<K, V>>, uniquingKeysWith: (V, V) -> V): this() {
+        for (entry in keysAndValues.iterable) {
+            val key = entry.element0
+            val value = entry.element1
+            if (storage.containsKey(key)) {
+                storage[key] = uniquingKeysWith((storage[key] as V).sref(), value).sref()
+            } else {
+                storage[key] = value
+            }
+        }
+    }
+
+    @Suppress("UNCHECKED_CAST")
     constructor(map: Map<K, V>, nocopy: Boolean = false, shared: Boolean = false) {
         if (nocopy && map is LinkedHashMap<*, *>) {
             storage = map as LinkedHashMap<K, V>
