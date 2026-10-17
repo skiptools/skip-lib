@@ -23,7 +23,6 @@ public struct Dictionary<Key, Value>: Collection {
     public init(uniqueKeysWithValues keysAndValues: any Sequence<(Key, Value)>) {
     }
 
-    @available(*, unavailable)
     public init(_ keysAndValues: any Sequence<(Key, Value)>, uniquingKeysWith combine: (Value, Value) throws -> Value) rethrows {
     }
 
