@@ -1,5 +1,4 @@
 // Copyright 2023–2026 Skip
-// SPDX-License-Identifier: MPL-2.0
 package skip.lib
 
 // WARNING: Replicate all implemented immutable Sequence, Collections API in String.kt

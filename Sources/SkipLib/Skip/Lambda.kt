@@ -1,5 +1,4 @@
 // Copyright 2023–2026 Skip
-// SPDX-License-Identifier: MPL-2.0
 package skip.lib
 
 // Immediately-executed Kotlin lambda expressions do not support return statements.

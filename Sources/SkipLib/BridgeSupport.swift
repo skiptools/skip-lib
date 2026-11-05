@@ -1,5 +1,4 @@
 // Copyright 2024–2026 Skip
-// SPDX-License-Identifier: MPL-2.0
 /// Marker protocol for types that are custom bridged from the Swift side.
 ///
 /// - Seealso: `KotlinConverting`

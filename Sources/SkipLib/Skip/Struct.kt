@@ -1,5 +1,4 @@
 // Copyright 2023–2026 Skip
-// SPDX-License-Identifier: MPL-2.0
 package skip.lib
 
 /// The transpiler adds conformance to this type to Kotlin classes translated from mutable Swift structs.

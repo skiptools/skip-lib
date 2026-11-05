@@ -1,5 +1,4 @@
 // Copyright 2023–2026 Skip
-// SPDX-License-Identifier: MPL-2.0
 import Testing
 
 // note differences between ICU (Swift's impl) and Java (Kotlin's impl): https://unicode-org.github.io/icu/userguide/strings/regexp.html#differences-with-java-regular-expressions

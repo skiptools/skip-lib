@@ -1056,8 +1056,3 @@ inline suspend fun <reified R, reified Response> send(request: R): Response wher
     return jsonDecoder.decode(Response::class, from = data) 
 } 
 ```
-
-## License
-
-This software is licensed under the 
-[Mozilla Public License 2.0](https://www.mozilla.org/MPL/).
